@@ -69,10 +69,6 @@
       border-radius: 3px 0 0 3px;
     }
 
-    #chat-input::placeholder {
-      color: #9aa7c2;
-    }
-
     #send-btn {
       padding: 8px 15px;
       background-color: #48508a;
@@ -82,18 +78,19 @@
       border-radius: 0 3px 3px 0;
     }
 
+    /* Lock screen styles */
     #lock-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: 100vw;
+      background-color: #191f41;
+      color: #c8d4e4;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-      width: 100vw;
-      position: fixed;
-      top: 0;
-      left: 0;
-      background-color: #191f41;
-      color: #c8d4e4;
       z-index: 9999;
     }
 
@@ -137,17 +134,12 @@
     <div id="error-msg"></div>
   </div>
 
-  <!-- Main content, hidden initially -->
-  <div id="main-content" style="display:none;">
+  <!-- Main Content -->
+  <div id="main-content" style="display: none; flex-direction: column; align-items: center;">
     <h1> Day 5; </h1>
-
-    <br>
-
-    <h2> Well yeah, and I'm sad, but at the same time I'm really happy that something could make me feel that sad. It's like, it makes me feel alive, you know? It makes me feel human...</h2>
+    <h2> Well yeah, and I'm sad, but at the same time I'm really happy that something could make me feel that sad...</h2>
     <h3> - Butters, South Park</h3>
-
     <div id="countdown"></div>
-
     <div id="chat-container">
       <div id="chat-box"></div>
       <div id="chat-input-container">
@@ -171,6 +163,7 @@
       remove
     } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
 
+    // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyBUmJ9k5pS62TzIkRHswO2lJLnaeRIfGmE",
       authDomain: "jess-chat-box.firebaseapp.com",
@@ -185,13 +178,13 @@
     const db = getDatabase(app);
     const messagesRef = ref(db, "messages");
 
-    // Lock screen logic
-    const SECRET_PASSCODE = "3456";
     const lockScreen = document.getElementById("lock-screen");
     const mainContent = document.getElementById("main-content");
     const passcodeInput = document.getElementById("passcode-input");
     const unlockBtn = document.getElementById("unlock-btn");
     const errorMsg = document.getElementById("error-msg");
+
+    const SECRET_PASSCODE = "3456";
 
     unlockBtn.addEventListener("click", unlock);
     passcodeInput.addEventListener("keydown", e => {
@@ -222,6 +215,11 @@
         chatBox.scrollTop = chatBox.scrollHeight;
       });
 
+      sendBtn.addEventListener("click", sendMessage);
+      chatInput.addEventListener("keydown", e => {
+        if (e.key === "Enter") sendMessage();
+      });
+
       async function sendMessage() {
         const text = chatInput.value.trim();
         if (!text) return;
@@ -234,12 +232,6 @@
         chatInput.value = "";
       }
 
-      sendBtn.addEventListener("click", sendMessage);
-      chatInput.addEventListener("keydown", e => {
-        if (e.key === "Enter") sendMessage();
-      });
-
-      // Auto-delete old messages
       const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
       const oldMessagesQuery = query(messagesRef, orderByChild("timestamp"), endAt(thirtyDaysAgo));
       get(oldMessagesQuery).then(snapshot => {
@@ -248,7 +240,6 @@
         });
       });
 
-      // Countdown Timer
       const startTime = new Date("June 13, 2025 14:40:00").getTime();
       const endTime = new Date("June 28, 2025 00:00:00").getTime();
       const countdown = document.getElementById("countdown");
@@ -265,10 +256,4 @@
         const elapsed = now - startTime;
         const percentage = Math.min((elapsed / total) * 100, 100).toFixed(2);
 
-        const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60
-
-      </script>
-</body>
-
-</html>                                                                  
+        const days = Math.floor
