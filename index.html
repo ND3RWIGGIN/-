@@ -2,161 +2,196 @@
 <html lang="en">
 
 <head>
-    <title>nd3rwiggin</title>
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #191f41;
-            color: #c8d4e4;
-            font-family: Arial, sans-serif;
-            text-align: center;
-        }
+  <title>nd3rwiggin</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column; /* Stacks the elements vertically */
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #191f41; /* Dark blue background */
+      color: #c8d4e4; /* Light greyish blue text */
+      font-family: Arial, sans-serif;
+      text-align: center; /* Centers the text */
+    }
 
-        h1 {
-            font-size: 3rem;
-        }
+    h1 {
+      font-size: 3rem;
+    }
 
-        h2 {
-            margin-top: 5px;
-            font-size: 1.5rem;
-        }
+    h2 {
+      margin-top: 5px; /* Adds some space between h1 and h2 */
+      font-size: 1.5rem;
+    }
 
-        #countdown {
-            margin-top: 20px;
-            font-size: 1.2rem;
-        }
+    #countdown {
+      margin-top: 20px;
+      font-size: 1.2rem;
+    }
 
-        #chat-container {
-            margin-top: 30px;
-            width: 300px;
-            max-height: 400px;
-            display: flex;
-            flex-direction: column;
-            align-items: stretch;
-        }
+    #chat-container {
+      margin-top: 30px;
+      width: 320px;
+      max-height: 400px;
+      display: flex;
+      flex-direction: column;
+      background-color: #2a2f4f;
+      border: 1px solid #c8d4e4;
+      border-radius: 5px;
+      padding: 10px;
+    }
 
-        #chat-box {
-            border: 1px solid #c8d4e4;
-            padding: 10px;
-            height: 200px;
-            overflow-y: auto;
-            background-color: #2a2f4f;
-            font-size: 0.9rem;
-            margin-bottom: 10px;
-        }
+    #chat-box {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 5px;
+      font-size: 0.9rem;
+      border-bottom: 1px solid #48508a;
+      max-height: 300px;
+      color: #c8d4e4;
+      text-align: left;
+    }
 
-        #chat-input {
-            padding: 8px;
-            border: none;
-            font-size: 1rem;
-            background-color: #3b4166;
-            color: #c8d4e4;
-        }
+    #chat-input-container {
+      margin-top: 10px;
+      display: flex;
+    }
 
-        #chat-input::placeholder {
-            color: #9aa7c2;
-        }
+    #chat-input {
+      flex-grow: 1;
+      padding: 8px;
+      border: none;
+      font-size: 1rem;
+      background-color: #3b4166;
+      color: #c8d4e4;
+      border-radius: 3px 0 0 3px;
+    }
 
-        button {
-            padding: 8px;
-            background-color: #48508a;
-            color: #c8d4e4;
-            border: none;
-            cursor: pointer;
-            margin-top: 5px;
-        }
-    </style>
+    #chat-input::placeholder {
+      color: #9aa7c2;
+    }
+
+    #send-btn {
+      padding: 8px 15px;
+      background-color: #48508a;
+      color: #c8d4e4;
+      border: none;
+      cursor: pointer;
+      border-radius: 0 3px 3px 0;
+    }
+  </style>
 </head>
 
 <body>
-    <h1> Day 5; </h1>
+  <h1> Day 5; </h1>
 
-    <h2>
-        Well yeah, and I'm sad, but at the same time I'm really happy that something could make me feel that sad. It's like, it makes me feel alive, you know? It makes me feel human. And the only way I could feel this sad now is if I felt somethin' really good before. So I have to take the bad with the good, so I guess what I'm feelin' is like a, beautiful sadness. I guess that sounds stupid.
-    </h2>
+  <br>
 
-    <h3> - Butters, South Park</h3>
+  <h2> Well yeah, and I'm sad, but at the same time I'm really happy that something could make me feel that sad. It's like, it makes me feel alive, you know? It makes me feel human. And the only way I could feel this sad now is if I felt somethin' really good before. So I have to take the bad with the good, so I guess what I'm feelin' is like a, beautiful sadness. I guess that sounds stupid.</h2>
 
-    <div id="countdown"></div>
+  <h3> - Butters, South Park</h3>
 
-    <!-- Local Chat Box -->
-    <div id="chat-container">
-        <div id="chat-box"></div>
-        <input type="text" id="chat-input" placeholder="Type your message..." />
-        <button onclick="sendMessage()">Send</button>
+  <div id="countdown"></div>
+
+  <div id="chat-container">
+    <div id="chat-box"></div>
+    <div id="chat-input-container">
+      <input type="text" id="chat-input" placeholder="Type your message..." />
+      <button id="send-btn">Send</button>
     </div>
+  </div>
 
-    <script>
-        // Countdown from June 13, 2025 @ 2:40 PM to June 28, 2025 @ 12:00 AM
-        const startTime = new Date("June 13, 2025 14:40:00").getTime();
-        const endTime = new Date("June 28, 2025 00:00:00").getTime();
+  <script type="module">
+    // Import Firebase modules
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+    import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
 
-        function updateCountdown() {
-            const now = new Date().getTime();
-            let timeLeft = endTime - now;
+    // Your Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyBUmJ9k5pS62TzIkRHswO2lJLnaeRIfGmE",
+      authDomain: "jess-chat-box.firebaseapp.com",
+      projectId: "jess-chat-box",
+      storageBucket: "jess-chat-box.firebasestorage.app",
+      messagingSenderId: "414967828897",
+      appId: "1:414967828897:web:89045ed9bd4b3257c4bbe0",
+      measurementId: "G-P1EVKQ9M7E"
+    };
 
-            if (timeLeft <= 0) {
-                document.getElementById("countdown").innerHTML = "Countdown complete.";
-                clearInterval(interval);
-                return;
-            }
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-            const totalDuration = endTime - startTime;
-            const timeElapsed = now - startTime;
-            const percentage = Math.min((timeElapsed / totalDuration) * 100, 100).toFixed(2);
+    const chatBox = document.getElementById("chat-box");
+    const chatInput = document.getElementById("chat-input");
+    const sendBtn = document.getElementById("send-btn");
 
-            const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+    const messagesRef = ref(db, "messages");
 
-            document.getElementById("countdown").innerHTML =
-                `Time left: ${days}d ${hours}h ${minutes}m ${seconds}s<br>` +
-                `Progress: ${percentage}%`;
-        }
+    // Display new messages when added
+    onChildAdded(messagesRef, (data) => {
+      const msg = data.val();
+      const div = document.createElement("div");
+      const time = new Date(msg.timestamp).toLocaleTimeString();
+      div.textContent = `[${time}] ${msg.name}: ${msg.text}`;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    });
 
-        updateCountdown();
-        const interval = setInterval(updateCountdown, 1000);
+    // Send message function
+    function sendMessage() {
+      const text = chatInput.value.trim();
+      if (!text) return;
 
-        // Local Chat
-        function sendMessage() {
-            const input = document.getElementById("chat-input");
-            const message = input.value.trim();
-            if (!message) return;
+      const message = {
+        name: "Visitor", // You can customize to prompt for user name
+        text,
+        timestamp: Date.now()
+      };
 
-            const chatBox = document.getElementById("chat-box");
-            const messageElement = document.createElement("div");
-            messageElement.textContent = "You: " + message;
-            chatBox.appendChild(messageElement);
-            input.value = "";
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
+      push(messagesRef, message);
+      chatInput.value = "";
+    }
 
-        document.getElementById("chat-input").addEventListener("keydown", function (e) {
-            if (e.key === "Enter") {
-                sendMessage();
-            }
-        });
-    </script>
+    sendBtn.addEventListener("click", sendMessage);
+    chatInput.addEventListener("keydown", e => {
+      if (e.key === "Enter") {
+        sendMessage();
+      }
+    });
 
-    <!--Start of Tawk.to Script-->
-    <script type="text/javascript">
-        var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
-        (function () {
-            var s1 = document.createElement("script"), s0 = document.getElementsByTagName("script")[0];
-            s1.async = true;
-            s1.src = 'https://embed.tawk.to/684c6e5ca4191c190b4b29ae/1itl8u6db';
-            s1.charset = 'UTF-8';
-            s1.setAttribute('crossorigin', '*');
-            s0.parentNode.insertBefore(s1, s0);
-        })();
-    </script>
-    <!--End of Tawk.to Script-->
+    // Countdown logic (from June 13, 2025 14:40 to June 28, 2025 00:00)
+    const startTime = new Date("June 13, 2025 14:40:00").getTime();
+    const endTime = new Date("June 28, 2025 00:00:00").getTime();
+
+    function updateCountdown() {
+      const now = new Date().getTime();
+      let timeLeft = endTime - now;
+
+      if (timeLeft <= 0) {
+        document.getElementById("countdown").innerHTML = "Countdown complete.";
+        clearInterval(interval);
+        return;
+      }
+
+      const totalDuration = endTime - startTime;
+      const timeElapsed = now - startTime;
+      const percentage = Math.min((timeElapsed / totalDuration) * 100, 100).toFixed(2);
+
+      const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+      document.getElementById("countdown").innerHTML =
+        `Time left: ${days}d ${hours}h ${minutes}m ${seconds}s<br>` +
+        `Progress: ${percentage}%`;
+    }
+
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
+  </script>
 </body>
 
 </html>
