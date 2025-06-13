@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <title>nd3rwiggin</title>
   <style>
@@ -17,19 +16,9 @@
       text-align: center;
     }
 
-    h1 {
-      font-size: 3rem;
-    }
-
-    h2 {
-      margin-top: 5px;
-      font-size: 1.5rem;
-    }
-
-    #countdown {
-      margin-top: 20px;
-      font-size: 1.2rem;
-    }
+    h1 { font-size: 3rem; }
+    h2 { margin-top: 5px; font-size: 1.5rem; }
+    #countdown { margin-top: 20px; font-size: 1.2rem; }
 
     #chat-container {
       margin-top: 30px;
@@ -69,6 +58,10 @@
       border-radius: 3px 0 0 3px;
     }
 
+    #chat-input::placeholder {
+      color: #9aa7c2;
+    }
+
     #send-btn {
       padding: 8px 15px;
       background-color: #48508a;
@@ -78,15 +71,13 @@
       border-radius: 0 3px 3px 0;
     }
 
-    /* Lock screen styles */
-    #lock-screen {
+    /* Lock and username screens */
+    .screen {
       position: fixed;
-      top: 0;
-      left: 0;
+      top: 0; left: 0;
       height: 100vh;
       width: 100vw;
       background-color: #191f41;
-      color: #c8d4e4;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -94,7 +85,7 @@
       z-index: 9999;
     }
 
-    #passcode-input {
+    .input-field {
       padding: 10px;
       font-size: 1.2rem;
       border-radius: 5px;
@@ -106,7 +97,7 @@
       color: #c8d4e4;
     }
 
-    #unlock-btn {
+    .btn {
       margin-top: 15px;
       padding: 10px 20px;
       font-size: 1rem;
@@ -117,29 +108,35 @@
       cursor: pointer;
     }
 
-    #error-msg {
-      color: #ff6b6b;
-      margin-top: 10px;
-      height: 1.2em;
-    }
+    #error-msg { color: #ff6b6b; margin-top: 10px; height: 1.2em; }
   </style>
 </head>
 
 <body>
-  <!-- Lock screen -->
-  <div id="lock-screen">
-    <h2>Enter Passcode to Access</h2>
-    <input type="password" id="passcode-input" placeholder="Passcode" />
-    <button id="unlock-btn">Unlock</button>
+  <!-- Passcode screen -->
+  <div class="screen" id="lock-screen">
+    <h2>Enter Passcode</h2>
+    <input class="input-field" type="password" id="passcode-input" placeholder="Passcode" />
+    <button class="btn" id="unlock-btn">Unlock</button>
     <div id="error-msg"></div>
   </div>
 
-  <!-- Main Content -->
-  <div id="main-content" style="display: none; flex-direction: column; align-items: center;">
-    <h1> Day 5; </h1>
-    <h2> Well yeah, and I'm sad, but at the same time I'm really happy that something could make me feel that sad...</h2>
-    <h3> - Butters, South Park</h3>
+  <!-- Username screen -->
+  <div class="screen" id="username-screen" style="display:none;">
+    <h2>Choose a Username</h2>
+    <input class="input-field" type="text" id="username-input" placeholder="Username" />
+    <button class="btn" id="submit-username">Continue</button>
+    <div id="username-error" style="color: #ff6b6b; margin-top: 10px;"></div>
+  </div>
+
+  <!-- Main chat + content -->
+  <div id="main-content" style="display:none;">
+    <h1>Day 5;</h1>
+    <h2>Well yeah, and I'm sad, but at the same time I'm really happy that something could make me feel that sad...</h2>
+    <h3>- Butters, South Park</h3>
+
     <div id="countdown"></div>
+
     <div id="chat-container">
       <div id="chat-box"></div>
       <div id="chat-input-container">
@@ -163,7 +160,6 @@
       remove
     } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
 
-    // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyBUmJ9k5pS62TzIkRHswO2lJLnaeRIfGmE",
       authDomain: "jess-chat-box.firebaseapp.com",
@@ -178,34 +174,65 @@
     const db = getDatabase(app);
     const messagesRef = ref(db, "messages");
 
+    const chatBox = document.getElementById("chat-box");
+    const chatInput = document.getElementById("chat-input");
+    const sendBtn = document.getElementById("send-btn");
+
     const lockScreen = document.getElementById("lock-screen");
+    const usernameScreen = document.getElementById("username-screen");
     const mainContent = document.getElementById("main-content");
     const passcodeInput = document.getElementById("passcode-input");
     const unlockBtn = document.getElementById("unlock-btn");
     const errorMsg = document.getElementById("error-msg");
+    const usernameInput = document.getElementById("username-input");
+    const submitUsernameBtn = document.getElementById("submit-username");
+    const usernameError = document.getElementById("username-error");
 
     const SECRET_PASSCODE = "3456";
 
-    unlockBtn.addEventListener("click", unlock);
-    passcodeInput.addEventListener("keydown", e => {
-      if (e.key === "Enter") unlock();
-    });
-
-    function unlock() {
-      if (passcodeInput.value.trim() === SECRET_PASSCODE) {
+    // Check passcode
+    unlockBtn.onclick = () => {
+      if (passcodeInput.value === SECRET_PASSCODE) {
         lockScreen.style.display = "none";
-        mainContent.style.display = "flex";
-        startApp();
+        const savedName = localStorage.getItem("username");
+        if (savedName) {
+          startApp(savedName);
+        } else {
+          usernameScreen.style.display = "flex";
+        }
       } else {
         errorMsg.textContent = "Incorrect passcode.";
       }
-    }
+    };
 
-    function startApp() {
-      const chatBox = document.getElementById("chat-box");
-      const chatInput = document.getElementById("chat-input");
-      const sendBtn = document.getElementById("send-btn");
+    // Handle username submission
+    submitUsernameBtn.onclick = async () => {
+      const desiredName = usernameInput.value.trim();
+      if (!desiredName) {
+        usernameError.textContent = "Please enter a username.";
+        return;
+      }
 
+      // Check for duplicates
+      const snapshot = await get(messagesRef);
+      let taken = false;
+      snapshot.forEach((child) => {
+        if (child.val().name === desiredName) taken = true;
+      });
+
+      if (taken) {
+        usernameError.textContent = "That username is already taken.";
+      } else {
+        localStorage.setItem("username", desiredName);
+        usernameScreen.style.display = "none";
+        startApp(desiredName);
+      }
+    };
+
+    function startApp(username) {
+      mainContent.style.display = "flex";
+
+      // Load existing messages
       onChildAdded(messagesRef, (data) => {
         const msg = data.val();
         const div = document.createElement("div");
@@ -215,60 +242,67 @@
         chatBox.scrollTop = chatBox.scrollHeight;
       });
 
-      sendBtn.addEventListener("click", sendMessage);
-      chatInput.addEventListener("keydown", e => {
-        if (e.key === "Enter") sendMessage();
-      });
+      // Send message
+      sendBtn.onclick = () => sendMessage(username);
+      chatInput.onkeydown = (e) => {
+        if (e.key === "Enter") sendMessage(username);
+      };
 
-      async function sendMessage() {
+      async function sendMessage(name) {
         const text = chatInput.value.trim();
         if (!text) return;
+
         const message = {
-          name: "Visitor",
+          name,
           text,
           timestamp: Date.now()
         };
+
         await push(messagesRef, message);
         chatInput.value = "";
       }
 
-      const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
-      const oldMessagesQuery = query(messagesRef, orderByChild("timestamp"), endAt(thirtyDaysAgo));
-      get(oldMessagesQuery).then(snapshot => {
+      // Delete messages older than 30 days
+      async function deleteOldMessages() {
+        const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+        const oldQuery = query(messagesRef, orderByChild("timestamp"), endAt(thirtyDaysAgo));
+        const snapshot = await get(oldQuery);
         snapshot.forEach(child => {
-          remove(ref(db, 'messages/' + child.key));
+          remove(ref(db, "messages/" + child.key));
         });
-      });
-
-      const startTime = new Date("June 13, 2025 14:40:00").getTime();
-      const endTime = new Date("June 28, 2025 00:00:00").getTime();
-      const countdown = document.getElementById("countdown");
-
-      function updateCountdown() {
-        const now = Date.now();
-        const timeLeft = endTime - now;
-        if (timeLeft <= 0) {
-          countdown.innerHTML = "Countdown complete.";
-          return clearInterval(interval);
-        }
-
-        const total = endTime - startTime;
-        const elapsed = now - startTime;
-        const percentage = Math.min((elapsed / total) * 100, 100).toFixed(2);
-
-        const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-
-        countdown.innerHTML = `Time left: ${days}d ${hours}h ${minutes}m ${seconds}s<br>Progress: ${percentage}%`;
       }
 
-      updateCountdown();
-      const interval = setInterval(updateCountdown, 1000);
+      deleteOldMessages();
     }
+
+    // Countdown
+    const startTime = new Date("June 13, 2025 14:40:00").getTime();
+    const endTime = new Date("June 28, 2025 00:00:00").getTime();
+
+    function updateCountdown() {
+      const now = Date.now();
+      const timeLeft = endTime - now;
+      const total = endTime - startTime;
+      const elapsed = now - startTime;
+      const percent = Math.min((elapsed / total) * 100, 100).toFixed(2);
+
+      if (timeLeft <= 0) {
+        document.getElementById("countdown").textContent = "Countdown complete.";
+        return;
+      }
+
+      const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+      document.getElementById("countdown").innerHTML =
+        `Time left: ${days}d ${hours}h ${minutes}m ${seconds}s<br>Progress: ${percent}%`;
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
   </script>
 </body>
-
 </html>
 
