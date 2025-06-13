@@ -91,7 +91,8 @@
       height: 100vh;
       width: 100vw;
       position: fixed;
-      top: 0; left: 0;
+      top: 0;
+      left: 0;
       background-color: #191f41;
       color: #c8d4e4;
       z-index: 9999;
@@ -201,15 +202,15 @@
 
     const messagesRef = ref(db, "messages");
 
-    // Passcode - change this to your desired secret passcode
-    const SECRET_PASSCODE = "1234";
+    // Passcode - updated as requested
+    const SECRET_PASSCODE = "MO-CHAT-IMO";
 
     // Unlock function
     function unlock() {
       const enteredCode = passcodeInput.value.trim();
       if (enteredCode === SECRET_PASSCODE) {
         lockScreen.style.display = "none";
-        mainContent.style.display = "flex";
+        mainContent.style.display = "block";
         errorMsg.textContent = "";
         startApp();
       } else {
@@ -237,7 +238,7 @@
         chatBox.scrollTop = chatBox.scrollHeight;
       });
 
-      // Delete messages older than 30 days
+      // Delete messages older than 30 days once on start
       async function deleteOldMessages() {
         const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
         const oldMessagesQuery = query(messagesRef, orderByChild("timestamp"), endAt(thirtyDaysAgo));
@@ -246,6 +247,7 @@
           remove(ref(db, 'messages/' + childSnapshot.key));
         });
       }
+      deleteOldMessages();
 
       // Send message
       async function sendMessage() {
@@ -253,10 +255,19 @@
         if (!text) return;
 
         const message = {
-          name: "Visitor", // Customize if you want
+          name: "Visitor", // Customize if needed
           text,
           timestamp: Date.now()
         };
 
         await push(messagesRef, message);
-        chat
+        chatInput.value = "";
+      }
+
+      sendBtn.addEventListener("click", sendMessage);
+      chatInput.addEventListener("keydown", e => {
+        if (e.key === "Enter") sendMessage();
+      });
+
+      // Countdown timer
+      const startTime = new Date("June 13, 2025 14
