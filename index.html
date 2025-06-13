@@ -106,7 +106,17 @@
   <script type="module">
     // Import Firebase modules
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-    import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
+    import {
+      getDatabase,
+      ref,
+      push,
+      onChildAdded,
+      query,
+      orderByChild,
+      endAt,
+      get,
+      remove
+    } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
 
     // Your Firebase config
     const firebaseConfig = {
@@ -139,8 +149,18 @@
       chatBox.scrollTop = chatBox.scrollHeight;
     });
 
+    // Function to delete messages older than 30 days
+    async function deleteOldMessages() {
+      const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+      const oldMessagesQuery = query(messagesRef, orderByChild("timestamp"), endAt(thirtyDaysAgo));
+      const snapshot = await get(oldMessagesQuery);
+      snapshot.forEach((childSnapshot) => {
+        remove(ref(db, 'messages/' + childSnapshot.key));
+      });
+    }
+
     // Send message function
-    function sendMessage() {
+    async function sendMessage() {
       const text = chatInput.value.trim();
       if (!text) return;
 
@@ -150,8 +170,11 @@
         timestamp: Date.now()
       };
 
-      push(messagesRef, message);
+      await push(messagesRef, message);
       chatInput.value = "";
+
+      // Clean old messages after sending new one
+      deleteOldMessages();
     }
 
     sendBtn.addEventListener("click", sendMessage);
@@ -160,6 +183,9 @@
         sendMessage();
       }
     });
+
+    // Run deletion once when the page loads
+    deleteOldMessages();
 
     // Countdown logic (from June 13, 2025 14:40 to June 28, 2025 00:00)
     const startTime = new Date("June 13, 2025 14:40:00").getTime();
