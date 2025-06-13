@@ -6,15 +6,15 @@
     <style>
         body {
             display: flex;
-            flex-direction: column; /* Stacks the elements vertically */
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-color: #191f41; /* Dark blue background */
-            color: #c8d4e4; /* Light greyish blue text */
+            background-color: #191f41;
+            color: #c8d4e4;
             font-family: Arial, sans-serif;
-            text-align: center; /* Centers the text */
+            text-align: center;
         }
 
         h1 {
@@ -22,8 +22,13 @@
         }
 
         h2 {
-            margin-top: 5px; /* Adds some space between h1 and h2 */
+            margin-top: 5px;
             font-size: 1.5rem;
+        }
+
+        #countdown {
+            margin-top: 20px;
+            font-size: 1.2rem;
         }
     </style>
 </head>
@@ -31,12 +36,45 @@
 <body>
     <h1> Day 5; </h1>
 
-    <br>
-    
-    <h2> Well yeah, and I'm sad, but at the same time I'm really happy that something could make me feel that sad. It's like, it makes me feel alive, you know? It makes me feel human. And the only way I could feel this sad now is if I felt somethin' really good before. So I have to take the bad with the good, so I guess what I'm feelin' is like a, beautiful sadness. I guess that sounds stupid.</h2>
+    <h2>
+        Well yeah, and I'm sad, but at the same time I'm really happy that something could make me feel that sad. It's like, it makes me feel alive, you know? It makes me feel human. And the only way I could feel this sad now is if I felt somethin' really good before. So I have to take the bad with the good, so I guess what I'm feelin' is like a, beautiful sadness. I guess that sounds stupid.
+    </h2>
 
     <h3> - Butters, South Park</h3>
+
+    <div id="countdown"></div>
+
+    <script>
+        const startTime = new Date("June 13, 2025 14:25:00").getTime();
+        const endTime = new Date("June 28, 2025 00:00:00").getTime();
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            let timeLeft = endTime - now;
+
+            if (timeLeft <= 0) {
+                document.getElementById("countdown").innerHTML = "Countdown complete.";
+                clearInterval(interval);
+                return;
+            }
+
+            const totalDuration = endTime - startTime;
+            const timeElapsed = now - startTime;
+            const percentage = Math.min((timeElapsed / totalDuration) * 100, 100).toFixed(2);
+
+            const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+            document.getElementById("countdown").innerHTML = 
+                `Time left: ${days}d ${hours}h ${minutes}m ${seconds}s<br>` +
+                `Progress: ${percentage}%`;
+        }
+
+        updateCountdown(); // Run immediately
+        const interval = setInterval(updateCountdown, 1000); // Update every second
+    </script>
 </body>
 
 </html>
-
