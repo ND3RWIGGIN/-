@@ -6,15 +6,15 @@
   <style>
     body {
       display: flex;
-      flex-direction: column; /* Stacks the elements vertically */
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       height: 100vh;
       margin: 0;
-      background-color: #191f41; /* Dark blue background */
-      color: #c8d4e4; /* Light greyish blue text */
+      background-color: #191f41;
+      color: #c8d4e4;
       font-family: Arial, sans-serif;
-      text-align: center; /* Centers the text */
+      text-align: center;
     }
 
     h1 {
@@ -22,7 +22,7 @@
     }
 
     h2 {
-      margin-top: 5px; /* Adds some space between h1 and h2 */
+      margin-top: 5px;
       font-size: 1.5rem;
     }
 
@@ -81,86 +81,29 @@
       cursor: pointer;
       border-radius: 0 3px 3px 0;
     }
-
-    /* Passcode lock styles */
-    #lock-screen {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      width: 100vw;
-      position: fixed;
-      top: 0;
-      left: 0;
-      background-color: #191f41;
-      color: #c8d4e4;
-      z-index: 9999;
-    }
-
-    #passcode-input {
-      padding: 10px;
-      font-size: 1.2rem;
-      border-radius: 5px;
-      border: none;
-      margin-top: 10px;
-      width: 250px;
-      text-align: center;
-      background-color: #3b4166;
-      color: #c8d4e4;
-    }
-
-    #unlock-btn {
-      margin-top: 15px;
-      padding: 10px 20px;
-      font-size: 1rem;
-      background-color: #48508a;
-      border: none;
-      color: #c8d4e4;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    #error-msg {
-      color: #ff6b6b;
-      margin-top: 10px;
-      height: 1.2em;
-    }
   </style>
 </head>
 
 <body>
-  <!-- Lock screen -->
-  <div id="lock-screen">
-    <h2>Enter Passcode to Access</h2>
-    <input type="password" id="passcode-input" placeholder="Passcode" />
-    <button id="unlock-btn">Unlock</button>
-    <div id="error-msg"></div>
-  </div>
+  <h1> Day 5; </h1>
 
-  <!-- Main content, initially hidden -->
-  <div id="main-content" style="display:none;">
-    <h1> Day 5; </h1>
+  <br>
 
-    <br>
+  <h2> Well yeah, and I'm sad, but at the same time I'm really happy that something could make me feel that sad. It's like, it makes me feel alive, you know? It makes me feel human. And the only way I could feel this sad now is if I felt somethin' really good before. So I have to take the bad with the good, so I guess what I'm feelin' is like a, beautiful sadness. I guess that sounds stupid.</h2>
 
-    <h2> Well yeah, and I'm sad, but at the same time I'm really happy that something could make me feel that sad. It's like, it makes me feel alive, you know? It makes me feel human. And the only way I could feel this sad now is if I felt somethin' really good before. So I have to take the bad with the good, so I guess what I'm feelin' is like a, beautiful sadness. I guess that sounds stupid.</h2>
+  <h3> - Butters, South Park</h3>
 
-    <h3> - Butters, South Park</h3>
+  <div id="countdown"></div>
 
-    <div id="countdown"></div>
-
-    <div id="chat-container">
-      <div id="chat-box"></div>
-      <div id="chat-input-container">
-        <input type="text" id="chat-input" placeholder="Type your message..." />
-        <button id="send-btn">Send</button>
-      </div>
+  <div id="chat-container">
+    <div id="chat-box"></div>
+    <div id="chat-input-container">
+      <input type="text" id="chat-input" placeholder="Type your message..." />
+      <button id="send-btn">Send</button>
     </div>
   </div>
 
   <script type="module">
-    // Firebase imports
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
     import {
       getDatabase,
@@ -174,7 +117,6 @@
       remove
     } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
 
-    // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyBUmJ9k5pS62TzIkRHswO2lJLnaeRIfGmE",
       authDomain: "jess-chat-box.firebaseapp.com",
@@ -185,89 +127,84 @@
       measurementId: "G-P1EVKQ9M7E"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-
-    // Elements
-    const lockScreen = document.getElementById("lock-screen");
-    const mainContent = document.getElementById("main-content");
-    const passcodeInput = document.getElementById("passcode-input");
-    const unlockBtn = document.getElementById("unlock-btn");
-    const errorMsg = document.getElementById("error-msg");
+    const messagesRef = ref(db, "messages");
 
     const chatBox = document.getElementById("chat-box");
     const chatInput = document.getElementById("chat-input");
     const sendBtn = document.getElementById("send-btn");
 
-    const messagesRef = ref(db, "messages");
-
-    // Passcode - updated as requested
-    const SECRET_PASSCODE = "MO-CHAT-IMO";
-
-    // Unlock function
-    function unlock() {
-      const enteredCode = passcodeInput.value.trim();
-      if (enteredCode === SECRET_PASSCODE) {
-        lockScreen.style.display = "none";
-        mainContent.style.display = "block";
-        errorMsg.textContent = "";
-        startApp();
-      } else {
-        errorMsg.textContent = "Incorrect passcode. Try again.";
-        passcodeInput.value = "";
-      }
-    }
-
-    unlockBtn.addEventListener("click", unlock);
-    passcodeInput.addEventListener("keydown", e => {
-      if (e.key === "Enter") {
-        unlock();
-      }
+    onChildAdded(messagesRef, (data) => {
+      const msg = data.val();
+      const div = document.createElement("div");
+      const time = new Date(msg.timestamp).toLocaleTimeString();
+      div.textContent = `[${time}] ${msg.name}: ${msg.text}`;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
     });
 
-    // Main app logic (chat, countdown, message deletion)
-    function startApp() {
-      // Display new messages
-      onChildAdded(messagesRef, (data) => {
-        const msg = data.val();
-        const div = document.createElement("div");
-        const time = new Date(msg.timestamp).toLocaleTimeString();
-        div.textContent = `[${time}] ${msg.name}: ${msg.text}`;
-        chatBox.appendChild(div);
-        chatBox.scrollTop = chatBox.scrollHeight;
+    async function sendMessage() {
+      const text = chatInput.value.trim();
+      if (!text) return;
+
+      const message = {
+        name: "Visitor",
+        text,
+        timestamp: Date.now()
+      };
+
+      await push(messagesRef, message);
+      chatInput.value = "";
+    }
+
+    sendBtn.addEventListener("click", sendMessage);
+    chatInput.addEventListener("keydown", e => {
+      if (e.key === "Enter") sendMessage();
+    });
+
+    // Auto-delete messages older than 30 days
+    async function deleteOldMessages() {
+      const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+      const oldMessagesQuery = query(messagesRef, orderByChild("timestamp"), endAt(thirtyDaysAgo));
+      const snapshot = await get(oldMessagesQuery);
+      snapshot.forEach((child) => {
+        remove(ref(db, 'messages/' + child.key));
       });
+    }
+    deleteOldMessages();
 
-      // Delete messages older than 30 days once on start
-      async function deleteOldMessages() {
-        const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
-        const oldMessagesQuery = query(messagesRef, orderByChild("timestamp"), endAt(thirtyDaysAgo));
-        const snapshot = await get(oldMessagesQuery);
-        snapshot.forEach((childSnapshot) => {
-          remove(ref(db, 'messages/' + childSnapshot.key));
-        });
-      }
-      deleteOldMessages();
+    // Countdown Timer
+    const startTime = new Date("June 13, 2025 14:40:00").getTime();
+    const endTime = new Date("June 28, 2025 00:00:00").getTime();
 
-      // Send message
-      async function sendMessage() {
-        const text = chatInput.value.trim();
-        if (!text) return;
+    function updateCountdown() {
+      const now = new Date().getTime();
+      let timeLeft = endTime - now;
 
-        const message = {
-          name: "Visitor", // Customize if needed
-          text,
-          timestamp: Date.now()
-        };
-
-        await push(messagesRef, message);
-        chatInput.value = "";
+      if (timeLeft <= 0) {
+        document.getElementById("countdown").innerHTML = "Countdown complete.";
+        clearInterval(interval);
+        return;
       }
 
-      sendBtn.addEventListener("click", sendMessage);
-      chatInput.addEventListener("keydown", e => {
-        if (e.key === "Enter") sendMessage();
-      });
+      const totalDuration = endTime - startTime;
+      const timeElapsed = now - startTime;
+      const percentage = Math.min((timeElapsed / totalDuration) * 100, 100).toFixed(2);
 
-      // Countdown timer
-      const startTime = new Date("June 13, 2025 14
+      const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+      document.getElementById("countdown").innerHTML =
+        `Time left: ${days}d ${hours}h ${minutes}m ${seconds}s<br>` +
+        `Progress: ${percentage}%`;
+    }
+
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
+  </script>
+</body>
+
+</html>
