@@ -147,15 +147,6 @@
         <button id="send-btn">Send</button>
       </div>
     </div>
-
-    <!-- Play Music button, initially hidden -->
-    <button id="music-toggle" class="btn" style="margin-top: 25px; display: none;">Play Music</button>
-    
-    <!-- Audio element for NIN.mp3 -->
-    <audio id="bg-music" loop>
-      <source src="NIN.mp3" type="audio/mpeg" />
-      Your browser does not support the audio element.
-    </audio>
   </div>
 
   <script type="module">
@@ -200,29 +191,6 @@
     const submitUsernameBtn = document.getElementById("submit-username");
     const usernameError = document.getElementById("username-error");
 
-    const music = document.getElementById("bg-music");
-    const toggleBtn = document.getElementById("music-toggle");
-    let isPlaying = false;
-
-    // Music toggle button handler with proper play/pause and error handling
-    toggleBtn.addEventListener("click", () => {
-      if (!isPlaying) {
-        music.play()
-          .then(() => {
-            toggleBtn.textContent = "Pause Music";
-            isPlaying = true;
-          })
-          .catch((err) => {
-            console.error("Audio play error:", err);
-            alert("Failed to play audio: " + err.message);
-          });
-      } else {
-        music.pause();
-        toggleBtn.textContent = "Play Music";
-        isPlaying = false;
-      }
-    });
-
     const SECRET_PASSCODE = "3456";
 
     // Check passcode
@@ -266,9 +234,6 @@
 
     function startApp(username) {
       mainContent.style.display = "flex";
-
-      // Show the Play Music button now that app is unlocked
-      toggleBtn.style.display = "inline-block";
 
       // Load existing messages
       onChildAdded(messagesRef, (data) => {
