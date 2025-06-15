@@ -71,7 +71,6 @@
       border-radius: 0 3px 3px 0;
     }
 
-    /* Lock and username screens */
     .screen {
       position: fixed;
       top: 0; left: 0;
@@ -108,10 +107,13 @@
       cursor: pointer;
     }
 
-    #error-msg { color: #ff6b6b; margin-top: 10px; height: 1.2em; }
+    #error-msg, #auth-error {
+      color: #ff6b6b;
+      margin-top: 10px;
+      height: 1.2em;
+    }
   </style>
 </head>
-
 <body>
   <!-- Passcode screen -->
   <div class="screen" id="lock-screen">
@@ -121,21 +123,21 @@
     <div id="error-msg"></div>
   </div>
 
-  <!-- Username screen -->
-  <div class="screen" id="username-screen" style="display:none;">
-    <h2>Choose a Username</h2>
-    <input class="input-field" type="text" id="username-input" placeholder="Username" />
-    <button class="btn" id="submit-username">Continue</button>
-    <div id="username-error" style="color: #ff6b6b; margin-top: 10px;"></div>
+  <!-- Auth screen -->
+  <div class="screen" id="auth-screen" style="display:none;">
+    <h2>Log In / Sign Up</h2>
+    <input class="input-field" type="email" id="auth-email" placeholder="Email" />
+    <input class="input-field" type="password" id="auth-password" placeholder="Password" />
+    <button class="btn" id="login-btn">Log In</button>
+    <button class="btn" id="signup-btn">Sign Up</button>
+    <div id="auth-error"></div>
   </div>
 
-  <!-- Main chat + content -->
+  <!-- Main content -->
   <div id="main-content" style="display:none; flex-direction: column; align-items: center;">
     <h1>Day 7;</h1>
-    <h2> Sometimes I wonder whether I'll look back or at you in the future
-      
-    </h2>
-    <h3>- ND3RWIGGIN </h3>
+    <h2>Sometimes I wonder whether I'll look back or at you in the future</h2>
+    <h3>- ND3RWIGGIN</h3>
 
     <div id="countdown"></div>
 
@@ -161,6 +163,12 @@
       get,
       remove
     } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
+    import {
+      getAuth,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBUmJ9k5pS62TzIkRHswO2lJLnaeRIfGmE",
@@ -168,12 +176,12 @@
       projectId: "jess-chat-box",
       storageBucket: "jess-chat-box.appspot.com",
       messagingSenderId: "414967828897",
-      appId: "1:414967828897:web:89045ed9bd4b3257c4bbe0",
-      measurementId: "G-P1EVKQ9M7E"
+      appId: "1:414967828897:web:89045ed9bd4b3257c4bbe0"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
+    const auth = getAuth(app);
     const messagesRef = ref(db, "messages");
 
     const chatBox = document.getElementById("chat-box");
@@ -181,73 +189,72 @@
     const sendBtn = document.getElementById("send-btn");
 
     const lockScreen = document.getElementById("lock-screen");
-    const usernameScreen = document.getElementById("username-screen");
+    const authScreen = document.getElementById("auth-screen");
     const mainContent = document.getElementById("main-content");
+
     const passcodeInput = document.getElementById("passcode-input");
     const unlockBtn = document.getElementById("unlock-btn");
     const errorMsg = document.getElementById("error-msg");
-    const usernameInput = document.getElementById("username-input");
-    const submitUsernameBtn = document.getElementById("submit-username");
-    const usernameError = document.getElementById("username-error");
+
+    const authEmail = document.getElementById("auth-email");
+    const authPassword = document.getElementById("auth-password");
+    const loginBtn = document.getElementById("login-btn");
+    const signupBtn = document.getElementById("signup-btn");
+    const authError = document.getElementById("auth-error");
 
     const SECRET_PASSCODE = "112906";
 
-    // Check passcode
     unlockBtn.onclick = () => {
       if (passcodeInput.value === SECRET_PASSCODE) {
         lockScreen.style.display = "none";
-        const savedName = localStorage.getItem("username");
-        if (savedName) {
-          startApp(savedName);
-        } else {
-          usernameScreen.style.display = "flex";
-        }
+        onAuthStateChanged(auth, (user) => {
+          if (user) {
+            startApp(user.email);
+          } else {
+            authScreen.style.display = "flex";
+          }
+        });
       } else {
         errorMsg.textContent = "Incorrect passcode.";
       }
     };
 
-    // Handle username submission
-    submitUsernameBtn.onclick = async () => {
-      const desiredName = usernameInput.value.trim();
-      if (!desiredName) {
-        usernameError.textContent = "Please enter a username.";
-        return;
-      }
-
-      // Check for duplicates
-      const snapshot = await get(messagesRef);
-      let taken = false;
-      snapshot.forEach((child) => {
-        if (child.val().name === desiredName) taken = true;
-      });
-
-      if (taken) {
-        usernameError.textContent = "That username is already taken.";
-      } else {
-        localStorage.setItem("username", desiredName);
-        usernameScreen.style.display = "none";
-        startApp(desiredName);
-      }
+    loginBtn.onclick = () => {
+      signInWithEmailAndPassword(auth, authEmail.value, authPassword.value)
+        .then((userCredential) => {
+          authScreen.style.display = "none";
+          startApp(userCredential.user.email);
+        })
+        .catch((err) => {
+          authError.textContent = err.message;
+        });
     };
 
-    function startApp(username) {
-      mainContent.style.display = "flex";
+    signupBtn.onclick = () => {
+      createUserWithEmailAndPassword(auth, authEmail.value, authPassword.value)
+        .then((userCredential) => {
+          authScreen.style.display = "none";
+          startApp(userCredential.user.email);
+        })
+        .catch((err) => {
+          authError.textContent = err.message;
+        });
+    };
 
-      // Load existing messages
+    function startApp(email) {
+      mainContent.style.display = "flex";
       onChildAdded(messagesRef, (data) => {
         const msg = data.val();
-        const div = document.createElement("div");
         const time = new Date(msg.timestamp).toLocaleTimeString();
+        const div = document.createElement("div");
         div.textContent = `[${time}] ${msg.name}: ${msg.text}`;
         chatBox.appendChild(div);
         chatBox.scrollTop = chatBox.scrollHeight;
       });
 
-      // Send message
-      sendBtn.onclick = () => sendMessage(username);
+      sendBtn.onclick = () => sendMessage(email);
       chatInput.onkeydown = (e) => {
-        if (e.key === "Enter") sendMessage(username);
+        if (e.key === "Enter") sendMessage(email);
       };
 
       async function sendMessage(name) {
@@ -264,7 +271,6 @@
         chatInput.value = "";
       }
 
-      // Delete messages older than 30 days
       async function deleteOldMessages() {
         const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
         const oldQuery = query(messagesRef, orderByChild("timestamp"), endAt(thirtyDaysAgo));
@@ -277,7 +283,6 @@
       deleteOldMessages();
     }
 
-    // Countdown
     const startTime = new Date("June 13, 2025 14:40:00").getTime();
     const endTime = new Date("June 28, 2025 00:00:00").getTime();
 
