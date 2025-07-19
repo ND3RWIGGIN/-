@@ -36,16 +36,11 @@
       flex-grow: 1;
       overflow-y: auto;
       padding: 5px;
-      font-size: 1.1rem;
+      font-size: 0.9rem;
       border-bottom: 1px solid #48508a;
       max-height: 300px;
       color: #c8d4e4;
       text-align: left;
-    }
-
-    #chat-box h2 {
-      font-size: 1.5rem;
-      margin: 10px 0;
     }
 
     #chat-input-container {
@@ -120,6 +115,7 @@
   </style>
 </head>
 <body>
+  <!-- Passcode screen -->
   <div class="screen" id="lock-screen">
     <h2>Enter Passcode</h2>
     <input class="input-field" type="password" id="passcode-input" placeholder="Passcode" />
@@ -127,6 +123,7 @@
     <div id="error-msg"></div>
   </div>
 
+  <!-- Auth screen -->
   <div class="screen" id="auth-screen" style="display:none;">
     <h2>Log In / Sign Up</h2>
     <input class="input-field" type="email" id="auth-email" placeholder="Email" />
@@ -136,13 +133,16 @@
     <div id="auth-error"></div>
   </div>
 
+  <!-- Main content -->
   <div id="main-content" style="display:none; flex-direction: column; align-items: center;">
+    <h2></h2>
+    <h3> - <em> J5 </em>, Nd3rwiggin </h3>
     <div id="countdown"></div>
 
     <div id="chat-container">
       <div id="chat-box"></div>
       <div id="chat-input-container">
-        <input type="text" id="chat-input" maxlength="200" placeholder="Write up to 200 characters..." />
+        <input type="text" id="chat-input" placeholder="Type your message..." maxlength="200" />
         <button id="send-btn">Send</button>
       </div>
     </div>
@@ -159,9 +159,7 @@
       orderByChild,
       endAt,
       get,
-      remove,
-      child,
-      set
+      remove
     } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
     import {
       getAuth,
@@ -183,7 +181,6 @@
     const db = getDatabase(app);
     const auth = getAuth(app);
     const messagesRef = ref(db, "messages");
-    const usageRef = ref(db, "usage");
 
     const chatBox = document.getElementById("chat-box");
     const chatInput = document.getElementById("chat-input");
@@ -210,7 +207,7 @@
         lockScreen.style.display = "none";
         onAuthStateChanged(auth, (user) => {
           if (user) {
-            startApp(user);
+            startApp(user.email);
           } else {
             authScreen.style.display = "flex";
           }
@@ -224,7 +221,7 @@
       signInWithEmailAndPassword(auth, authEmail.value, authPassword.value)
         .then((userCredential) => {
           authScreen.style.display = "none";
-          startApp(userCredential.user);
+          startApp(userCredential.user.email);
         })
         .catch((err) => {
           authError.textContent = err.message;
@@ -235,66 +232,77 @@
       createUserWithEmailAndPassword(auth, authEmail.value, authPassword.value)
         .then((userCredential) => {
           authScreen.style.display = "none";
-          startApp(userCredential.user);
+          startApp(userCredential.user.email);
         })
         .catch((err) => {
           authError.textContent = err.message;
         });
     };
 
-    function isUserAllowed(email) {
-      // Force today to be Jessica's day
-      return email === "jessicaparvez@gmail.com";
-    }
-
-    async function hasUserPostedToday(email) {
-      const usageSnapshot = await get(child(usageRef, email.replace('.', '_')));
-      if (!usageSnapshot.exists()) return false;
-      const lastPostTime = usageSnapshot.val();
-      const now = Date.now();
-      return now - lastPostTime < (48 * 60 * 60 * 1000);
-    }
-
-    function updateUsage(email) {
-      return set(ref(db, `usage/${email.replace('.', '_')}`), Date.now());
-    }
-
-    function startApp(user) {
+    function startApp(email) {
       mainContent.style.display = "flex";
-      const email = user.email;
 
       onChildAdded(messagesRef, (data) => {
         const msg = data.val();
-        const div = document.createElement("h2");
-        div.textContent = `${msg.name}: ${msg.text}`;
+        const time = new Date(msg.timestamp).toLocaleTimeString();
+        const div = document.createElement("div");
+        div.textContent = `[${time}] ${msg.name}: ${msg.text}`;
         chatBox.appendChild(div);
         chatBox.scrollTop = chatBox.scrollHeight;
       });
 
-      sendBtn.onclick = async () => {
-        const allowed = isUserAllowed(email);
-        const posted = await hasUserPostedToday(email);
+      sendBtn.onclick = () => sendMessage(email);
+      chatInput.onkeydown = (e) => {
+        if (e.key === "Enter") sendMessage(email);
+      };
 
-        if (!allowed) {
-          alert("You can't post today.");
-          return;
-        }
-        if (posted) {
-          alert("You can only post once every 48 hours.");
-          return;
-        }
-
+      async function sendMessage(name) {
         const text = chatInput.value.trim();
-        if (!text || text.length > 200) return;
+        if (!text) return;
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const startOfToday = today.getTime();
+
+        const q = query(messagesRef, orderByChild("email"));
+        const snapshot = await get(q);
+        let hasPostedToday = false;
+
+        snapshot.forEach(child => {
+          const msg = child.val();
+          if (msg.email === name && msg.timestamp >= startOfToday) {
+            hasPostedToday = true;
+          }
+        });
+
+        if (hasPostedToday) {
+          const div = document.createElement("div");
+          div.textContent = `[System]: You can only post once per day.`;
+          chatBox.appendChild(div);
+          chatBox.scrollTop = chatBox.scrollHeight;
+          return;
+        }
 
         await push(messagesRef, {
-          name: email,
-          text: text,
+          name,
+          email: name,
+          text,
           timestamp: Date.now()
         });
+
         chatInput.value = "";
-        updateUsage(email);
-      };
+      }
+
+      async function deleteOldMessages() {
+        const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+        const oldQuery = query(messagesRef, orderByChild("timestamp"), endAt(thirtyDaysAgo));
+        const snapshot = await get(oldQuery);
+        snapshot.forEach(child => {
+          remove(ref(db, "messages/" + child.key));
+        });
+      }
+
+      deleteOldMessages();
     }
 
     const startTime = new Date("July 10, 2025 00:00:00").getTime();
@@ -302,6 +310,7 @@
     function updateCountdown() {
       const now = Date.now();
       const elapsed = now - startTime;
+
       const days = Math.floor(elapsed / (1000 * 60 * 60 * 24));
       const hours = Math.floor((elapsed % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const minutes = Math.floor((elapsed % (1000 * 60 * 60)) / (1000 * 60));
@@ -316,4 +325,3 @@
   </script>
 </body>
 </html>
-
