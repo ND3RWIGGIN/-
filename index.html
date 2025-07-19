@@ -1,111 +1,307 @@
+You said:
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>Chat</title>
-    <style>
-      body {
-        background-color: black;
-        color: white;
-        font-family: sans-serif;
-        padding: 20px;
+<html lang="en">
+<head>
+  <title>nd3rwiggin</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #191f41;
+      color: #c8d4e4;
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+
+    h1 { font-size: 3rem; }
+    h2 { margin-top: 5px; font-size: 1.5rem; }
+    #countdown { margin-top: 20px; font-size: 1.2rem; }
+
+    #chat-container {
+      margin-top: 30px;
+      width: 320px;
+      max-height: 400px;
+      display: flex;
+      flex-direction: column;
+      background-color: #2a2f4f;
+      border: 1px solid #c8d4e4;
+      border-radius: 5px;
+      padding: 10px;
+    }
+
+    #chat-box {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 5px;
+      font-size: 0.9rem;
+      border-bottom: 1px solid #48508a;
+      max-height: 300px;
+      color: #c8d4e4;
+      text-align: left;
+    }
+
+    #chat-input-container {
+      margin-top: 10px;
+      display: flex;
+    }
+
+    #chat-input {
+      flex-grow: 1;
+      padding: 8px;
+      border: none;
+      font-size: 1rem;
+      background-color: #3b4166;
+      color: #c8d4e4;
+      border-radius: 3px 0 0 3px;
+    }
+
+    #chat-input::placeholder {
+      color: #9aa7c2;
+    }
+
+    #send-btn {
+      padding: 8px 15px;
+      background-color: #48508a;
+      color: #c8d4e4;
+      border: none;
+      cursor: pointer;
+      border-radius: 0 3px 3px 0;
+    }
+
+    .screen {
+      position: fixed;
+      top: 0; left: 0;
+      height: 100vh;
+      width: 100vw;
+      background-color: #191f41;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    .input-field {
+      padding: 10px;
+      font-size: 1.2rem;
+      border-radius: 5px;
+      border: none;
+      margin-top: 10px;
+      width: 250px;
+      text-align: center;
+      background-color: #3b4166;
+      color: #c8d4e4;
+    }
+
+    .btn {
+      margin-top: 15px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      background-color: #48508a;
+      border: none;
+      color: #c8d4e4;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #error-msg, #auth-error {
+      color: #ff6b6b;
+      margin-top: 10px;
+      height: 1.2em;
+    }
+  </style>
+</head>
+<body>
+  <!-- Passcode screen -->
+  <div class="screen" id="lock-screen">
+    <h2>Enter Passcode</h2>
+    <input class="input-field" type="password" id="passcode-input" placeholder="Passcode" />
+    <button class="btn" id="unlock-btn">Unlock</button>
+    <div id="error-msg"></div>
+  </div>
+
+  <!-- Auth screen -->
+  <div class="screen" id="auth-screen" style="display:none;">
+    <h2>Log In / Sign Up</h2>
+    <input class="input-field" type="email" id="auth-email" placeholder="Email" />
+    <input class="input-field" type="password" id="auth-password" placeholder="Password" />
+    <button class="btn" id="login-btn">Log In</button>
+    <button class="btn" id="signup-btn">Sign Up</button>
+    <div id="auth-error"></div>
+  </div>
+
+  <!-- Main content -->
+  <div id="main-content" style="display:none; flex-direction: column; align-items: center;">
+    <h2>  
+
+      
+
+    </h2>
+    <h3> - <em> J5 </em>, Nd3rwiggin </h3>
+    
+    <div id="countdown"></div>
+
+    <div id="chat-container">
+      <div id="chat-box"></div>
+      <div id="chat-input-container">
+        <input type="text" id="chat-input" placeholder="Type your message..." />
+        <button id="send-btn">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+    import {
+      getDatabase,
+      ref,
+      push,
+      onChildAdded,
+      query,
+      orderByChild,
+      endAt,
+      get,
+      remove
+    } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
+    import {
+      getAuth,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBUmJ9k5pS62TzIkRHswO2lJLnaeRIfGmE",
+      authDomain: "jess-chat-box.firebaseapp.com",
+      projectId: "jess-chat-box",
+      storageBucket: "jess-chat-box.appspot.com",
+      messagingSenderId: "414967828897",
+      appId: "1:414967828897:web:89045ed9bd4b3257c4bbe0"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+    const messagesRef = ref(db, "messages");
+
+    const chatBox = document.getElementById("chat-box");
+    const chatInput = document.getElementById("chat-input");
+    const sendBtn = document.getElementById("send-btn");
+
+    const lockScreen = document.getElementById("lock-screen");
+    const authScreen = document.getElementById("auth-screen");
+    const mainContent = document.getElementById("main-content");
+
+    const passcodeInput = document.getElementById("passcode-input");
+    const unlockBtn = document.getElementById("unlock-btn");
+    const errorMsg = document.getElementById("error-msg");
+
+    const authEmail = document.getElementById("auth-email");
+    const authPassword = document.getElementById("auth-password");
+    const loginBtn = document.getElementById("login-btn");
+    const signupBtn = document.getElementById("signup-btn");
+    const authError = document.getElementById("auth-error");
+
+    const SECRET_PASSCODE = "112906";
+
+    unlockBtn.onclick = () => {
+      if (passcodeInput.value === SECRET_PASSCODE) {
+        lockScreen.style.display = "none";
+        onAuthStateChanged(auth, (user) => {
+          if (user) {
+            startApp(user.email);
+          } else {
+            authScreen.style.display = "flex";
+          }
+        });
+      } else {
+        errorMsg.textContent = "Incorrect passcode.";
       }
-      #chatBox {
-        height: 300px;
-        overflow-y: scroll;
-        border: 1px solid white;
-        padding: 10px;
-        margin-bottom: 10px;
-      }
-      #chatInput {
-        width: 80%;
-        padding: 10px;
-        font-size: 16px;
-      }
-      #sendButton {
-        padding: 10px;
-        font-size: 16px;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>Chat</h1>
-    <div id="chatBox"></div>
-    <input id="chatInput" placeholder="Type a message..." />
-    <button id="sendButton">Send</button>
+    };
 
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-      import {
-        getDatabase,
-        ref,
-        onChildAdded,
-        push
-      } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
-      import {
-        getAuth,
-        onAuthStateChanged,
-        signInWithPopup,
-        GoogleAuthProvider
-      } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+    loginBtn.onclick = () => {
+      signInWithEmailAndPassword(auth, authEmail.value, authPassword.value)
+        .then((userCredential) => {
+          authScreen.style.display = "none";
+          startApp(userCredential.user.email);
+        })
+        .catch((err) => {
+          authError.textContent = err.message;
+        });
+    };
 
-      const firebaseConfig = {
-        databaseURL: "https://alternating-chat-default-rtdb.firebaseio.com",
-        apiKey: "AIzaSyB-dU4nBB7uAoL4sEakI7ek0TaDTTjTCqA",
-        authDomain: "alternating-chat.firebaseapp.com",
-        projectId: "alternating-chat",
-        storageBucket: "alternating-chat.appspot.com",
-        messagingSenderId: "7472238731",
-        appId: "1:7472238731:web:5d9c3b92877ff1c3d1cda1"
-      };
+    signupBtn.onclick = () => {
+      createUserWithEmailAndPassword(auth, authEmail.value, authPassword.value)
+        .then((userCredential) => {
+          authScreen.style.display = "none";
+          startApp(userCredential.user.email);
+        })
+        .catch((err) => {
+          authError.textContent = err.message;
+        });
+    };
 
-      const app = initializeApp(firebaseConfig);
-      const db = getDatabase(app);
-      const auth = getAuth();
-      const messagesRef = ref(db, "messages");
-
-      const chatBox = document.getElementById("chatBox");
-      const chatInput = document.getElementById("chatInput");
-      const sendButton = document.getElementById("sendButton");
-
+    function startApp(email) {
+      mainContent.style.display = "flex";
       onChildAdded(messagesRef, (data) => {
         const msg = data.val();
+        const time = new Date(msg.timestamp).toLocaleTimeString();
         const div = document.createElement("div");
-        const date = new Date(msg.timestamp || Date.now());
-        const time = date.toLocaleTimeString();
-        div.textContent = `[${time}] ${msg.name}: ${msg.text}`;
+        div.textContent = [${time}] ${msg.name}: ${msg.text};
         chatBox.appendChild(div);
         chatBox.scrollTop = chatBox.scrollHeight;
       });
 
-      sendButton.onclick = () => {
-        if (auth.currentUser) {
-          sendMessage(auth.currentUser.displayName);
-        } else {
-          signInWithPopup(auth, new GoogleAuthProvider());
-        }
+      sendBtn.onclick = () => sendMessage(email);
+      chatInput.onkeydown = (e) => {
+        if (e.key === "Enter") sendMessage(email);
       };
 
-      function sendMessage(name) {
+      async function sendMessage(name) {
         const text = chatInput.value.trim();
         if (!text) return;
 
-        const newMessage = {
-          name: name,
-          text: text,
-          timestamp: Date.now()
-        };
+        const div = document.createElement("div");
+        div.textContent = [System]: Chat is temporarily disabled. Please try again later.;
+        chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
 
-        push(messagesRef, newMessage);
         chatInput.value = "";
       }
 
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          console.log("Signed in as:", user.displayName);
-        } else {
-          console.log("Signed out");
-        }
-      });
-    </script>
-  </body>
+      async function deleteOldMessages() {
+        const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+        const oldQuery = query(messagesRef, orderByChild("timestamp"), endAt(thirtyDaysAgo));
+        const snapshot = await get(oldQuery);
+        snapshot.forEach(child => {
+          remove(ref(db, "messages/" + child.key));
+        });
+      }
+
+      deleteOldMessages();
+    }
+
+    const startTime = new Date("July 10, 2025 00:00:00").getTime();
+
+    function updateCountdown() {
+      const now = Date.now();
+      const elapsed = now - startTime;
+
+      const days = Math.floor(elapsed / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((elapsed % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((elapsed % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((elapsed % (1000 * 60)) / 1000);
+
+      document.getElementById("countdown").textContent =
+        Time since start: ${days}d ${hours}h ${minutes}m ${seconds}s;
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+  </script>
+</body>
 </html>
