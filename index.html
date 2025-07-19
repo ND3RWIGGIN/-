@@ -36,11 +36,16 @@
       flex-grow: 1;
       overflow-y: auto;
       padding: 5px;
-      font-size: 0.9rem;
+      font-size: 1.1rem;
       border-bottom: 1px solid #48508a;
       max-height: 300px;
       color: #c8d4e4;
       text-align: left;
+    }
+
+    #chat-box h2 {
+      font-size: 1.5rem;
+      margin: 10px 0;
     }
 
     #chat-input-container {
@@ -155,7 +160,8 @@
       endAt,
       get,
       remove,
-      child
+      child,
+      set
     } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
     import {
       getAuth,
@@ -237,11 +243,8 @@
     };
 
     function isUserAllowed(email) {
-      const now = Date.now();
-      const daysSinceStart = Math.floor((now - startTime) / (1000 * 60 * 60 * 24));
-      const isJessicaDay = daysSinceStart % 2 === 0;
-      return (email === "jessicaparvez@gmail.com" && isJessicaDay) ||
-             (email === "eesanana@gmail.com" && !isJessicaDay);
+      // Force today to be Jessica's day
+      return email === "jessicaparvez@gmail.com";
     }
 
     async function hasUserPostedToday(email) {
@@ -253,7 +256,7 @@
     }
 
     function updateUsage(email) {
-      return push(ref(db, `usage/${email.replace('.', '_')}`), Date.now());
+      return set(ref(db, `usage/${email.replace('.', '_')}`), Date.now());
     }
 
     function startApp(user) {
@@ -262,9 +265,8 @@
 
       onChildAdded(messagesRef, (data) => {
         const msg = data.val();
-        const time = new Date(msg.timestamp).toLocaleTimeString();
-        const div = document.createElement("div");
-        div.textContent = `[${time}] ${msg.name}: ${msg.text}`;
+        const div = document.createElement("h2");
+        div.textContent = `${msg.name}: ${msg.text}`;
         chatBox.appendChild(div);
         chatBox.scrollTop = chatBox.scrollHeight;
       });
@@ -274,7 +276,7 @@
         const posted = await hasUserPostedToday(email);
 
         if (!allowed) {
-          alert("You can only post on alternate days.");
+          alert("You can't post today.");
           return;
         }
         if (posted) {
