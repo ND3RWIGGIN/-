@@ -135,34 +135,34 @@
 
   <!-- Main content -->
   <div id="main-content" style="display:none; flex-direction: column; align-items: center;">
-    <h2>  Guess I got what I deserved <br>
-Kept you waiting there too long, my love <br>
-All that time, without a word <br>
-Did you really think that I'd forget <br>
-Or I'd regret <br>
-The special love I have for you <br>
-My baby blue <br> <br>
-All those days became so long <br>
-Did you really think I'd do you wrong? <br>
-Dixie, when I let you go <br>
-Thought you'd realize I would know <br>
-I would show <br>
-The special love I have for you <br>
-My baby blue <br> <br>
-What can I do? What can I say? <br>
-Except I want you by my side <br>
-How can I show you? Show me the way <br>
-Don't you know the times I've tried? <br> <br>
-Guess that's all I have to say <br>
-Except the feeling just grows stronger everyday <br>
-Just one thing before I go <br>
-Take good care, baby, let me know <br>
-Let it grow <br>
-The special love you have for me <br>
-My Dixie dear 
-
+    <h2>
+      Guess I got what I deserved <br>
+      Kept you waiting there too long, my love <br>
+      All that time, without a word <br>
+      Did you really think that I'd forget <br>
+      Or I'd regret <br>
+      The special love I have for you <br>
+      My baby blue <br><br>
+      All those days became so long <br>
+      Did you really think I'd do you wrong? <br>
+      Dixie, when I let you go <br>
+      Thought you'd realize I would know <br>
+      I would show <br>
+      The special love I have for you <br>
+      My baby blue <br><br>
+      What can I do? What can I say? <br>
+      Except I want you by my side <br>
+      How can I show you? Show me the way <br>
+      Don't you know the times I've tried? <br><br>
+      Guess that's all I have to say <br>
+      Except the feeling just grows stronger everyday <br>
+      Just one thing before I go <br>
+      Take good care, baby, let me know <br>
+      Let it grow <br>
+      The special love you have for me <br>
+      My Dixie dear
     </h2>
-    <h3> - <em> My Baby Blue </em>, Badfinger </h3>
+    <h3> - <em>My Baby Blue</em>, Badfinger </h3>
     <br>
     <h4> I'm glad you texted Jess. I don't think you know how much you mean to me. (J4) </h4>
     <div id="countdown"></div>
@@ -269,6 +269,7 @@ My Dixie dear
 
     function startApp(email) {
       mainContent.style.display = "flex";
+
       onChildAdded(messagesRef, (data) => {
         const msg = data.val();
         const time = new Date(msg.timestamp).toLocaleTimeString();
@@ -287,11 +288,13 @@ My Dixie dear
         const text = chatInput.value.trim();
         if (!text) return;
 
-        const div = document.createElement("div");
-        div.textContent = `[System]: Chat is temporarily disabled. Please try again later.`;
-        chatBox.appendChild(div);
-        chatBox.scrollTop = chatBox.scrollHeight;
+        const message = {
+          name,
+          text,
+          timestamp: Date.now()
+        };
 
+        await push(messagesRef, message);
         chatInput.value = "";
       }
 
