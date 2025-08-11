@@ -3,22 +3,57 @@
 <head>
   <title>nd3rwiggin</title>
   <style>
+    /* Make body full height and column layout */
     body {
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      align-items: center;
       height: 100vh;
       margin: 0;
       background-color: #191f41;
       color: #c8d4e4;
       font-family: Arial, sans-serif;
       text-align: center;
+      overflow: hidden; /* prevent scroll on body */
     }
 
-    h1 { font-size: 3rem; }
-    h2 { margin-top: 5px; font-size: 1.5rem; }
-    
+    /* Quote container fixed height at top */
+    #quote-container {
+      flex-shrink: 0;
+      padding: 40px 20px 20px;
+      background-color: #191f41;
+      font-size: 1.5rem;
+      line-height: 1.4;
+      font-weight: 500;
+      user-select: none;
+      color: #c8d4e4;
+    }
+
+    #quote-container em {
+      font-style: italic;
+      font-weight: 400;
+      font-size: 1rem;
+    }
+
+    /* Main content scrollable area */
+    #main-content {
+      flex-grow: 1;
+      overflow-y: auto;
+      display: none; /* initially hidden, shown after login */
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      padding: 10px 0 30px;
+      box-sizing: border-box;
+    }
+
+    h2, h3 {
+      margin: 0;
+    }
+    h3 {
+      margin-top: 5px;
+      font-weight: 400;
+    }
+
     #chat-container {
       margin-top: 30px;
       width: 320px;
@@ -177,14 +212,15 @@
     <div id="auth-error"></div>
   </div>
 
-  <!-- Main content -->
-  <div id="main-content" style="display:none; flex-direction: column; align-items: center; width: 100%;">
-    <h2>
-      A tornado flew around my room before you came <br>
-      Excuse the mess it made, it usually doesn’t rain in Southern California. 
-    </h2>
-    <h3> - <em> Thinking Bout You </em>, Frank Ocean </h3>
+  <!-- Quote container fixed at top -->
+  <div id="quote-container">
+    A tornado flew around my room before you came <br>
+    Excuse the mess it made, it usually doesn’t rain in Southern California. <br>
+    <em>- Thinking Bout You, Frank Ocean</em>
+  </div>
 
+  <!-- Main content -->
+  <div id="main-content">
     <!-- Online users -->
     <div id="online-users-container">
       <strong>Online Users:</strong>
