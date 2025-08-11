@@ -125,6 +125,37 @@
       padding-left: 10px;
       margin-top: 5px;
     }
+
+    /* New styles for photo upload section */
+    #photo-section {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin: 20px 0;
+      width: 100%;
+      max-width: 700px;
+    }
+    .photo-container {
+      text-align: center;
+      flex: 1;
+    }
+    .photo-container img {
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 2px solid #48508a;
+      background-color: #252a59;
+    }
+    .photo-container input[type="file"] {
+      margin-top: 10px;
+    }
+    .upload-msg {
+      margin-top: 6px;
+      font-size: 0.9rem;
+      height: 1.2em;
+      color: #c8d4e4;
+    }
   </style>
 </head>
 <body>
@@ -147,12 +178,10 @@
   </div>
 
   <!-- Main content -->
-  <div id="main-content" style="display:none; flex-direction: column; align-items: center;">
+  <div id="main-content" style="display:none; flex-direction: column; align-items: center; width: 100%;">
     <h2>
-
-A tornado flew around my room before you came <br>
-Excuse the mess it made, it usually doesn’t rain in Southern California. 
-      
+      A tornado flew around my room before you came <br>
+      Excuse the mess it made, it usually doesn’t rain in Southern California. 
     </h2>
     <h3> - <em> Thinking Bout You </em>, Frank Ocean </h3>
 
@@ -160,6 +189,24 @@ Excuse the mess it made, it usually doesn’t rain in Southern California.
     <div id="online-users-container">
       <strong>Online Users:</strong>
       <ul id="online-users-list"></ul>
+    </div>
+
+    <!-- New photo upload & display section -->
+    <div id="photo-section">
+      <div class="photo-container">
+        <h3>Jess's Photo</h3>
+        <img id="jess-img" src="" alt="Jess's photo" />
+        <br />
+        <input type="file" id="jess-file" accept="image/*" />
+        <div id="jess-msg" class="upload-msg"></div>
+      </div>
+      <div class="photo-container">
+        <h3>Eesa's Photo</h3>
+        <img id="eesa-img" src="" alt="Eesa's photo" />
+        <br />
+        <input type="file" id="eesa-file" accept="image/*" />
+        <div id="eesa-msg" class="upload-msg"></div>
+      </div>
     </div>
 
     <div id="chat-container">
@@ -208,6 +255,7 @@ Excuse the mess it made, it usually doesn’t rain in Southern California.
     const auth = getAuth(app);
     const messagesRef = ref(db, "messages");
 
+    // Elements
     const chatBox = document.getElementById("chat-box");
     const chatInput = document.getElementById("chat-input");
     const sendBtn = document.getElementById("send-btn");
@@ -226,10 +274,82 @@ Excuse the mess it made, it usually doesn’t rain in Southern California.
     const signupBtn = document.getElementById("signup-btn");
     const authError = document.getElementById("auth-error");
 
-    const SECRET_PASSCODE = "112906";
+    const users = {
+      jess: "Jess",
+      eesa: "Eesa"
+    };
+
+    // Utility to check if two timestamps are on same day
+    function isSameDay(ts1, ts2) {
+      const d1 = new Date(ts1);
+      const d2 = new Date(ts2);
+      return d1.getFullYear() === d2.getFullYear() &&
+        d1.getMonth() === d2.getMonth() &&
+        d1.getDate() === d2.getDate();
+    }
+
+    // Upload base64 image to Realtime Database
+    async function uploadImageAsBase64(file, userId) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = async function(event) {
+          const base64String = event.target.result;
+          const now = Date.now();
+
+          const photoRef = ref(db, "photos/" + userId);
+
+          // Check if user already uploaded today
+          get(photoRef).then(snapshot => {
+            const data = snapshot.val();
+            if (data && isSameDay(data.timestamp, now)) {
+              reject("You can only upload once per day.");
+            } else {
+              set(photoRef, {
+                imageBase64: base64String,
+                timestamp: now
+              }).then(() => {
+                resolve("Upload successful!");
+              }).catch(reject);
+            }
+          }).catch(reject);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // Show user's photo from database
+    function showImage(userId) {
+      const photoRef = ref(db, "photos/" + userId);
+      onValue(photoRef, (snapshot) => {
+        const data = snapshot.val();
+        const imgEl = document.getElementById(userId + "-img");
+        if (data && data.imageBase64) {
+          imgEl.src = data.imageBase64;
+        } else {
+          imgEl.src = "";
+        }
+      });
+    }
+
+    // Remove photos older than 7 days
+    function cleanupOldPhotos() {
+      const photosRef = ref(db, "photos/");
+      get(photosRef).then(snapshot => {
+        const allPhotos = snapshot.val();
+        if (!allPhotos) return;
+
+        const now = Date.now();
+        Object.entries(allPhotos).forEach(([userId, photoData]) => {
+          if (now - photoData.timestamp > 7 * 24 * 60 * 60 * 1000) {
+            remove(ref(db, "photos/" + userId));
+          }
+        });
+      });
+    }
 
     unlockBtn.onclick = () => {
-      if (passcodeInput.value === SECRET_PASSCODE) {
+      if (passcodeInput.value === "112906") {
         lockScreen.style.display = "none";
         onAuthStateChanged(auth, (user) => {
           if (user) {
@@ -268,7 +388,6 @@ Excuse the mess it made, it usually doesn’t rain in Southern California.
     function startApp(user) {
       mainContent.style.display = "flex";
 
-      // Setup presence tracking
       const userId = user.uid;
       const email = user.email;
       const userRef = ref(db, 'presence/' + userId);
@@ -278,13 +397,36 @@ Excuse the mess it made, it usually doesn’t rain in Southern California.
 
       const presenceRef = ref(db, 'presence/');
       onValue(presenceRef, (snapshot) => {
-        const users = snapshot.val() || {};
+        const usersOnline = snapshot.val() || {};
         const onlineUsersList = document.getElementById('online-users-list');
         onlineUsersList.innerHTML = '';
-        Object.values(users).forEach((userEmail) => {
+        Object.values(usersOnline).forEach((userEmail) => {
           const li = document.createElement('li');
           li.textContent = userEmail;
           onlineUsersList.appendChild(li);
+        });
+      });
+
+      // Show images initially & on change
+      Object.keys(users).forEach(userIdKey => showImage(userIdKey));
+
+      // Setup file input listeners for uploading
+      Object.keys(users).forEach(userIdKey => {
+        const fileInput = document.getElementById(userIdKey + "-file");
+        const msgDiv = document.getElementById(userIdKey + "-msg");
+
+        fileInput.addEventListener("change", async (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+
+          msgDiv.textContent = "Uploading...";
+          try {
+            const result = await uploadImageAsBase64(file, userIdKey);
+            msgDiv.textContent = result;
+          } catch (err) {
+            msgDiv.textContent = err;
+          }
+          fileInput.value = "";
         });
       });
 
@@ -327,6 +469,9 @@ Excuse the mess it made, it usually doesn’t rain in Southern California.
       }
 
       deleteOldMessages();
+
+      // Clean up old photos >7 days on every app start
+      cleanupOldPhotos();
     }
   </script>
 </body>
