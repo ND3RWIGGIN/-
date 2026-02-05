@@ -6,6 +6,7 @@
 <title>nd3rwiggin</title>
 
 <style>
+/* ---------- BASE ---------- */
 body {
   margin: 0;
   font-family: Arial, sans-serif;
@@ -17,6 +18,11 @@ body {
   overflow: hidden;
 }
 
+button {
+  font-family: inherit;
+}
+
+/* ---------- SCREENS ---------- */
 .screen {
   position: fixed;
   inset: 0;
@@ -53,12 +59,15 @@ body {
 #error-msg, #auth-error {
   color: #ff6b6b;
   margin-top: 10px;
+  min-height: 1.2em;
 }
 
+/* ---------- HEADER ---------- */
 #quote-container {
   padding: 30px 20px 10px;
   text-align: center;
   font-size: 1.4rem;
+  user-select: none;
 }
 
 #quote-container em {
@@ -66,6 +75,7 @@ body {
   opacity: 0.8;
 }
 
+/* ---------- MAIN ---------- */
 #main-content {
   flex: 1;
   overflow-y: auto;
@@ -78,6 +88,7 @@ body {
   margin-bottom: 10px;
 }
 
+/* ---------- COLOR PICKER ---------- */
 #colors {
   display: flex;
   gap: 8px;
@@ -86,12 +97,14 @@ body {
 
 #colors button {
   padding: 6px 10px;
-  border: none;
   border-radius: 4px;
-  color: #fff;
+  border: none;
   cursor: pointer;
+  color: #000;
+  font-size: 0.75rem;
 }
 
+/* ---------- SCHEDULE ---------- */
 #schedule-scroll {
   overflow-x: auto;
 }
@@ -122,12 +135,14 @@ body {
   padding: 4px;
   font-size: 0.7rem;
   outline: none;
+  word-break: break-word;
 }
 
 .half.left {
   border-right: 1px solid #48508a;
 }
 
+/* ---------- CHAT ---------- */
 #chat-container {
   margin-top: 20px;
   border-top: 1px solid #48508a;
@@ -143,39 +158,45 @@ body {
   font-size: 0.85rem;
 }
 
-#clear-week {
-  margin: 10px 0;
-  background: #ff6b6b;
+#chat-input {
+  width: calc(100% - 60px);
+  padding: 6px;
+  background: #3b4166;
+  border: none;
+  color: #c8d4e4;
 }
+
 </style>
 </head>
 
 <body>
 
+<!-- ---------- LOCK SCREEN ---------- -->
 <div class="screen" id="lock-screen">
   <h2>Enter Passcode</h2>
   <input class="input-field" id="passcode-input" type="password" />
-  <button class="btn" id="unlock-btn">Unlock</button>
+  <button class="btn" id="unlock-btn" type="button">Unlock</button>
   <div id="error-msg"></div>
 </div>
 
+<!-- ---------- AUTH SCREEN ---------- -->
 <div class="screen" id="auth-screen" style="display:none;">
   <h2>Log In / Sign Up</h2>
   <input class="input-field" id="auth-email" type="email" placeholder="Email" />
   <input class="input-field" id="auth-password" type="password" placeholder="Password" />
-  <button class="btn" id="login-btn">Log In</button>
-  <button class="btn" id="signup-btn">Sign Up</button>
+  <button class="btn" id="login-btn" type="button">Log In</button>
+  <button class="btn" id="signup-btn" type="button">Sign Up</button>
   <div id="auth-error"></div>
 </div>
 
+<!-- ---------- HEADER ---------- -->
 <div id="quote-container">
   “Sometimes it just feels like I’m too late”<br />
   <em>nd3r, J12</em>
 </div>
 
+<!-- ---------- MAIN ---------- -->
 <div id="main-content">
-
-  <button class="btn" id="clear-week">Clear the Week</button>
 
   <div id="online-users-container">
     <strong>Online:</strong>
@@ -183,11 +204,13 @@ body {
   </div>
 
   <div id="colors">
-    <button data-color="#4caf50" style="background:#4caf50">Free</button>
-    <button data-color="#ff9800" style="background:#ff9800">School</button>
-    <button data-color="#2196f3" style="background:#2196f3">Work</button>
-    <button data-color="#fbc02d" style="background:#fbc02d">Other</button>
+    <button data-color="#4caf50" style="background:#4caf50;">Free</button>
+    <button data-color="#ff9800" style="background:#ff9800;">School</button>
+    <button data-color="#2196f3" style="background:#2196f3;">Work</button>
+    <button data-color="#ffeb3b" style="background:#ffeb3b;">Other</button>
   </div>
+
+  <button class="btn" id="clear-week-btn" type="button">Clear the Week</button>
 
   <div id="schedule-scroll">
     <div id="schedule-grid"></div>
@@ -196,15 +219,37 @@ body {
   <div id="chat-container">
     <div id="chat-box"></div>
     <input id="chat-input" placeholder="Type..." />
-    <button id="send-btn">Send</button>
+    <button id="send-btn" type="button">Send</button>
   </div>
 
 </div>
 
+<!-- ---------- SCRIPT ---------- -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-import { getDatabase, ref, set, onValue, push, onDisconnect, remove } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
+import { getDatabase, ref, set, onValue, push, remove, onDisconnect } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+
+/* ---------- DOM ---------- */
+const lockScreen = document.getElementById("lock-screen");
+const authScreen = document.getElementById("auth-screen");
+const mainContent = document.getElementById("main-content");
+
+const passcodeInput = document.getElementById("passcode-input");
+const unlockBtn = document.getElementById("unlock-btn");
+const errorMsg = document.getElementById("error-msg");
+
+const authEmail = document.getElementById("auth-email");
+const authPassword = document.getElementById("auth-password");
+const loginBtn = document.getElementById("login-btn");
+const signupBtn = document.getElementById("signup-btn");
+const authError = document.getElementById("auth-error");
+
+const onlineUsersList = document.getElementById("online-users-list");
+const chatBox = document.getElementById("chat-box");
+const chatInput = document.getElementById("chat-input");
+const sendBtn = document.getElementById("send-btn");
+const clearWeekBtn = document.getElementById("clear-week-btn");
 
 /* ---------- FIREBASE ---------- */
 const firebaseConfig = {
@@ -220,24 +265,30 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
-/* ---------- PASSCODE ---------- */
-unlockBtn.onclick = () => {
+/* ---------- UNLOCK (FIXED) ---------- */
+unlockBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+
   if (passcodeInput.value === "092603") {
     lockScreen.style.display = "none";
     onAuthStateChanged(auth, user => {
-      user ? start(user) : authScreen.style.display = "flex";
+      if (user) start(user);
+      else authScreen.style.display = "flex";
     });
-  } else errorMsg.textContent = "Wrong passcode.";
-};
+  } else {
+    errorMsg.textContent = "Wrong passcode.";
+  }
+});
 
 /* ---------- AUTH ---------- */
 loginBtn.onclick = () =>
   signInWithEmailAndPassword(auth, authEmail.value, authPassword.value)
-  .catch(e => authError.textContent = e.message);
+    .catch(e => authError.textContent = e.message);
 
 signupBtn.onclick = () =>
   createUserWithEmailAndPassword(auth, authEmail.value, authPassword.value)
-  .catch(e => authError.textContent = e.message);
+    .catch(e => authError.textContent = e.message);
 
 /* ---------- START ---------- */
 function start(user) {
@@ -248,6 +299,15 @@ function start(user) {
   set(pRef, user.email);
   onDisconnect(pRef).remove();
 
+  onValue(ref(db, "presence"), snap => {
+    onlineUsersList.innerHTML = "";
+    Object.values(snap.val() || {}).forEach(email => {
+      const li = document.createElement("li");
+      li.textContent = email;
+      onlineUsersList.appendChild(li);
+    });
+  });
+
   setupSchedule(user.email);
   setupChat(user.email);
 }
@@ -257,36 +317,49 @@ const days = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
 const hours = Array.from({length:15},(_,i)=>i+8);
 const grid = document.getElementById("schedule-grid");
 
-let currentColor = "#4caf50";
+grid.appendChild(document.createElement("div"));
+days.forEach(d => {
+  const h = document.createElement("div");
+  h.textContent = d;
+  h.className = "day-header";
+  grid.appendChild(h);
+});
+
+let selectedColor = "#4caf50";
 document.querySelectorAll("#colors button").forEach(b =>
-  b.onclick = () => currentColor = b.dataset.color
+  b.onclick = () => selectedColor = b.dataset.color
 );
 
 function setupSchedule(email) {
-  const side = email === "eesanana@gmail.com" ? "right" : "left";
-
-  grid.innerHTML = "<div></div>" + days.map(d=>`<div class="day-header">${d}</div>`).join("");
+  const mySide = email === "eesanana@gmail.com" ? "right" : "left";
 
   hours.forEach(hr => {
-    grid.innerHTML += `<div class="hour-label">${hr}:00</div>`;
+    const l = document.createElement("div");
+    l.textContent = hr + ":00";
+    l.className = "hour-label";
+    grid.appendChild(l);
+
     days.forEach(d => {
       const cell = document.createElement("div");
       cell.className = "hour-cell";
 
-      ["left","right"].forEach(s => {
+      ["left","right"].forEach(side => {
         const h = document.createElement("div");
-        h.className = "half " + s;
-        h.contentEditable = s === side;
+        h.className = "half " + side;
+        h.contentEditable = side === mySide;
 
-        if (s !== side) {
-          h.onclick = () => alert("NOT YOUR SIDE SILLY");
-        } else {
-          h.oninput = () => saveHalf(d, hr, s, h);
-          h.onclick = () => {
-            h.style.backgroundColor = currentColor;
-            saveHalf(d, hr, s, h);
-          };
-        }
+        h.onclick = () => {
+          if (side !== mySide) {
+            alert("NOT YOUR SIDE SILLY");
+            return;
+          }
+          h.style.backgroundColor = selectedColor;
+          saveHalf(d, hr, side, h);
+        };
+
+        h.oninput = () => {
+          if (side === mySide) saveHalf(d, hr, side, h);
+        };
 
         cell.appendChild(h);
       });
@@ -297,28 +370,34 @@ function setupSchedule(email) {
 
   onValue(ref(db, "schedule"), snap => {
     document.querySelectorAll(".half").forEach(h => {
-      const d = days[Math.floor((h.parentNode.cellIndex-1))];
-      const hr = hours[Math.floor(h.parentNode.parentNode.rowIndex-1)];
-      const s = h.classList.contains("right") ? "right" : "left";
-      const v = snap.val()?.[d]?.[hr]?.[s];
-      if (v) {
-        h.innerText = v.text;
-        h.style.backgroundColor = v.color;
-      }
+      const d = h.parentElement;
+      const day = h.parentElement.dataset?.day;
+    });
+
+    snap.forEach(daySnap => {
+      daySnap.forEach(hourSnap => {
+        Object.entries(hourSnap.val()).forEach(([side,val]) => {
+          document.querySelectorAll(`.half.${side}`).forEach(h => {
+            if (h.innerText !== val.text) {
+              h.innerText = val.text || "";
+              h.style.backgroundColor = val.color || "";
+            }
+          });
+        });
+      });
     });
   });
 }
 
-function saveHalf(d, hr, s, el) {
-  set(ref(db, `schedule/${d}/${hr}/${s}`), {
+function saveHalf(day, hour, side, el) {
+  set(ref(db, `schedule/${day}/${hour}/${side}`), {
     text: el.innerText,
     color: el.style.backgroundColor
   });
 }
 
-/* ---------- CLEAR WEEK ---------- */
-document.getElementById("clear-week").onclick = () => {
-  if (confirm("Clear the entire week for BOTH of you?")) {
+clearWeekBtn.onclick = () => {
+  if (confirm("Clear the entire week?")) {
     remove(ref(db, "schedule"));
   }
 };
@@ -336,7 +415,10 @@ function setupChat(email) {
   onValue(chatRef, snap => {
     chatBox.innerHTML = "";
     snap.forEach(m => {
-      chatBox.innerHTML += `<div>[${new Date(m.val().time).toLocaleTimeString()}] ${m.val().name}: ${m.val().text}</div>`;
+      const d = document.createElement("div");
+      d.textContent =
+        `[${new Date(m.val().time).toLocaleTimeString()}] ${m.val().name}: ${m.val().text}`;
+      chatBox.appendChild(d);
     });
     chatBox.scrollTop = chatBox.scrollHeight;
   });
