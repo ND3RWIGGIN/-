@@ -179,7 +179,7 @@ body {
     <button data-color="#4caf50">Free</button>
     <button data-color="#ff9800">School</button>
     <button data-color="#2196f3">Work</button>
-    <button data-color="#9c27b0">Other</button>
+    <button data-color="#facc15">Other</button>
   </div>
 
   <div id="schedule-scroll">
@@ -199,7 +199,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebas
 import { getDatabase, ref, set, onValue, push, onDisconnect } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
 
-/* ---------- DOM ELEMENTS (FIX) ---------- */
+/* ---------- DOM ELEMENTS ---------- */
 const lockScreen = document.getElementById("lock-screen");
 const authScreen = document.getElementById("auth-screen");
 const mainContent = document.getElementById("main-content");
@@ -293,7 +293,7 @@ let color = "#4caf50";
 document.querySelectorAll("#colors button").forEach(b => b.onclick = () => color = b.dataset.color);
 
 function setupSchedule(email) {
-  const side = email === "eesanana@gmail.com" ? "left" : "right";
+  const side = email === "eesanana@gmail.com" ? "right" : "left";
 
   hours.forEach(hr => {
     const l = document.createElement("div");
