@@ -6,6 +6,7 @@
 <title>nd3rwiggin</title>
 
 <style>
+/* ---------- BASE ---------- */
 body {
   margin: 0;
   font-family: Arial, sans-serif;
@@ -17,6 +18,11 @@ body {
   overflow: hidden;
 }
 
+button {
+  font-family: inherit;
+}
+
+/* ---------- SCREENS ---------- */
 .screen {
   position: fixed;
   inset: 0;
@@ -56,10 +62,12 @@ body {
   min-height: 1.2em;
 }
 
+/* ---------- HEADER ---------- */
 #quote-container {
   padding: 30px 20px 10px;
   text-align: center;
   font-size: 1.4rem;
+  user-select: none;
 }
 
 #quote-container em {
@@ -67,6 +75,7 @@ body {
   opacity: 0.8;
 }
 
+/* ---------- MAIN ---------- */
 #main-content {
   flex: 1;
   overflow-y: auto;
@@ -74,6 +83,12 @@ body {
   display: none;
 }
 
+#online-users-container {
+  font-size: 0.85rem;
+  margin-bottom: 10px;
+}
+
+/* ---------- COLOR PICKER ---------- */
 #colors {
   display: flex;
   gap: 8px;
@@ -85,9 +100,11 @@ body {
   border-radius: 4px;
   border: none;
   cursor: pointer;
+  color: #000;
   font-size: 0.75rem;
 }
 
+/* ---------- SCHEDULE ---------- */
 #schedule-scroll {
   overflow-x: auto;
 }
@@ -125,6 +142,7 @@ body {
   border-right: 1px solid #48508a;
 }
 
+/* ---------- CHAT ---------- */
 #chat-container {
   margin-top: 20px;
   border-top: 1px solid #48508a;
@@ -147,11 +165,13 @@ body {
   border: none;
   color: #c8d4e4;
 }
+
 </style>
 </head>
 
 <body>
 
+<!-- ---------- LOCK SCREEN ---------- -->
 <div class="screen" id="lock-screen">
   <h2>Enter Passcode</h2>
   <input class="input-field" id="passcode-input" type="password" />
@@ -159,6 +179,7 @@ body {
   <div id="error-msg"></div>
 </div>
 
+<!-- ---------- AUTH SCREEN ---------- -->
 <div class="screen" id="auth-screen" style="display:none;">
   <h2>Log In / Sign Up</h2>
   <input class="input-field" id="auth-email" type="email" placeholder="Email" />
@@ -168,12 +189,19 @@ body {
   <div id="auth-error"></div>
 </div>
 
+<!-- ---------- HEADER ---------- -->
 <div id="quote-container">
   “Sometimes it just feels like I’m too late”<br />
   <em>nd3r, J12</em>
 </div>
 
+<!-- ---------- MAIN ---------- -->
 <div id="main-content">
+
+  <div id="online-users-container">
+    <strong>Online:</strong>
+    <ul id="online-users-list"></ul>
+  </div>
 
   <div id="colors">
     <button data-color="#4caf50" style="background:#4caf50;">Free</button>
@@ -196,10 +224,32 @@ body {
 
 </div>
 
+<!-- ---------- SCRIPT ---------- -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-import { getDatabase, ref, set, onValue, push, remove } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
+import { getDatabase, ref, set, onValue, push, remove, onDisconnect } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+
+/* ---------- DOM ---------- */
+const lockScreen = document.getElementById("lock-screen");
+const authScreen = document.getElementById("auth-screen");
+const mainContent = document.getElementById("main-content");
+
+const passcodeInput = document.getElementById("passcode-input");
+const unlockBtn = document.getElementById("unlock-btn");
+const errorMsg = document.getElementById("error-msg");
+
+const authEmail = document.getElementById("auth-email");
+const authPassword = document.getElementById("auth-password");
+const loginBtn = document.getElementById("login-btn");
+const signupBtn = document.getElementById("signup-btn");
+const authError = document.getElementById("auth-error");
+
+const onlineUsersList = document.getElementById("online-users-list");
+const chatBox = document.getElementById("chat-box");
+const chatInput = document.getElementById("chat-input");
+const sendBtn = document.getElementById("send-btn");
+const clearWeekBtn = document.getElementById("clear-week-btn");
 
 /* ---------- FIREBASE ---------- */
 const firebaseConfig = {
@@ -215,57 +265,79 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
-/* ---------- UNLOCK ---------- */
-unlockBtn.onclick = () => {
+/* ---------- UNLOCK (FIXED) ---------- */
+unlockBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+
   if (passcodeInput.value === "092603") {
     lockScreen.style.display = "none";
-    onAuthStateChanged(auth, u => u ? start(u) : authScreen.style.display = "flex");
-  } else errorMsg.textContent = "Wrong passcode.";
-};
+    onAuthStateChanged(auth, user => {
+      if (user) start(user);
+      else authScreen.style.display = "flex";
+    });
+  } else {
+    errorMsg.textContent = "Wrong passcode.";
+  }
+});
 
 /* ---------- AUTH ---------- */
 loginBtn.onclick = () =>
   signInWithEmailAndPassword(auth, authEmail.value, authPassword.value)
-  .catch(e => authError.textContent = e.message);
+    .catch(e => authError.textContent = e.message);
 
 signupBtn.onclick = () =>
   createUserWithEmailAndPassword(auth, authEmail.value, authPassword.value)
-  .catch(e => authError.textContent = e.message);
+    .catch(e => authError.textContent = e.message);
+
+/* ---------- START ---------- */
+function start(user) {
+  authScreen.style.display = "none";
+  mainContent.style.display = "block";
+
+  const pRef = ref(db, "presence/" + user.uid);
+  set(pRef, user.email);
+  onDisconnect(pRef).remove();
+
+  onValue(ref(db, "presence"), snap => {
+    onlineUsersList.innerHTML = "";
+    Object.values(snap.val() || {}).forEach(email => {
+      const li = document.createElement("li");
+      li.textContent = email;
+      onlineUsersList.appendChild(li);
+    });
+  });
+
+  setupSchedule(user.email);
+  setupChat(user.email);
+}
 
 /* ---------- SCHEDULE ---------- */
 const days = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
 const hours = Array.from({length:15},(_,i)=>i+8);
 const grid = document.getElementById("schedule-grid");
 
+grid.appendChild(document.createElement("div"));
+days.forEach(d => {
+  const h = document.createElement("div");
+  h.textContent = d;
+  h.className = "day-header";
+  grid.appendChild(h);
+});
+
 let selectedColor = "#4caf50";
 document.querySelectorAll("#colors button").forEach(b =>
   b.onclick = () => selectedColor = b.dataset.color
 );
 
-function start(user) {
-  authScreen.style.display = "none";
-  mainContent.style.display = "block";
-  buildSchedule(user.email);
-  setupChat(user.email);
-}
-
-function buildSchedule(email) {
+function setupSchedule(email) {
   const mySide = email === "eesanana@gmail.com" ? "right" : "left";
 
-  grid.innerHTML = "";
-  grid.appendChild(document.createElement("div"));
-  days.forEach(d => {
-    const h = document.createElement("div");
-    h.textContent = d;
-    h.className = "day-header";
-    grid.appendChild(h);
-  });
-
   hours.forEach(hr => {
-    const label = document.createElement("div");
-    label.textContent = hr + ":00";
-    label.className = "hour-label";
-    grid.appendChild(label);
+    const l = document.createElement("div");
+    l.textContent = hr + ":00";
+    l.className = "hour-label";
+    grid.appendChild(l);
 
     days.forEach(d => {
       const cell = document.createElement("div");
@@ -275,25 +347,20 @@ function buildSchedule(email) {
         const h = document.createElement("div");
         h.className = "half " + side;
         h.contentEditable = side === mySide;
-        h.dataset.day = d;
-        h.dataset.hour = hr;
-        h.dataset.side = side;
 
         h.onclick = () => {
           if (side !== mySide) {
             alert("NOT YOUR SIDE SILLY");
             return;
           }
-          if (h.style.backgroundColor === selectedColor) {
-            h.innerText = "";
-            h.style.backgroundColor = "";
-          } else {
-            h.style.backgroundColor = selectedColor;
-          }
-          save(h);
+          h.style.backgroundColor = selectedColor;
+          saveHalf(d, hr, side, h);
         };
 
-        h.oninput = () => side === mySide && save(h);
+        h.oninput = () => {
+          if (side === mySide) saveHalf(d, hr, side, h);
+        };
+
         cell.appendChild(h);
       });
 
@@ -301,46 +368,59 @@ function buildSchedule(email) {
     });
   });
 
-  onValue(ref(db,"schedule"), snap => {
+  onValue(ref(db, "schedule"), snap => {
     document.querySelectorAll(".half").forEach(h => {
-      const v = snap.val()?.[h.dataset.day]?.[h.dataset.hour]?.[h.dataset.side];
-      h.innerText = v?.text || "";
-      h.style.backgroundColor = v?.color || "";
+      const d = h.parentElement;
+      const day = h.parentElement.dataset?.day;
+    });
+
+    snap.forEach(daySnap => {
+      daySnap.forEach(hourSnap => {
+        Object.entries(hourSnap.val()).forEach(([side,val]) => {
+          document.querySelectorAll(`.half.${side}`).forEach(h => {
+            if (h.innerText !== val.text) {
+              h.innerText = val.text || "";
+              h.style.backgroundColor = val.color || "";
+            }
+          });
+        });
+      });
     });
   });
 }
 
-function save(h) {
-  set(ref(db,`schedule/${h.dataset.day}/${h.dataset.hour}/${h.dataset.side}`),{
-    text: h.innerText,
-    color: h.style.backgroundColor
+function saveHalf(day, hour, side, el) {
+  set(ref(db, `schedule/${day}/${hour}/${side}`), {
+    text: el.innerText,
+    color: el.style.backgroundColor
   });
 }
 
-document.getElementById("clear-week-btn").onclick = () => {
-  if (!confirm("Clear the entire week?")) return;
-  remove(ref(db,"schedule"));
-  document.querySelectorAll(".half").forEach(h => {
-    h.innerText = "";
-    h.style.backgroundColor = "";
-  });
+clearWeekBtn.onclick = () => {
+  if (confirm("Clear the entire week?")) {
+    remove(ref(db, "schedule"));
+  }
 };
 
 /* ---------- CHAT ---------- */
 function setupChat(email) {
-  const chatRef = ref(db,"chat_river");
+  const chatRef = ref(db, "chat_river");
+
   sendBtn.onclick = () => {
     if (!chatInput.value.trim()) return;
-    push(chatRef,{name:email,text:chatInput.value,time:Date.now()});
+    push(chatRef, { name: email, text: chatInput.value, time: Date.now() });
     chatInput.value = "";
   };
-  onValue(chatRef,snap=>{
-    chatBox.innerHTML="";
-    snap.forEach(m=>{
-      const d=document.createElement("div");
-      d.textContent=`[${new Date(m.val().time).toLocaleTimeString()}] ${m.val().name}: ${m.val().text}`;
+
+  onValue(chatRef, snap => {
+    chatBox.innerHTML = "";
+    snap.forEach(m => {
+      const d = document.createElement("div");
+      d.textContent =
+        `[${new Date(m.val().time).toLocaleTimeString()}] ${m.val().name}: ${m.val().text}`;
       chatBox.appendChild(d);
     });
+    chatBox.scrollTop = chatBox.scrollHeight;
   });
 }
 </script>
