@@ -4,36 +4,26 @@
   <title>nd3rwiggin</title>
   <style>
     body {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
       margin: 0;
-      background-color: #191f41;
+      height: 100vh;
+      background: #191f41;
       color: #c8d4e4;
       font-family: Arial, sans-serif;
-      text-align: center;
+      display: flex;
+      flex-direction: column;
       overflow: hidden;
+      text-align: center;
     }
 
     #quote-container {
-      padding: 40px 20px 20px;
-      font-size: 1.5rem;
+      padding: 35px 20px 20px;
+      font-size: 1.4rem;
       user-select: none;
     }
 
     #quote-container em {
-      font-size: 1rem;
-      font-style: italic;
-      opacity: 0.8;
-    }
-
-    #main-content {
-      flex-grow: 1;
-      overflow-y: auto;
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      padding-bottom: 30px;
+      font-size: 0.95rem;
+      opacity: 0.75;
     }
 
     .screen {
@@ -53,7 +43,7 @@
       margin-top: 10px;
       width: 250px;
       text-align: center;
-      background-color: #3b4166;
+      background: #3b4166;
       border: none;
       color: #c8d4e4;
       border-radius: 5px;
@@ -62,7 +52,7 @@
     .btn {
       margin-top: 15px;
       padding: 10px 20px;
-      background-color: #48508a;
+      background: #48508a;
       border: none;
       color: #c8d4e4;
       border-radius: 5px;
@@ -71,31 +61,46 @@
 
     #error-msg, #auth-error {
       color: #ff6b6b;
-      height: 1.2em;
       margin-top: 10px;
+      height: 1.2em;
     }
 
-    /* Schedule */
+    #main-content {
+      flex: 1;
+      overflow-y: auto;
+      display: none;
+      padding-bottom: 40px;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    /* ===== SCHEDULE ===== */
     #schedule-container {
-      margin-top: 30px;
-      width: 90%;
-      max-width: 700px;
+      margin-top: 25px;
+      width: 95%;
+      max-width: 1100px;
     }
 
     #schedule-grid {
       display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 6px;
-      margin-top: 15px;
+      grid-template-columns: 60px repeat(7, 1fr);
+      gap: 4px;
+      margin-top: 10px;
+      font-size: 0.75rem;
+    }
+
+    .time-label, .day-label {
+      background: #2a2f4f;
+      border: 1px solid #48508a;
+      padding: 6px;
+      font-weight: bold;
     }
 
     .schedule-cell {
-      background-color: #2a2f4f;
+      background: #2a2f4f;
       border: 1px solid #48508a;
-      min-height: 80px;
-      padding: 6px;
-      font-size: 0.8rem;
-      border-radius: 5px;
+      min-height: 45px;
+      padding: 4px;
       cursor: pointer;
       outline: none;
     }
@@ -105,10 +110,10 @@
     }
 
     #color-picker {
-      margin-top: 12px;
+      margin-top: 10px;
       display: flex;
-      justify-content: center;
       gap: 10px;
+      justify-content: center;
     }
 
     #color-picker button {
@@ -119,7 +124,7 @@
       color: #fff;
     }
 
-    /* Chat */
+    /* ===== CHAT ===== */
     #chat-container {
       margin-top: 30px;
       width: 320px;
@@ -132,11 +137,11 @@
     }
 
     #chat-box {
-      flex-grow: 1;
+      flex: 1;
       overflow-y: auto;
-      font-size: 0.9rem;
       text-align: left;
-      margin-bottom: 10px;
+      font-size: 0.9rem;
+      margin-bottom: 8px;
     }
 
     #chat-input-container {
@@ -144,7 +149,7 @@
     }
 
     #chat-input {
-      flex-grow: 1;
+      flex: 1;
       padding: 8px;
       background: #3b4166;
       border: none;
@@ -163,37 +168,32 @@
 
 <body>
 
-<!-- Lock Screen -->
 <div class="screen" id="lock-screen">
   <h2>Enter Passcode</h2>
-  <input class="input-field" type="password" id="passcode-input" />
-  <button class="btn" id="unlock-btn">Unlock</button>
+  <input id="passcode-input" class="input-field" type="password">
+  <button id="unlock-btn" class="btn">Unlock</button>
   <div id="error-msg"></div>
 </div>
 
-<!-- Auth Screen -->
 <div class="screen" id="auth-screen" style="display:none;">
   <h2>Log In / Sign Up</h2>
-  <input class="input-field" type="email" id="auth-email" placeholder="Email">
-  <input class="input-field" type="password" id="auth-password" placeholder="Password">
-  <button class="btn" id="login-btn">Log In</button>
-  <button class="btn" id="signup-btn">Sign Up</button>
+  <input id="auth-email" class="input-field" type="email" placeholder="Email">
+  <input id="auth-password" class="input-field" type="password" placeholder="Password">
+  <button id="login-btn" class="btn">Log In</button>
+  <button id="signup-btn" class="btn">Sign Up</button>
   <div id="auth-error"></div>
 </div>
 
 <div id="quote-container">
-  "Sometimes it just feels like I'm too late"
-  <br>
+  "Sometimes it just feels like I'm too late"<br>
   <em>nd3r, J12</em>
 </div>
 
 <div id="main-content">
 
-  <!-- Schedule -->
   <div id="schedule-container">
-    <h2>Shared Schedule</h2>
-    <p style="font-size:0.85rem; opacity:0.8;">Click to color • Type to edit • Auto-syncs</p>
-
+    <h2>Weekly Schedule</h2>
+    <p style="opacity:.8;font-size:.8rem;">Click to color • Type to edit • Live sync</p>
     <div id="schedule-grid"></div>
 
     <div id="color-picker">
@@ -204,11 +204,10 @@
     </div>
   </div>
 
-  <!-- Chat -->
   <div id="chat-container">
     <div id="chat-box"></div>
     <div id="chat-input-container">
-      <input id="chat-input" placeholder="Type..." />
+      <input id="chat-input" placeholder="Type...">
       <button id="send-btn">Send</button>
     </div>
   </div>
@@ -216,142 +215,154 @@
 </div>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-  import { getDatabase, ref, push, onChildAdded, onValue, set } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
-  import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+import { getDatabase, ref, push, onChildAdded, onValue, set, remove } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyBUmJ9k5pS62TzIkRHswO2lJLnaeRIfGmE",
-    authDomain: "jess-chat-box.firebaseapp.com",
-    projectId: "jess-chat-box",
-    storageBucket: "jess-chat-box.appspot.com",
-    messagingSenderId: "414967828897",
-    appId: "1:414967828897:web:89045ed9bd4b3257c4bbe0"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyBUmJ9k5pS62TzIkRHswO2lJLnaeRIfGmE",
+  authDomain: "jess-chat-box.firebaseapp.com",
+  projectId: "jess-chat-box",
+  messagingSenderId: "414967828897",
+  appId: "1:414967828897:web:89045ed9bd4b3257c4bbe0"
+};
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const auth = getAuth(app);
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
 
-  /* DOM ELEMENTS */
-  const unlockBtn = document.getElementById("unlock-btn");
-  const passcodeInput = document.getElementById("passcode-input");
-  const lockScreen = document.getElementById("lock-screen");
-  const authScreen = document.getElementById("auth-screen");
-  const mainContent = document.getElementById("main-content");
-  const errorMsg = document.getElementById("error-msg");
+/* DOM */
+const unlockBtn = document.getElementById("unlock-btn");
+const passcodeInput = document.getElementById("passcode-input");
+const lockScreen = document.getElementById("lock-screen");
+const authScreen = document.getElementById("auth-screen");
+const mainContent = document.getElementById("main-content");
+const errorMsg = document.getElementById("error-msg");
 
-  const loginBtn = document.getElementById("login-btn");
-  const signupBtn = document.getElementById("signup-btn");
-  const authEmail = document.getElementById("auth-email");
-  const authPassword = document.getElementById("auth-password");
-  const authError = document.getElementById("auth-error");
+const loginBtn = document.getElementById("login-btn");
+const signupBtn = document.getElementById("signup-btn");
+const authEmail = document.getElementById("auth-email");
+const authPassword = document.getElementById("auth-password");
+const authError = document.getElementById("auth-error");
 
-  const chatBox = document.getElementById("chat-box");
-  const chatInput = document.getElementById("chat-input");
-  const sendBtn = document.getElementById("send-btn");
+const chatBox = document.getElementById("chat-box");
+const chatInput = document.getElementById("chat-input");
+const sendBtn = document.getElementById("send-btn");
 
-  /* PASSCODE */
-  unlockBtn.onclick = () => {
-    if (passcodeInput.value === "092603") {
-      lockScreen.style.display = "none";
-      onAuthStateChanged(auth, user => {
-        if (user) startApp(user);
-        else authScreen.style.display = "flex";
-      });
-    } else {
-      errorMsg.textContent = "Incorrect passcode.";
-    }
-  };
+/* PASSCODE */
+unlockBtn.onclick = async () => {
+  if (passcodeInput.value === "092603") {
+    lockScreen.style.display = "none";
 
-  loginBtn.onclick = () => {
-    signInWithEmailAndPassword(auth, authEmail.value, authPassword.value)
-      .then(res => startApp(res.user))
-      .catch(err => authError.textContent = err.message);
-  };
+    // 🔥 HARD RESET CHAT
+    await remove(ref(db, "messages"));
 
-  signupBtn.onclick = () => {
-    createUserWithEmailAndPassword(auth, authEmail.value, authPassword.value)
-      .then(res => startApp(res.user))
-      .catch(err => authError.textContent = err.message);
-  };
+    onAuthStateChanged(auth, user =>
+      user ? startApp(user) : authScreen.style.display = "flex"
+    );
+  } else {
+    errorMsg.textContent = "Incorrect passcode.";
+  }
+};
 
-  function startApp(user) {
-    authScreen.style.display = "none";
-    mainContent.style.display = "flex";
+/* AUTH */
+loginBtn.onclick = () =>
+  signInWithEmailAndPassword(auth, authEmail.value, authPassword.value)
+    .then(r => startApp(r.user))
+    .catch(e => authError.textContent = e.message);
 
-    /* SCHEDULE */
-    const scheduleRef = ref(db, "schedule");
-    const grid = document.getElementById("schedule-grid");
-    const days = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-    let selectedColor = "#4caf50";
+signupBtn.onclick = () =>
+  createUserWithEmailAndPassword(auth, authEmail.value, authPassword.value)
+    .then(r => startApp(r.user))
+    .catch(e => authError.textContent = e.message);
 
-    grid.innerHTML = "";
+function startApp(user) {
+  authScreen.style.display = "none";
+  mainContent.style.display = "flex";
+
+  /* ===== SCHEDULE ===== */
+  const grid = document.getElementById("schedule-grid");
+  const scheduleRef = ref(db, "schedule");
+  const days = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+  const hours = Array.from({length: 15}, (_, i) => i + 8);
+  let selectedColor = "#4caf50";
+
+  grid.innerHTML = "";
+
+  grid.appendChild(document.createElement("div"));
+  days.forEach(d => {
+    const h = document.createElement("div");
+    h.textContent = d;
+    h.className = "day-label";
+    grid.appendChild(h);
+  });
+
+  hours.forEach(hr => {
+    const label = document.createElement("div");
+    label.textContent = `${hr}:00`;
+    label.className = "time-label";
+    grid.appendChild(label);
 
     days.forEach(day => {
       const cell = document.createElement("div");
       cell.className = "schedule-cell";
       cell.contentEditable = true;
       cell.dataset.day = day;
+      cell.dataset.hour = hr;
 
       cell.onclick = () => {
-        cell.style.backgroundColor = selectedColor;
-        set(ref(db, "schedule/" + day), {
+        cell.style.background = selectedColor;
+        set(ref(db, `schedule/${day}/${hr}`), {
           text: cell.innerText,
           color: selectedColor
         });
       };
 
-      cell.oninput = () => {
-        set(ref(db, "schedule/" + day), {
+      cell.oninput = () =>
+        set(ref(db, `schedule/${day}/${hr}`), {
           text: cell.innerText,
           color: cell.style.backgroundColor
         });
-      };
 
       grid.appendChild(cell);
     });
+  });
 
-    onValue(scheduleRef, snap => {
-      const data = snap.val() || {};
-      document.querySelectorAll(".schedule-cell").forEach(cell => {
-        const d = data[cell.dataset.day];
-        if (d) {
-          cell.innerText = d.text || "";
-          cell.style.backgroundColor = d.color || "#2a2f4f";
-        }
-      });
+  onValue(scheduleRef, snap => {
+    const data = snap.val() || {};
+    document.querySelectorAll(".schedule-cell").forEach(cell => {
+      const d = data[cell.dataset.day]?.[cell.dataset.hour];
+      if (d) {
+        cell.innerText = d.text || "";
+        cell.style.background = d.color || "#2a2f4f";
+      }
     });
+  });
 
-    document.querySelectorAll("#color-picker button").forEach(btn => {
-      btn.onclick = () => selectedColor = btn.dataset.color;
+  document.querySelectorAll("#color-picker button")
+    .forEach(b => b.onclick = () => selectedColor = b.dataset.color);
+
+  /* ===== CHAT ===== */
+  const chatRef = ref(db, "messages");
+
+  onChildAdded(chatRef, snap => {
+    const m = snap.val();
+    const div = document.createElement("div");
+    div.textContent = `[${new Date(m.timestamp).toLocaleTimeString()}] ${m.name}: ${m.text}`;
+    chatBox.appendChild(div);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  });
+
+  sendBtn.onclick = () => {
+    if (!chatInput.value.trim()) return;
+    push(chatRef, {
+      name: user.email,
+      text: chatInput.value,
+      timestamp: Date.now()
     });
-
-    /* CHAT */
-    const chatRef = ref(db, "messages");
-
-    onChildAdded(chatRef, snap => {
-      const m = snap.val();
-      const div = document.createElement("div");
-      div.textContent = `[${new Date(m.timestamp).toLocaleTimeString()}] ${m.name}: ${m.text}`;
-      chatBox.appendChild(div);
-      chatBox.scrollTop = chatBox.scrollHeight;
-    });
-
-    sendBtn.onclick = send;
-    chatInput.onkeydown = e => e.key === "Enter" && send();
-
-    function send() {
-      if (!chatInput.value.trim()) return;
-      push(chatRef, {
-        name: user.email,
-        text: chatInput.value,
-        timestamp: Date.now()
-      });
-      chatInput.value = "";
-    }
-  }
+    chatInput.value = "";
+  };
+}
 </script>
-
 </body>
 </html>
