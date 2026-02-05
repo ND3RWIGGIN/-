@@ -17,7 +17,6 @@ body {
   overflow: hidden;
 }
 
-/* ---------- SCREENS ---------- */
 .screen {
   position: fixed;
   inset: 0;
@@ -56,18 +55,17 @@ body {
   margin-top: 10px;
 }
 
-/* ---------- QUOTE ---------- */
 #quote-container {
   padding: 30px 20px 10px;
   text-align: center;
   font-size: 1.4rem;
 }
+
 #quote-container em {
   font-size: 0.9rem;
   opacity: 0.8;
 }
 
-/* ---------- MAIN ---------- */
 #main-content {
   flex: 1;
   overflow-y: auto;
@@ -75,18 +73,17 @@ body {
   display: none;
 }
 
-/* ---------- PRESENCE ---------- */
 #online-users-container {
   font-size: 0.85rem;
   margin-bottom: 10px;
 }
 
-/* ---------- SCHEDULE ---------- */
 #colors {
   display: flex;
   gap: 8px;
   margin: 10px 0;
 }
+
 #colors button {
   padding: 6px 10px;
   border: none;
@@ -126,11 +123,11 @@ body {
   font-size: 0.7rem;
   outline: none;
 }
+
 .half.left {
   border-right: 1px solid #48508a;
 }
 
-/* ---------- CHAT ---------- */
 #chat-container {
   margin-top: 20px;
   border-top: 1px solid #48508a;
@@ -145,13 +142,11 @@ body {
   margin-bottom: 6px;
   font-size: 0.85rem;
 }
-
 </style>
 </head>
 
 <body>
 
-<!-- PASSCODE -->
 <div class="screen" id="lock-screen">
   <h2>Enter Passcode</h2>
   <input class="input-field" id="passcode-input" type="password" />
@@ -159,7 +154,6 @@ body {
   <div id="error-msg"></div>
 </div>
 
-<!-- AUTH -->
 <div class="screen" id="auth-screen" style="display:none;">
   <h2>Log In / Sign Up</h2>
   <input class="input-field" id="auth-email" type="email" placeholder="Email" />
@@ -176,27 +170,27 @@ body {
 
 <div id="main-content">
 
-<div id="online-users-container">
-  <strong>Online:</strong>
-  <ul id="online-users-list"></ul>
-</div>
+  <div id="online-users-container">
+    <strong>Online:</strong>
+    <ul id="online-users-list"></ul>
+  </div>
 
-<div id="colors">
-  <button data-color="#4caf50">Free</button>
-  <button data-color="#ff9800">School</button>
-  <button data-color="#2196f3">Work</button>
-  <button data-color="#9c27b0">Other</button>
-</div>
+  <div id="colors">
+    <button data-color="#4caf50">Free</button>
+    <button data-color="#ff9800">School</button>
+    <button data-color="#2196f3">Work</button>
+    <button data-color="#9c27b0">Other</button>
+  </div>
 
-<div id="schedule-scroll">
-  <div id="schedule-grid"></div>
-</div>
+  <div id="schedule-scroll">
+    <div id="schedule-grid"></div>
+  </div>
 
-<div id="chat-container">
-  <div id="chat-box"></div>
-  <input id="chat-input" placeholder="Type..." />
-  <button id="send-btn">Send</button>
-</div>
+  <div id="chat-container">
+    <div id="chat-box"></div>
+    <input id="chat-input" placeholder="Type..." />
+    <button id="send-btn">Send</button>
+  </div>
 
 </div>
 
@@ -205,7 +199,27 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebas
 import { getDatabase, ref, set, onValue, push, onDisconnect } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
 
-/* 🔴 USE YOUR EXISTING CONFIG */
+/* ---------- DOM ELEMENTS (FIX) ---------- */
+const lockScreen = document.getElementById("lock-screen");
+const authScreen = document.getElementById("auth-screen");
+const mainContent = document.getElementById("main-content");
+
+const passcodeInput = document.getElementById("passcode-input");
+const unlockBtn = document.getElementById("unlock-btn");
+const errorMsg = document.getElementById("error-msg");
+
+const authEmail = document.getElementById("auth-email");
+const authPassword = document.getElementById("auth-password");
+const loginBtn = document.getElementById("login-btn");
+const signupBtn = document.getElementById("signup-btn");
+const authError = document.getElementById("auth-error");
+
+const onlineUsersList = document.getElementById("online-users-list");
+const chatBox = document.getElementById("chat-box");
+const chatInput = document.getElementById("chat-input");
+const sendBtn = document.getElementById("send-btn");
+
+/* ---------- FIREBASE ---------- */
 const firebaseConfig = {
   apiKey: "AIzaSyBUmJ9k5pS62TzIkRHswO2lJLnaeRIfGmE",
   authDomain: "jess-chat-box.firebaseapp.com",
@@ -226,7 +240,9 @@ unlockBtn.onclick = () => {
     onAuthStateChanged(auth, user => {
       user ? start(user) : authScreen.style.display = "flex";
     });
-  } else errorMsg.textContent = "Wrong passcode.";
+  } else {
+    errorMsg.textContent = "Wrong passcode.";
+  }
 };
 
 /* ---------- AUTH ---------- */
@@ -238,21 +254,20 @@ signupBtn.onclick = () =>
   createUserWithEmailAndPassword(auth, authEmail.value, authPassword.value)
   .catch(e => authError.textContent = e.message);
 
-/* ---------- APP ---------- */
+/* ---------- START APP ---------- */
 function start(user) {
   authScreen.style.display = "none";
   mainContent.style.display = "block";
 
-  /* Presence */
   const pRef = ref(db, "presence/" + user.uid);
   set(pRef, user.email);
   onDisconnect(pRef).remove();
 
-  onValue(ref(db,"presence"), snap => {
+  onValue(ref(db, "presence"), snap => {
     onlineUsersList.innerHTML = "";
-    Object.values(snap.val() || {}).forEach(e => {
+    Object.values(snap.val() || {}).forEach(email => {
       const li = document.createElement("li");
-      li.textContent = e;
+      li.textContent = email;
       onlineUsersList.appendChild(li);
     });
   });
@@ -267,35 +282,39 @@ const hours = Array.from({length:15},(_,i)=>i+8);
 const grid = document.getElementById("schedule-grid");
 
 grid.appendChild(document.createElement("div"));
-days.forEach(d=>{
-  const h=document.createElement("div");
-  h.textContent=d; h.className="day-header";
+days.forEach(d => {
+  const h = document.createElement("div");
+  h.textContent = d;
+  h.className = "day-header";
   grid.appendChild(h);
 });
 
-let color="#4caf50";
-document.querySelectorAll("#colors button").forEach(b=>b.onclick=()=>color=b.dataset.color);
+let color = "#4caf50";
+document.querySelectorAll("#colors button").forEach(b => b.onclick = () => color = b.dataset.color);
 
-function setupSchedule(email){
+function setupSchedule(email) {
   const side = email === "eesanana@gmail.com" ? "left" : "right";
 
-  hours.forEach(hr=>{
-    const l=document.createElement("div");
-    l.textContent=hr+":00"; l.className="hour-label";
+  hours.forEach(hr => {
+    const l = document.createElement("div");
+    l.textContent = hr + ":00";
+    l.className = "hour-label";
     grid.appendChild(l);
 
-    days.forEach(d=>{
-      const cell=document.createElement("div");
-      cell.className="hour-cell";
+    days.forEach(d => {
+      const cell = document.createElement("div");
+      cell.className = "hour-cell";
 
-      ["left","right"].forEach(s=>{
-        const h=document.createElement("div");
-        h.className="half "+s;
-        h.contentEditable = s===side;
-        h.dataset.day=d; h.dataset.hour=hr; h.dataset.side=s;
+      ["left","right"].forEach(s => {
+        const h = document.createElement("div");
+        h.className = "half " + s;
+        h.contentEditable = s === side;
+        h.dataset.day = d;
+        h.dataset.hour = hr;
+        h.dataset.side = s;
 
-        h.oninput=()=>saveHalf(h);
-        h.onclick=()=>{ h.style.backgroundColor=color; saveHalf(h); };
+        h.oninput = () => saveHalf(h);
+        h.onclick = () => { h.style.backgroundColor = color; saveHalf(h); };
 
         cell.appendChild(h);
       });
@@ -304,41 +323,43 @@ function setupSchedule(email){
     });
   });
 
-  onValue(ref(db,"schedule"), snap=>{
-    document.querySelectorAll(".half").forEach(h=>{
-      if(document.activeElement===h) return;
-      const d=h.dataset;
-      const v=snap.val()?.[d.day]?.[d.hour]?.[d.side];
-      if(v){ h.innerText=v.text; h.style.backgroundColor=v.color||""; }
+  onValue(ref(db, "schedule"), snap => {
+    document.querySelectorAll(".half").forEach(h => {
+      if (document.activeElement === h) return;
+      const v = snap.val()?.[h.dataset.day]?.[h.dataset.hour]?.[h.dataset.side];
+      if (v) {
+        h.innerText = v.text;
+        h.style.backgroundColor = v.color || "";
+      }
     });
   });
 }
 
-function saveHalf(h){
-  set(ref(db,`schedule/${h.dataset.day}/${h.dataset.hour}/${h.dataset.side}`),{
-    text:h.innerText,
-    color:h.style.backgroundColor
+function saveHalf(h) {
+  set(ref(db, `schedule/${h.dataset.day}/${h.dataset.hour}/${h.dataset.side}`), {
+    text: h.innerText,
+    color: h.style.backgroundColor
   });
 }
 
-/* ---------- CHAT (EMPTY) ---------- */
-function setupChat(email){
-  const chatRef=ref(db,"chat_river");
-  sendBtn.onclick=()=>{
-    if(!chatInput.value.trim())return;
-    push(chatRef,{name:email,text:chatInput.value,time:Date.now()});
-    chatInput.value="";
+/* ---------- CHAT ---------- */
+function setupChat(email) {
+  const chatRef = ref(db, "chat_river");
+
+  sendBtn.onclick = () => {
+    if (!chatInput.value.trim()) return;
+    push(chatRef, { name: email, text: chatInput.value, time: Date.now() });
+    chatInput.value = "";
   };
 
-  onValue(chatRef,s=>{
-    chatBox.innerHTML="";
-    s.forEach(m=>{
-      const d=document.createElement("div");
-      const t=new Date(m.val().time).toLocaleTimeString();
-      d.textContent=`[${t}] ${m.val().name}: ${m.val().text}`;
+  onValue(chatRef, snap => {
+    chatBox.innerHTML = "";
+    snap.forEach(m => {
+      const d = document.createElement("div");
+      d.textContent = `[${new Date(m.val().time).toLocaleTimeString()}] ${m.val().name}: ${m.val().text}`;
       chatBox.appendChild(d);
     });
-    chatBox.scrollTop=chatBox.scrollHeight;
+    chatBox.scrollTop = chatBox.scrollHeight;
   });
 }
 </script>
