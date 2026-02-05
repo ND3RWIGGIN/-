@@ -90,7 +90,13 @@ body {
   border-radius: 4px;
   color: #fff;
   cursor: pointer;
+  font-size: 0.75rem;
 }
+
+#colors button.free { background:#4caf50; }
+#colors button.school { background:#ff9800; }
+#colors button.work { background:#2196f3; }
+#colors button.other { background:#facc15; color:#000; }
 
 #schedule-scroll {
   overflow-x: auto;
@@ -176,10 +182,10 @@ body {
   </div>
 
   <div id="colors">
-    <button data-color="#4caf50">Free</button>
-    <button data-color="#ff9800">School</button>
-    <button data-color="#2196f3">Work</button>
-    <button data-color="#facc15">Other</button>
+    <button class="free" data-color="#4caf50">Free</button>
+    <button class="school" data-color="#ff9800">School</button>
+    <button class="work" data-color="#2196f3">Work</button>
+    <button class="other" data-color="#facc15">Other</button>
   </div>
 
   <div id="schedule-scroll">
@@ -199,7 +205,12 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebas
 import { getDatabase, ref, set, onValue, push, onDisconnect } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
 
-/* ---------- DOM ELEMENTS ---------- */
+/* ---------- HELPERS ---------- */
+function denyEdit() {
+  alert("NOT YOUR SIDE SILLY");
+}
+
+/* ---------- DOM ---------- */
 const lockScreen = document.getElementById("lock-screen");
 const authScreen = document.getElementById("auth-screen");
 const mainContent = document.getElementById("main-content");
@@ -240,9 +251,7 @@ unlockBtn.onclick = () => {
     onAuthStateChanged(auth, user => {
       user ? start(user) : authScreen.style.display = "flex";
     });
-  } else {
-    errorMsg.textContent = "Wrong passcode.";
-  }
+  } else errorMsg.textContent = "Wrong passcode.";
 };
 
 /* ---------- AUTH ---------- */
@@ -254,7 +263,7 @@ signupBtn.onclick = () =>
   createUserWithEmailAndPassword(auth, authEmail.value, authPassword.value)
   .catch(e => authError.textContent = e.message);
 
-/* ---------- START APP ---------- */
+/* ---------- START ---------- */
 function start(user) {
   authScreen.style.display = "none";
   mainContent.style.display = "block";
@@ -265,9 +274,9 @@ function start(user) {
 
   onValue(ref(db, "presence"), snap => {
     onlineUsersList.innerHTML = "";
-    Object.values(snap.val() || {}).forEach(email => {
+    Object.values(snap.val() || {}).forEach(e => {
       const li = document.createElement("li");
-      li.textContent = email;
+      li.textContent = e;
       onlineUsersList.appendChild(li);
     });
   });
@@ -308,13 +317,21 @@ function setupSchedule(email) {
       ["left","right"].forEach(s => {
         const h = document.createElement("div");
         h.className = "half " + s;
-        h.contentEditable = s === side;
         h.dataset.day = d;
         h.dataset.hour = hr;
         h.dataset.side = s;
 
-        h.oninput = () => saveHalf(h);
-        h.onclick = () => { h.style.backgroundColor = color; saveHalf(h); };
+        if (s === side) {
+          h.contentEditable = true;
+          h.oninput = () => saveHalf(h);
+          h.onclick = () => {
+            h.style.backgroundColor = color;
+            saveHalf(h);
+          };
+        } else {
+          h.contentEditable = false;
+          h.onclick = denyEdit;
+        }
 
         cell.appendChild(h);
       });
