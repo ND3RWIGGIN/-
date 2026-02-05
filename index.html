@@ -104,6 +104,10 @@ button {
   font-size: 0.75rem;
 }
 
+#colors button.active {
+  border: 3px solid #fff;
+}
+
 /* ---------- SCHEDULE ---------- */
 #schedule-scroll {
   overflow-x: auto;
@@ -191,7 +195,7 @@ button {
 
 <!-- ---------- HEADER ---------- -->
 <div id="quote-container">
-  “Sometimes it just feels like I’m too late”<br />
+  "Sometimes it just feels like I'm too late"<br />
   <em>nd3r, J12</em>
 </div>
 
@@ -204,13 +208,12 @@ button {
   </div>
 
   <div id="colors">
-    <button data-color="#4caf50" style="background:#4caf50;">Free</button>
+    <button data-color="#4caf50" style="background:#4caf50;" class="active">Free</button>
     <button data-color="#ff9800" style="background:#ff9800;">School</button>
     <button data-color="#2196f3" style="background:#2196f3;">Work</button>
     <button data-color="#ffeb3b" style="background:#ffeb3b;">Other</button>
+    <button data-color="eraser" style="background:#f44336; color:#fff;">🧹 Eraser</button>
   </div>
-
-  <button class="btn" id="clear-week-btn" type="button">Clear the Week</button>
 
   <div id="schedule-scroll">
     <div id="schedule-grid"></div>
@@ -249,7 +252,6 @@ const onlineUsersList = document.getElementById("online-users-list");
 const chatBox = document.getElementById("chat-box");
 const chatInput = document.getElementById("chat-input");
 const sendBtn = document.getElementById("send-btn");
-const clearWeekBtn = document.getElementById("clear-week-btn");
 
 /* ---------- FIREBASE ---------- */
 const firebaseConfig = {
@@ -272,12 +274,24 @@ unlockBtn.addEventListener("click", (e) => {
 
   if (passcodeInput.value === "092603") {
     lockScreen.style.display = "none";
-    onAuthStateChanged(auth, user => {
-      if (user) start(user);
-      else authScreen.style.display = "flex";
-    });
+    
+    // Check if user is already logged in
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+      start(currentUser);
+    } else {
+      authScreen.style.display = "flex";
+    }
   } else {
     errorMsg.textContent = "Wrong passcode.";
+  }
+});
+
+/* ---------- AUTH STATE LISTENER ---------- */
+onAuthStateChanged(auth, user => {
+  if (user && lockScreen.style.display === "none" && authScreen.style.display !== "none") {
+    authScreen.style.display = "none";
+    start(user);
   }
 });
 
@@ -326,12 +340,19 @@ days.forEach(d => {
 });
 
 let selectedColor = "#4caf50";
-document.querySelectorAll("#colors button").forEach(b =>
-  b.onclick = () => selectedColor = b.dataset.color
-);
+
+// Color picker with eraser
+document.querySelectorAll("#colors button").forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll("#colors button").forEach(btn => btn.classList.remove("active"));
+    b.classList.add("active");
+    selectedColor = b.dataset.color;
+  };
+});
 
 function setupSchedule(email) {
   const mySide = email === "eesanana@gmail.com" ? "right" : "left";
+  const cellMap = {}; // Track cells by day/hour/side
 
   hours.forEach(hr => {
     const l = document.createElement("div");
@@ -347,14 +368,26 @@ function setupSchedule(email) {
         const h = document.createElement("div");
         h.className = "half " + side;
         h.contentEditable = side === mySide;
+        
+        // Store reference for updates
+        const key = `${d}-${hr}-${side}`;
+        cellMap[key] = h;
 
         h.onclick = () => {
           if (side !== mySide) {
             alert("NOT YOUR SIDE SILLY");
             return;
           }
-          h.style.backgroundColor = selectedColor;
-          saveHalf(d, hr, side, h);
+          
+          // Eraser clears the cell
+          if (selectedColor === "eraser") {
+            h.style.backgroundColor = "";
+            h.innerText = "";
+            saveHalf(d, hr, side, h);
+          } else {
+            h.style.backgroundColor = selectedColor;
+            saveHalf(d, hr, side, h);
+          }
         };
 
         h.oninput = () => {
@@ -368,21 +401,38 @@ function setupSchedule(email) {
     });
   });
 
+  // Listen for changes and update specific cells only
   onValue(ref(db, "schedule"), snap => {
-    document.querySelectorAll(".half").forEach(h => {
-      const d = h.parentElement;
-      const day = h.parentElement.dataset?.day;
-    });
-
-    snap.forEach(daySnap => {
-      daySnap.forEach(hourSnap => {
-        Object.entries(hourSnap.val()).forEach(([side,val]) => {
-          document.querySelectorAll(`.half.${side}`).forEach(h => {
-            if (h.innerText !== val.text) {
-              h.innerText = val.text || "";
-              h.style.backgroundColor = val.color || "";
+    const data = snap.val() || {};
+    
+    days.forEach(day => {
+      hours.forEach(hour => {
+        ["left", "right"].forEach(side => {
+          const key = `${day}-${hour}-${side}`;
+          const cell = cellMap[key];
+          
+          if (cell && data[day] && data[day][hour] && data[day][hour][side]) {
+            const val = data[day][hour][side];
+            
+            // Only update if different to avoid cursor jump
+            if (cell.innerText !== val.text || cell.style.backgroundColor !== val.color) {
+              const wasEditable = cell.contentEditable;
+              const selection = window.getSelection();
+              const hadFocus = document.activeElement === cell;
+              
+              cell.innerText = val.text || "";
+              cell.style.backgroundColor = val.color || "";
+              
+              // Restore focus if this cell was being edited
+              if (hadFocus && wasEditable === "true") {
+                cell.focus();
+              }
             }
-          });
+          } else if (cell && (!data[day] || !data[day][hour] || !data[day][hour][side])) {
+            // Clear cell if no data
+            cell.innerText = "";
+            cell.style.backgroundColor = "";
+          }
         });
       });
     });
@@ -390,17 +440,19 @@ function setupSchedule(email) {
 }
 
 function saveHalf(day, hour, side, el) {
-  set(ref(db, `schedule/${day}/${hour}/${side}`), {
-    text: el.innerText,
-    color: el.style.backgroundColor
-  });
-}
-
-clearWeekBtn.onclick = () => {
-  if (confirm("Clear the entire week?")) {
-    remove(ref(db, "schedule"));
+  const text = el.innerText.trim();
+  const color = el.style.backgroundColor;
+  
+  if (!text && !color) {
+    // Remove from database if empty
+    remove(ref(db, `schedule/${day}/${hour}/${side}`));
+  } else {
+    set(ref(db, `schedule/${day}/${hour}/${side}`), {
+      text: text,
+      color: color
+    });
   }
-};
+}
 
 /* ---------- CHAT ---------- */
 function setupChat(email) {
