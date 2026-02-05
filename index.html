@@ -3,25 +3,97 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Shared Space</title>
+<title>nd3rwiggin</title>
 
 <style>
 body {
   margin: 0;
-  font-family: system-ui, sans-serif;
-  background: #0f1220;
-  color: #fff;
+  font-family: Arial, sans-serif;
+  background: #191f41;
+  color: #c8d4e4;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
 }
 
-#main {
-  width: 100%;
-  max-width: 1100px;
-  padding: 12px;
+/* ---------- SCREENS ---------- */
+.screen {
+  position: fixed;
+  inset: 0;
+  background: #191f41;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.input-field {
+  padding: 10px;
+  font-size: 1.1rem;
+  margin-top: 10px;
+  width: 260px;
+  text-align: center;
+  border: none;
+  border-radius: 6px;
+  background: #3b4166;
+  color: #c8d4e4;
+}
+
+.btn {
+  margin-top: 15px;
+  padding: 10px 20px;
+  background: #48508a;
+  border: none;
+  color: #c8d4e4;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#error-msg, #auth-error {
+  color: #ff6b6b;
+  margin-top: 10px;
+}
+
+/* ---------- QUOTE ---------- */
+#quote-container {
+  padding: 30px 20px 10px;
+  text-align: center;
+  font-size: 1.4rem;
+}
+#quote-container em {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+/* ---------- MAIN ---------- */
+#main-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+  display: none;
+}
+
+/* ---------- PRESENCE ---------- */
+#online-users-container {
+  font-size: 0.85rem;
+  margin-bottom: 10px;
 }
 
 /* ---------- SCHEDULE ---------- */
+#colors {
+  display: flex;
+  gap: 8px;
+  margin: 10px 0;
+}
+#colors button {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+}
 
 #schedule-scroll {
   overflow-x: auto;
@@ -36,20 +108,14 @@ body {
 
 .day-header, .hour-label {
   font-size: 0.7rem;
-  opacity: 0.7;
   text-align: center;
-}
-
-.hour-label {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  opacity: 0.7;
 }
 
 .hour-cell {
   display: flex;
   min-height: 60px;
-  border: 1px solid #3a3f6b;
+  border: 1px solid #48508a;
   border-radius: 4px;
   overflow: hidden;
 }
@@ -60,59 +126,60 @@ body {
   font-size: 0.7rem;
   outline: none;
 }
-
-.half.me {
-  border-right: 1px solid #3a3f6b;
-}
-
-/* ---------- COLOR PICKER ---------- */
-
-#colors {
-  margin: 10px 0;
-  display: flex;
-  gap: 8px;
-}
-
-#colors button {
-  padding: 6px 10px;
-  border: none;
-  border-radius: 4px;
-  color: #fff;
-  cursor: pointer;
+.half.left {
+  border-right: 1px solid #48508a;
 }
 
 /* ---------- CHAT ---------- */
-
-#chat {
+#chat-container {
   margin-top: 20px;
-  border-top: 1px solid #3a3f6b;
+  border-top: 1px solid #48508a;
   padding-top: 10px;
 }
 
 #chat-box {
   height: 220px;
   overflow-y: auto;
-  border: 1px solid #3a3f6b;
+  border: 1px solid #48508a;
   padding: 6px;
   margin-bottom: 6px;
-}
-
-.message {
-  font-size: 0.8rem;
-  margin-bottom: 4px;
-}
-
-#chat-input {
-  width: 80%;
+  font-size: 0.85rem;
 }
 
 </style>
 </head>
 
 <body>
-<div id="main">
 
-<h2>Weekly Schedule</h2>
+<!-- PASSCODE -->
+<div class="screen" id="lock-screen">
+  <h2>Enter Passcode</h2>
+  <input class="input-field" id="passcode-input" type="password" />
+  <button class="btn" id="unlock-btn">Unlock</button>
+  <div id="error-msg"></div>
+</div>
+
+<!-- AUTH -->
+<div class="screen" id="auth-screen" style="display:none;">
+  <h2>Log In / Sign Up</h2>
+  <input class="input-field" id="auth-email" type="email" placeholder="Email" />
+  <input class="input-field" id="auth-password" type="password" placeholder="Password" />
+  <button class="btn" id="login-btn">Log In</button>
+  <button class="btn" id="signup-btn">Sign Up</button>
+  <div id="auth-error"></div>
+</div>
+
+<div id="quote-container">
+  “Sometimes it just feels like I’m too late”<br />
+  <em>nd3r, J12</em>
+</div>
+
+<div id="main-content">
+
+<div id="online-users-container">
+  <strong>Online:</strong>
+  <ul id="online-users-list"></ul>
+</div>
 
 <div id="colors">
   <button data-color="#4caf50">Free</button>
@@ -125,132 +192,156 @@ body {
   <div id="schedule-grid"></div>
 </div>
 
-<div id="chat">
-  <h3>Chat</h3>
+<div id="chat-container">
   <div id="chat-box"></div>
-  <input id="chat-input" placeholder="Message..." />
-  <button id="send">Send</button>
+  <input id="chat-input" placeholder="Type..." />
+  <button id="send-btn">Send</button>
 </div>
 
 </div>
 
 <script type="module">
-/* ---------- FIREBASE ---------- */
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, set, onValue, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+import { getDatabase, ref, set, onValue, push, onDisconnect } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
 
-/* 🔴 PASTE YOUR CONFIG HERE */
+/* 🔴 USE YOUR EXISTING CONFIG */
 const firebaseConfig = {
-  apiKey: "YOUR_KEY",
-  authDomain: "YOUR_DOMAIN",
-  databaseURL: "YOUR_DB_URL",
-  projectId: "YOUR_ID",
-  storageBucket: "YOUR_BUCKET",
-  messagingSenderId: "YOUR_SENDER",
-  appId: "YOUR_APP"
+  apiKey: "AIzaSyBUmJ9k5pS62TzIkRHswO2lJLnaeRIfGmE",
+  authDomain: "jess-chat-box.firebaseapp.com",
+  projectId: "jess-chat-box",
+  storageBucket: "jess-chat-box.appspot.com",
+  messagingSenderId: "414967828897",
+  appId: "1:414967828897:web:89045ed9bd4b3257c4bbe0"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+const auth = getAuth(app);
+
+/* ---------- PASSCODE ---------- */
+unlockBtn.onclick = () => {
+  if (passcodeInput.value === "092603") {
+    lockScreen.style.display = "none";
+    onAuthStateChanged(auth, user => {
+      user ? start(user) : authScreen.style.display = "flex";
+    });
+  } else errorMsg.textContent = "Wrong passcode.";
+};
+
+/* ---------- AUTH ---------- */
+loginBtn.onclick = () =>
+  signInWithEmailAndPassword(auth, authEmail.value, authPassword.value)
+  .catch(e => authError.textContent = e.message);
+
+signupBtn.onclick = () =>
+  createUserWithEmailAndPassword(auth, authEmail.value, authPassword.value)
+  .catch(e => authError.textContent = e.message);
+
+/* ---------- APP ---------- */
+function start(user) {
+  authScreen.style.display = "none";
+  mainContent.style.display = "block";
+
+  /* Presence */
+  const pRef = ref(db, "presence/" + user.uid);
+  set(pRef, user.email);
+  onDisconnect(pRef).remove();
+
+  onValue(ref(db,"presence"), snap => {
+    onlineUsersList.innerHTML = "";
+    Object.values(snap.val() || {}).forEach(e => {
+      const li = document.createElement("li");
+      li.textContent = e;
+      onlineUsersList.appendChild(li);
+    });
+  });
+
+  setupSchedule(user.email);
+  setupChat(user.email);
+}
 
 /* ---------- SCHEDULE ---------- */
-
 const days = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-const hours = Array.from({length: 15}, (_,i) => i + 8);
+const hours = Array.from({length:15},(_,i)=>i+8);
 const grid = document.getElementById("schedule-grid");
 
 grid.appendChild(document.createElement("div"));
-days.forEach(d => {
-  const h = document.createElement("div");
-  h.textContent = d;
-  h.className = "day-header";
+days.forEach(d=>{
+  const h=document.createElement("div");
+  h.textContent=d; h.className="day-header";
   grid.appendChild(h);
 });
 
-let selectedColor = "#4caf50";
+let color="#4caf50";
+document.querySelectorAll("#colors button").forEach(b=>b.onclick=()=>color=b.dataset.color);
 
-document.querySelectorAll("#colors button").forEach(b => {
-  b.onclick = () => selectedColor = b.dataset.color;
-});
+function setupSchedule(email){
+  const side = email === "eesanana@gmail.com" ? "left" : "right";
 
-hours.forEach(hour => {
-  const label = document.createElement("div");
-  label.className = "hour-label";
-  label.textContent = `${hour}:00`;
-  grid.appendChild(label);
+  hours.forEach(hr=>{
+    const l=document.createElement("div");
+    l.textContent=hr+":00"; l.className="hour-label";
+    grid.appendChild(l);
 
-  days.forEach(day => {
-    const cell = document.createElement("div");
-    cell.className = "hour-cell";
+    days.forEach(d=>{
+      const cell=document.createElement("div");
+      cell.className="hour-cell";
 
-    ["me","river"].forEach(owner => {
-      const half = document.createElement("div");
-      half.className = `half ${owner}`;
-      half.contentEditable = true;
-      half.dataset.day = day;
-      half.dataset.hour = hour;
-      half.dataset.owner = owner;
+      ["left","right"].forEach(s=>{
+        const h=document.createElement("div");
+        h.className="half "+s;
+        h.contentEditable = s===side;
+        h.dataset.day=d; h.dataset.hour=hr; h.dataset.side=s;
 
-      half.onclick = () => {
-        half.style.backgroundColor = selectedColor;
-        saveHalf(half);
-      };
+        h.oninput=()=>saveHalf(h);
+        h.onclick=()=>{ h.style.backgroundColor=color; saveHalf(h); };
 
-      half.oninput = () => saveHalf(half);
+        cell.appendChild(h);
+      });
 
-      cell.appendChild(half);
+      grid.appendChild(cell);
     });
-
-    grid.appendChild(cell);
   });
-});
 
-function saveHalf(half) {
-  const { day, hour, owner } = half.dataset;
-  set(ref(db, `schedule/${day}/${hour}/${owner}`), {
-    text: half.innerText,
-    color: half.style.backgroundColor || ""
+  onValue(ref(db,"schedule"), snap=>{
+    document.querySelectorAll(".half").forEach(h=>{
+      if(document.activeElement===h) return;
+      const d=h.dataset;
+      const v=snap.val()?.[d.day]?.[d.hour]?.[d.side];
+      if(v){ h.innerText=v.text; h.style.backgroundColor=v.color||""; }
+    });
   });
 }
 
-/* 🔒 Cursor-safe sync */
-onValue(ref(db,"schedule"), snap => {
-  const data = snap.val() || {};
-  document.querySelectorAll(".half").forEach(h => {
-    if (document.activeElement === h) return;
-    const { day, hour, owner } = h.dataset;
-    const saved = data?.[day]?.[hour]?.[owner];
-    if (saved) {
-      h.innerText = saved.text || "";
-      h.style.backgroundColor = saved.color || "";
-    }
+function saveHalf(h){
+  set(ref(db,`schedule/${h.dataset.day}/${h.dataset.hour}/${h.dataset.side}`),{
+    text:h.innerText,
+    color:h.style.backgroundColor
   });
-});
+}
 
-/* ---------- CHAT (NEW PATH = EMPTY) ---------- */
+/* ---------- CHAT (EMPTY) ---------- */
+function setupChat(email){
+  const chatRef=ref(db,"chat_river");
+  sendBtn.onclick=()=>{
+    if(!chatInput.value.trim())return;
+    push(chatRef,{name:email,text:chatInput.value,time:Date.now()});
+    chatInput.value="";
+  };
 
-const chatBox = document.getElementById("chat-box");
-const chatInput = document.getElementById("chat-input");
-const sendBtn = document.getElementById("send");
-
-const chatRef = ref(db, "chat_river"); // 🔥 NEW = NO OLD MESSAGES
-
-sendBtn.onclick = () => {
-  if (!chatInput.value.trim()) return;
-  push(chatRef, { text: chatInput.value });
-  chatInput.value = "";
-};
-
-onValue(chatRef, snap => {
-  chatBox.innerHTML = "";
-  snap.forEach(m => {
-    const d = document.createElement("div");
-    d.className = "message";
-    d.textContent = m.val().text;
-    chatBox.appendChild(d);
+  onValue(chatRef,s=>{
+    chatBox.innerHTML="";
+    s.forEach(m=>{
+      const d=document.createElement("div");
+      const t=new Date(m.val().time).toLocaleTimeString();
+      d.textContent=`[${t}] ${m.val().name}: ${m.val().text}`;
+      chatBox.appendChild(d);
+    });
+    chatBox.scrollTop=chatBox.scrollHeight;
   });
-  chatBox.scrollTop = chatBox.scrollHeight;
-});
+}
 </script>
+
 </body>
 </html>
