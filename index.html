@@ -90,13 +90,7 @@ body {
   border-radius: 4px;
   color: #fff;
   cursor: pointer;
-  font-size: 0.75rem;
 }
-
-#colors button.free { background:#4caf50; }
-#colors button.school { background:#ff9800; }
-#colors button.work { background:#2196f3; }
-#colors button.other { background:#facc15; color:#000; }
 
 #schedule-scroll {
   overflow-x: auto;
@@ -148,6 +142,11 @@ body {
   margin-bottom: 6px;
   font-size: 0.85rem;
 }
+
+#clear-week {
+  margin: 10px 0;
+  background: #ff6b6b;
+}
 </style>
 </head>
 
@@ -176,16 +175,18 @@ body {
 
 <div id="main-content">
 
+  <button class="btn" id="clear-week">Clear the Week</button>
+
   <div id="online-users-container">
     <strong>Online:</strong>
     <ul id="online-users-list"></ul>
   </div>
 
   <div id="colors">
-    <button class="free" data-color="#4caf50">Free</button>
-    <button class="school" data-color="#ff9800">School</button>
-    <button class="work" data-color="#2196f3">Work</button>
-    <button class="other" data-color="#facc15">Other</button>
+    <button data-color="#4caf50" style="background:#4caf50">Free</button>
+    <button data-color="#ff9800" style="background:#ff9800">School</button>
+    <button data-color="#2196f3" style="background:#2196f3">Work</button>
+    <button data-color="#fbc02d" style="background:#fbc02d">Other</button>
   </div>
 
   <div id="schedule-scroll">
@@ -202,33 +203,8 @@ body {
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-import { getDatabase, ref, set, onValue, push, onDisconnect } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
+import { getDatabase, ref, set, onValue, push, onDisconnect, remove } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
-
-/* ---------- HELPERS ---------- */
-function denyEdit() {
-  alert("NOT YOUR SIDE SILLY");
-}
-
-/* ---------- DOM ---------- */
-const lockScreen = document.getElementById("lock-screen");
-const authScreen = document.getElementById("auth-screen");
-const mainContent = document.getElementById("main-content");
-
-const passcodeInput = document.getElementById("passcode-input");
-const unlockBtn = document.getElementById("unlock-btn");
-const errorMsg = document.getElementById("error-msg");
-
-const authEmail = document.getElementById("auth-email");
-const authPassword = document.getElementById("auth-password");
-const loginBtn = document.getElementById("login-btn");
-const signupBtn = document.getElementById("signup-btn");
-const authError = document.getElementById("auth-error");
-
-const onlineUsersList = document.getElementById("online-users-list");
-const chatBox = document.getElementById("chat-box");
-const chatInput = document.getElementById("chat-input");
-const sendBtn = document.getElementById("send-btn");
 
 /* ---------- FIREBASE ---------- */
 const firebaseConfig = {
@@ -272,15 +248,6 @@ function start(user) {
   set(pRef, user.email);
   onDisconnect(pRef).remove();
 
-  onValue(ref(db, "presence"), snap => {
-    onlineUsersList.innerHTML = "";
-    Object.values(snap.val() || {}).forEach(e => {
-      const li = document.createElement("li");
-      li.textContent = e;
-      onlineUsersList.appendChild(li);
-    });
-  });
-
   setupSchedule(user.email);
   setupChat(user.email);
 }
@@ -290,26 +257,18 @@ const days = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
 const hours = Array.from({length:15},(_,i)=>i+8);
 const grid = document.getElementById("schedule-grid");
 
-grid.appendChild(document.createElement("div"));
-days.forEach(d => {
-  const h = document.createElement("div");
-  h.textContent = d;
-  h.className = "day-header";
-  grid.appendChild(h);
-});
-
-let color = "#4caf50";
-document.querySelectorAll("#colors button").forEach(b => b.onclick = () => color = b.dataset.color);
+let currentColor = "#4caf50";
+document.querySelectorAll("#colors button").forEach(b =>
+  b.onclick = () => currentColor = b.dataset.color
+);
 
 function setupSchedule(email) {
   const side = email === "eesanana@gmail.com" ? "right" : "left";
 
-  hours.forEach(hr => {
-    const l = document.createElement("div");
-    l.textContent = hr + ":00";
-    l.className = "hour-label";
-    grid.appendChild(l);
+  grid.innerHTML = "<div></div>" + days.map(d=>`<div class="day-header">${d}</div>`).join("");
 
+  hours.forEach(hr => {
+    grid.innerHTML += `<div class="hour-label">${hr}:00</div>`;
     days.forEach(d => {
       const cell = document.createElement("div");
       cell.className = "hour-cell";
@@ -317,20 +276,16 @@ function setupSchedule(email) {
       ["left","right"].forEach(s => {
         const h = document.createElement("div");
         h.className = "half " + s;
-        h.dataset.day = d;
-        h.dataset.hour = hr;
-        h.dataset.side = s;
+        h.contentEditable = s === side;
 
-        if (s === side) {
-          h.contentEditable = true;
-          h.oninput = () => saveHalf(h);
-          h.onclick = () => {
-            h.style.backgroundColor = color;
-            saveHalf(h);
-          };
+        if (s !== side) {
+          h.onclick = () => alert("NOT YOUR SIDE SILLY");
         } else {
-          h.contentEditable = false;
-          h.onclick = denyEdit;
+          h.oninput = () => saveHalf(d, hr, s, h);
+          h.onclick = () => {
+            h.style.backgroundColor = currentColor;
+            saveHalf(d, hr, s, h);
+          };
         }
 
         cell.appendChild(h);
@@ -342,22 +297,31 @@ function setupSchedule(email) {
 
   onValue(ref(db, "schedule"), snap => {
     document.querySelectorAll(".half").forEach(h => {
-      if (document.activeElement === h) return;
-      const v = snap.val()?.[h.dataset.day]?.[h.dataset.hour]?.[h.dataset.side];
+      const d = days[Math.floor((h.parentNode.cellIndex-1))];
+      const hr = hours[Math.floor(h.parentNode.parentNode.rowIndex-1)];
+      const s = h.classList.contains("right") ? "right" : "left";
+      const v = snap.val()?.[d]?.[hr]?.[s];
       if (v) {
         h.innerText = v.text;
-        h.style.backgroundColor = v.color || "";
+        h.style.backgroundColor = v.color;
       }
     });
   });
 }
 
-function saveHalf(h) {
-  set(ref(db, `schedule/${h.dataset.day}/${h.dataset.hour}/${h.dataset.side}`), {
-    text: h.innerText,
-    color: h.style.backgroundColor
+function saveHalf(d, hr, s, el) {
+  set(ref(db, `schedule/${d}/${hr}/${s}`), {
+    text: el.innerText,
+    color: el.style.backgroundColor
   });
 }
+
+/* ---------- CLEAR WEEK ---------- */
+document.getElementById("clear-week").onclick = () => {
+  if (confirm("Clear the entire week for BOTH of you?")) {
+    remove(ref(db, "schedule"));
+  }
+};
 
 /* ---------- CHAT ---------- */
 function setupChat(email) {
@@ -372,9 +336,7 @@ function setupChat(email) {
   onValue(chatRef, snap => {
     chatBox.innerHTML = "";
     snap.forEach(m => {
-      const d = document.createElement("div");
-      d.textContent = `[${new Date(m.val().time).toLocaleTimeString()}] ${m.val().name}: ${m.val().text}`;
-      chatBox.appendChild(d);
+      chatBox.innerHTML += `<div>[${new Date(m.val().time).toLocaleTimeString()}] ${m.val().name}: ${m.val().text}</div>`;
     });
     chatBox.scrollTop = chatBox.scrollHeight;
   });
