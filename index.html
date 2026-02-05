@@ -3,7 +3,6 @@
 <head>
   <title>nd3rwiggin</title>
   <style>
-    /* Make body full height and column layout */
     body {
       display: flex;
       flex-direction: column;
@@ -13,127 +12,56 @@
       color: #c8d4e4;
       font-family: Arial, sans-serif;
       text-align: center;
-      overflow: hidden; /* prevent scroll on body */
+      overflow: hidden;
     }
 
-    /* Quote container fixed height at top */
     #quote-container {
-      flex-shrink: 0;
       padding: 40px 20px 20px;
-      background-color: #191f41;
       font-size: 1.5rem;
-      line-height: 1.4;
-      font-weight: 500;
       user-select: none;
-      color: #c8d4e4;
     }
 
     #quote-container em {
-      font-style: italic;
-      font-weight: 400;
       font-size: 1rem;
+      font-style: italic;
+      opacity: 0.8;
     }
 
-    /* Main content scrollable area */
     #main-content {
       flex-grow: 1;
       overflow-y: auto;
-      display: none; /* initially hidden, shown after login */
-      flex-direction: column;
+      display: none;
       align-items: center;
-      width: 100%;
-      padding: 10px 0 30px;
-      box-sizing: border-box;
-    }
-
-    h2, h3 {
-      margin: 0;
-    }
-    h3 {
-      margin-top: 5px;
-      font-weight: 400;
-    }
-
-    #chat-container {
-      margin-top: 30px;
-      width: 320px;
-      max-height: 400px;
-      display: flex;
       flex-direction: column;
-      background-color: #2a2f4f;
-      border: 1px solid #c8d4e4;
-      border-radius: 5px;
-      padding: 10px;
-    }
-
-    #chat-box {
-      flex-grow: 1;
-      overflow-y: auto;
-      padding: 5px;
-      font-size: 0.9rem;
-      border-bottom: 1px solid #48508a;
-      max-height: 300px;
-      color: #c8d4e4;
-      text-align: left;
-    }
-
-    #chat-input-container {
-      margin-top: 10px;
-      display: flex;
-    }
-
-    #chat-input {
-      flex-grow: 1;
-      padding: 8px;
-      border: none;
-      font-size: 1rem;
-      background-color: #3b4166;
-      color: #c8d4e4;
-      border-radius: 3px 0 0 3px;
-    }
-
-    #chat-input::placeholder {
-      color: #9aa7c2;
-    }
-
-    #send-btn {
-      padding: 8px 15px;
-      background-color: #48508a;
-      color: #c8d4e4;
-      border: none;
-      cursor: pointer;
-      border-radius: 0 3px 3px 0;
+      padding-bottom: 30px;
     }
 
     .screen {
       position: fixed;
-      top: 0; left: 0;
-      height: 100vh;
-      width: 100vw;
-      background-color: #191f41;
+      inset: 0;
+      background: #191f41;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      z-index: 9999;
+      z-index: 999;
     }
 
     .input-field {
       padding: 10px;
-      font-size: 1.2rem;
-      border-radius: 5px;
-      border: none;
+      font-size: 1.1rem;
       margin-top: 10px;
       width: 250px;
       text-align: center;
       background-color: #3b4166;
+      border: none;
       color: #c8d4e4;
+      border-radius: 5px;
     }
 
     .btn {
       margin-top: 15px;
       padding: 10px 20px;
-      font-size: 1rem;
       background-color: #48508a;
       border: none;
       color: #c8d4e4;
@@ -143,375 +71,262 @@
 
     #error-msg, #auth-error {
       color: #ff6b6b;
-      margin-top: 10px;
       height: 1.2em;
+      margin-top: 10px;
     }
 
-    #online-users-container {
-      margin-top: 15px;
-      width: 320px;
-      color: #c8d4e4;
-      text-align: left;
-      font-size: 0.9rem;
-    }
-
-    #online-users-list {
-      list-style: none;
-      padding-left: 10px;
-      margin-top: 5px;
-    }
-
-    /* New styles for photo upload section */
-    #photo-section {
-      display: flex;
-      justify-content: center;
-      gap: 40px;
-      margin: 20px 0;
-      width: 100%;
+    /* Schedule */
+    #schedule-container {
+      margin-top: 30px;
+      width: 90%;
       max-width: 700px;
     }
-    .photo-container {
-      text-align: center;
-      flex: 1;
+
+    #schedule-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      margin-top: 15px;
     }
-    .photo-container img {
-      width: 150px;
-      height: 150px;
-      object-fit: cover;
-      border-radius: 10px;
-      border: 2px solid #48508a;
-      background-color: #252a59;
+
+    .schedule-cell {
+      background-color: #2a2f4f;
+      border: 1px solid #48508a;
+      min-height: 80px;
+      padding: 6px;
+      font-size: 0.8rem;
+      border-radius: 5px;
+      cursor: pointer;
+      outline: none;
     }
-    .photo-container input[type="file"] {
-      margin-top: 10px;
+
+    .schedule-cell:focus {
+      box-shadow: 0 0 0 2px #48508a;
     }
-    .upload-msg {
-      margin-top: 6px;
+
+    #color-picker {
+      margin-top: 12px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    #color-picker button {
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      color: #fff;
+    }
+
+    /* Chat */
+    #chat-container {
+      margin-top: 30px;
+      width: 320px;
+      background: #2a2f4f;
+      border: 1px solid #c8d4e4;
+      border-radius: 5px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #chat-box {
+      flex-grow: 1;
+      overflow-y: auto;
       font-size: 0.9rem;
-      height: 1.2em;
+      text-align: left;
+      margin-bottom: 10px;
+    }
+
+    #chat-input-container {
+      display: flex;
+    }
+
+    #chat-input {
+      flex-grow: 1;
+      padding: 8px;
+      background: #3b4166;
+      border: none;
       color: #c8d4e4;
+    }
+
+    #send-btn {
+      padding: 8px 14px;
+      background: #48508a;
+      border: none;
+      color: #c8d4e4;
+      cursor: pointer;
     }
   </style>
 </head>
+
 <body>
-  <!-- Passcode screen -->
-  <div class="screen" id="lock-screen">
-    <h2>Enter Passcode</h2>
-    <input class="input-field" type="password" id="passcode-input" placeholder="Passcode" />
-    <button class="btn" id="unlock-btn">Unlock</button>
-    <div id="error-msg"></div>
-  </div>
 
-  <!-- Auth screen -->
-  <div class="screen" id="auth-screen" style="display:none;">
-    <h2>Log In / Sign Up</h2>
-    <input class="input-field" type="email" id="auth-email" placeholder="Email" />
-    <input class="input-field" type="password" id="auth-password" placeholder="Password" />
-    <button class="btn" id="login-btn">Log In</button>
-    <button class="btn" id="signup-btn">Sign Up</button>
-    <div id="auth-error"></div>
-  </div>
+<!-- Lock Screen -->
+<div class="screen" id="lock-screen">
+  <h2>Enter Passcode</h2>
+  <input class="input-field" type="password" id="passcode-input" />
+  <button class="btn" id="unlock-btn">Unlock</button>
+  <div id="error-msg"></div>
+</div>
 
-  <!-- Quote container fixed at top -->
-  <div id="quote-container">
+<!-- Auth -->
+<div class="screen" id="auth-screen" style="display:none;">
+  <h2>Log In / Sign Up</h2>
+  <input class="input-field" type="email" id="auth-email" placeholder="Email">
+  <input class="input-field" type="password" id="auth-password" placeholder="Password">
+  <button class="btn" id="login-btn">Log In</button>
+  <button class="btn" id="signup-btn">Sign Up</button>
+  <div id="auth-error"></div>
+</div>
 
+<div id="quote-container">
+  "Sometimes it just feels like I'm too late"
+  <br>
+  <em>nd3r, J12</em>
+</div>
 
-"Sometimes it just feels like I'm too late"
-    <br>
+<div id="main-content">
 
-    <em> nd3r, J12 </em>
-  </div>
+  <!-- Schedule -->
+  <div id="schedule-container">
+    <h2>Shared Schedule</h2>
+    <p style="font-size:0.85rem; opacity:0.8;">Click to color • Type to edit • Auto-syncs</p>
 
-  <!-- Main content -->
-  <div id="main-content">
-    <!-- Online users -->
-    <div id="online-users-container">
-      <strong>Online Users:</strong>
-      <ul id="online-users-list"></ul>
-    </div>
+    <div id="schedule-grid"></div>
 
-    <!-- New photo upload & display section -->
-    <div id="photo-section">
-      <div class="photo-container">
-        <h3>Jess's Photo</h3>
-        <img id="jess-img" src="" alt="Jess's photo" />
-        <br />
-        <input type="file" id="jess-file" accept="image/*" />
-        <div id="jess-msg" class="upload-msg"></div>
-      </div>
-      <div class="photo-container">
-        <h3>Eesa's Photo</h3>
-        <img id="eesa-img" src="" alt="Eesa's photo" />
-        <br />
-        <input type="file" id="eesa-file" accept="image/*" />
-        <div id="eesa-msg" class="upload-msg"></div>
-      </div>
-    </div>
-
-    <div id="chat-container">
-      <div id="chat-box"></div>
-      <div id="chat-input-container">
-        <input type="text" id="chat-input" placeholder="Type your message..." />
-        <button id="send-btn">Send</button>
-      </div>
+    <div id="color-picker">
+      <button data-color="#4caf50" style="background:#4caf50">Free</button>
+      <button data-color="#ff9800" style="background:#ff9800">School</button>
+      <button data-color="#2196f3" style="background:#2196f3">Work</button>
+      <button data-color="#9c27b0" style="background:#9c27b0">Other</button>
     </div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-    import {
-      getDatabase,
-      ref,
-      push,
-      onChildAdded,
-      query,
-      orderByChild,
-      endAt,
-      get,
-      remove,
-      onDisconnect,
-      set,
-      onValue
-    } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
-    import {
-      getAuth,
-      createUserWithEmailAndPassword,
-      signInWithEmailAndPassword,
-      onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+  <!-- Chat -->
+  <div id="chat-container">
+    <div id="chat-box"></div>
+    <div id="chat-input-container">
+      <input id="chat-input" placeholder="Type..." />
+      <button id="send-btn">Send</button>
+    </div>
+  </div>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBUmJ9k5pS62TzIkRHswO2lJLnaeRIfGmE",
-      authDomain: "jess-chat-box.firebaseapp.com",
-      projectId: "jess-chat-box",
-      storageBucket: "jess-chat-box.appspot.com",
-      messagingSenderId: "414967828897",
-      appId: "1:414967828897:web:89045ed9bd4b3257c4bbe0"
-    };
+</div>
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const auth = getAuth(app);
-    const messagesRef = ref(db, "messages");
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+  import { getDatabase, ref, push, onChildAdded, onValue, set } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
+  import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
 
-    // Elements
-    const chatBox = document.getElementById("chat-box");
-    const chatInput = document.getElementById("chat-input");
-    const sendBtn = document.getElementById("send-btn");
+  const firebaseConfig = {
+    apiKey: "AIzaSyBUmJ9k5pS62TzIkRHswO2lJLnaeRIfGmE",
+    authDomain: "jess-chat-box.firebaseapp.com",
+    projectId: "jess-chat-box",
+    storageBucket: "jess-chat-box.appspot.com",
+    messagingSenderId: "414967828897",
+    appId: "1:414967828897:web:89045ed9bd4b3257c4bbe0"
+  };
 
-    const lockScreen = document.getElementById("lock-screen");
-    const authScreen = document.getElementById("auth-screen");
-    const mainContent = document.getElementById("main-content");
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const auth = getAuth(app);
 
-    const passcodeInput = document.getElementById("passcode-input");
-    const unlockBtn = document.getElementById("unlock-btn");
-    const errorMsg = document.getElementById("error-msg");
-
-    const authEmail = document.getElementById("auth-email");
-    const authPassword = document.getElementById("auth-password");
-    const loginBtn = document.getElementById("login-btn");
-    const signupBtn = document.getElementById("signup-btn");
-    const authError = document.getElementById("auth-error");
-
-    const users = {
-      jess: "Jess",
-      eesa: "Eesa"
-    };
-
-    // Utility to check if two timestamps are on same day
-    function isSameDay(ts1, ts2) {
-      const d1 = new Date(ts1);
-      const d2 = new Date(ts2);
-      return d1.getFullYear() === d2.getFullYear() &&
-        d1.getMonth() === d2.getMonth() &&
-        d1.getDate() === d2.getDate();
+  // Passcode
+  unlock-btn.onclick = () => {
+    if (passcode-input.value === "092603") {
+      lock-screen.style.display = "none";
+      onAuthStateChanged(auth, user => {
+        user ? startApp(user) : auth-screen.style.display = "flex";
+      });
+    } else {
+      error-msg.textContent = "Incorrect passcode.";
     }
+  };
 
-    // Upload base64 image to Realtime Database
-    async function uploadImageAsBase64(file, userId) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = async function(event) {
-          const base64String = event.target.result;
-          const now = Date.now();
+  login-btn.onclick = () =>
+    signInWithEmailAndPassword(auth, auth-email.value, auth-password.value)
+      .then(res => startApp(res.user))
+      .catch(e => auth-error.textContent = e.message);
 
-          const photoRef = ref(db, "photos/" + userId);
+  signup-btn.onclick = () =>
+    createUserWithEmailAndPassword(auth, auth-email.value, auth-password.value)
+      .then(res => startApp(res.user))
+      .catch(e => auth-error.textContent = e.message);
 
-          // Check if user already uploaded today
-          get(photoRef).then(snapshot => {
-            const data = snapshot.val();
-            if (data && isSameDay(data.timestamp, now)) {
-              reject("You can only upload once per day.");
-            } else {
-              set(photoRef, {
-                imageBase64: base64String,
-                timestamp: now
-              }).then(() => {
-                resolve("Upload successful!");
-              }).catch(reject);
-            }
-          }).catch(reject);
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    }
+  function startApp(user) {
+    auth-screen.style.display = "none";
+    main-content.style.display = "flex";
 
-    // Show user's photo from database
-    function showImage(userId) {
-      const photoRef = ref(db, "photos/" + userId);
-      onValue(photoRef, (snapshot) => {
-        const data = snapshot.val();
-        const imgEl = document.getElementById(userId + "-img");
-        if (data && data.imageBase64) {
-          imgEl.src = data.imageBase64;
-        } else {
-          imgEl.src = "";
-        }
-      });
-    }
+    /* Schedule */
+    const scheduleRef = ref(db, "schedule");
+    const grid = document.getElementById("schedule-grid");
+    const days = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+    let selectedColor = "#4caf50";
 
-    // Remove photos older than 7 days
-    function cleanupOldPhotos() {
-      const photosRef = ref(db, "photos/");
-      get(photosRef).then(snapshot => {
-        const allPhotos = snapshot.val();
-        if (!allPhotos) return;
+    days.forEach(day => {
+      const cell = document.createElement("div");
+      cell.className = "schedule-cell";
+      cell.contentEditable = true;
+      cell.dataset.day = day;
 
-        const now = Date.now();
-        Object.entries(allPhotos).forEach(([userId, photoData]) => {
-          if (now - photoData.timestamp > 7 * 24 * 60 * 60 * 1000) {
-            remove(ref(db, "photos/" + userId));
-          }
+      cell.onclick = () => {
+        cell.style.backgroundColor = selectedColor;
+        set(ref(db, "schedule/" + day), {
+          text: cell.innerText,
+          color: selectedColor
         });
-      });
-    }
-
-    unlockBtn.onclick = () => {
-      if (passcodeInput.value === "mochatimo") {
-        lockScreen.style.display = "none";
-        onAuthStateChanged(auth, (user) => {
-          if (user) {
-            startApp(user);
-          } else {
-            authScreen.style.display = "flex";
-          }
-        });
-      } else {
-        errorMsg.textContent = "Incorrect passcode.";
-      }
-    };
-
-    loginBtn.onclick = () => {
-      signInWithEmailAndPassword(auth, authEmail.value, authPassword.value)
-        .then((userCredential) => {
-          authScreen.style.display = "none";
-          startApp(userCredential.user);
-        })
-        .catch((err) => {
-          authError.textContent = err.message;
-        });
-    };
-
-    signupBtn.onclick = () => {
-      createUserWithEmailAndPassword(auth, authEmail.value, authPassword.value)
-        .then((userCredential) => {
-          authScreen.style.display = "none";
-          startApp(userCredential.user);
-        })
-        .catch((err) => {
-          authError.textContent = err.message;
-        });
-    };
-
-    function startApp(user) {
-      mainContent.style.display = "flex";
-
-      const userId = user.uid;
-      const email = user.email;
-      const userRef = ref(db, 'presence/' + userId);
-
-      set(userRef, email);
-      onDisconnect(userRef).remove();
-
-      const presenceRef = ref(db, 'presence/');
-      onValue(presenceRef, (snapshot) => {
-        const usersOnline = snapshot.val() || {};
-        const onlineUsersList = document.getElementById('online-users-list');
-        onlineUsersList.innerHTML = '';
-        Object.values(usersOnline).forEach((userEmail) => {
-          const li = document.createElement('li');
-          li.textContent = userEmail;
-          onlineUsersList.appendChild(li);
-        });
-      });
-
-      // Show images initially & on change
-      Object.keys(users).forEach(userIdKey => showImage(userIdKey));
-
-      // Setup file input listeners for uploading
-      Object.keys(users).forEach(userIdKey => {
-        const fileInput = document.getElementById(userIdKey + "-file");
-        const msgDiv = document.getElementById(userIdKey + "-msg");
-
-        fileInput.addEventListener("change", async (e) => {
-          const file = e.target.files[0];
-          if (!file) return;
-
-          msgDiv.textContent = "Uploading...";
-          try {
-            const result = await uploadImageAsBase64(file, userIdKey);
-            msgDiv.textContent = result;
-          } catch (err) {
-            msgDiv.textContent = err;
-          }
-          fileInput.value = "";
-        });
-      });
-
-      // Load and listen for new chat messages
-      onChildAdded(messagesRef, (data) => {
-        const msg = data.val();
-        const time = new Date(msg.timestamp).toLocaleTimeString();
-        const div = document.createElement("div");
-        div.textContent = `[${time}] ${msg.name}: ${msg.text}`;
-        chatBox.appendChild(div);
-        chatBox.scrollTop = chatBox.scrollHeight;
-      });
-
-      sendBtn.onclick = () => sendMessage(user.email);
-      chatInput.onkeydown = (e) => {
-        if (e.key === "Enter") sendMessage(user.email);
       };
 
-      async function sendMessage(name) {
-        const text = chatInput.value.trim();
-        if (!text) return;
-
-        const message = {
-          name,
-          text,
-          timestamp: Date.now()
-        };
-
-        await push(messagesRef, message);
-        chatInput.value = "";
-      }
-
-      async function deleteOldMessages() {
-        const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
-        const oldQuery = query(messagesRef, orderByChild("timestamp"), endAt(thirtyDaysAgo));
-        const snapshot = await get(oldQuery);
-        snapshot.forEach(child => {
-          remove(ref(db, "messages/" + child.key));
+      cell.oninput = () => {
+        set(ref(db, "schedule/" + day), {
+          text: cell.innerText,
+          color: cell.style.backgroundColor
         });
-      }
+      };
 
-      deleteOldMessages();
+      grid.appendChild(cell);
+    });
 
-      // Clean up old photos >7 days on every app start
-      cleanupOldPhotos();
+    onValue(scheduleRef, snap => {
+      const data = snap.val() || {};
+      document.querySelectorAll(".schedule-cell").forEach(c => {
+        const d = data[c.dataset.day];
+        if (d) {
+          c.innerText = d.text || "";
+          c.style.backgroundColor = d.color || "#2a2f4f";
+        }
+      });
+    });
+
+    document.querySelectorAll("#color-picker button").forEach(btn =>
+      btn.onclick = () => selectedColor = btn.dataset.color
+    );
+
+    /* Chat */
+    const chatRef = ref(db, "messages");
+    onChildAdded(chatRef, snap => {
+      const m = snap.val();
+      const div = document.createElement("div");
+      div.textContent = `[${new Date(m.timestamp).toLocaleTimeString()}] ${m.name}: ${m.text}`;
+      chat-box.appendChild(div);
+      chat-box.scrollTop = chat-box.scrollHeight;
+    });
+
+    send-btn.onclick = send;
+    chat-input.onkeydown = e => e.key === "Enter" && send();
+
+    function send() {
+      if (!chat-input.value.trim()) return;
+      push(chatRef, {
+        name: user.email,
+        text: chat-input.value,
+        timestamp: Date.now()
+      });
+      chat-input.value = "";
     }
-  </script>
+  }
+</script>
 </body>
 </html>
