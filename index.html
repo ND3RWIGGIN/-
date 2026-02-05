@@ -99,7 +99,7 @@ button {
 }
 
 /* =========================================================
-   COLOR PICKER
+   TOOLS
    ========================================================= */
 #colors {
   display: flex;
@@ -114,6 +114,11 @@ button {
   cursor: pointer;
   font-size: 0.75rem;
   color: #000;
+}
+
+#eraser-btn {
+  background: #e53935;
+  color: #fff;
 }
 
 /* =========================================================
@@ -188,9 +193,7 @@ button {
 
 <body>
 
-<!-- =========================================================
-     LOCK SCREEN
-     ========================================================= -->
+<!-- LOCK -->
 <div class="screen" id="lock-screen">
   <h2>Enter Passcode</h2>
   <input class="input-field" id="passcode-input" type="password" />
@@ -198,9 +201,7 @@ button {
   <div id="error-msg"></div>
 </div>
 
-<!-- =========================================================
-     AUTH SCREEN
-     ========================================================= -->
+<!-- AUTH -->
 <div class="screen" id="auth-screen" style="display:none;">
   <h2>Log In / Sign Up</h2>
   <input class="input-field" id="auth-email" type="email" placeholder="Email" />
@@ -210,17 +211,11 @@ button {
   <div id="auth-error"></div>
 </div>
 
-<!-- =========================================================
-     HEADER
-     ========================================================= -->
 <div id="quote-container">
   “Sometimes it just feels like I’m too late”<br />
   <em>nd3r, J12</em>
 </div>
 
-<!-- =========================================================
-     MAIN CONTENT
-     ========================================================= -->
 <div id="main-content">
 
   <div id="online-users-container">
@@ -233,9 +228,8 @@ button {
     <button data-color="#ff9800" style="background:#ff9800;">School</button>
     <button data-color="#2196f3" style="background:#2196f3;">Work</button>
     <button data-color="#ffeb3b" style="background:#ffeb3b;">Other</button>
+    <button id="eraser-btn">Eraser</button>
   </div>
-
-  <button class="btn" id="clear-week-btn" type="button">Clear the Week</button>
 
   <div id="schedule-scroll">
     <div id="schedule-grid"></div>
@@ -249,42 +243,13 @@ button {
 
 </div>
 
-<!-- =========================================================
-     SCRIPT
-     ========================================================= -->
 <script type="module">
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
 import { getDatabase, ref, set, onValue, push, remove, onDisconnect } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
 
 /* =========================================================
-   DOM REFERENCES
-   ========================================================= */
-const lockScreen = document.getElementById("lock-screen");
-const authScreen = document.getElementById("auth-screen");
-const mainContent = document.getElementById("main-content");
-
-const passcodeInput = document.getElementById("passcode-input");
-const unlockBtn = document.getElementById("unlock-btn");
-const errorMsg = document.getElementById("error-msg");
-
-const authEmail = document.getElementById("auth-email");
-const authPassword = document.getElementById("auth-password");
-const loginBtn = document.getElementById("login-btn");
-const signupBtn = document.getElementById("signup-btn");
-const authError = document.getElementById("auth-error");
-
-const onlineUsersList = document.getElementById("online-users-list");
-const chatBox = document.getElementById("chat-box");
-const chatInput = document.getElementById("chat-input");
-const sendBtn = document.getElementById("send-btn");
-const clearWeekBtn = document.getElementById("clear-week-btn");
-
-const grid = document.getElementById("schedule-grid");
-
-/* =========================================================
-   FIREBASE
+   FIREBASE + AUTH
    ========================================================= */
 const firebaseConfig = {
   apiKey: "AIzaSyBUmJ9k5pS62TzIkRHswO2lJLnaeRIfGmE",
@@ -326,41 +291,33 @@ signupBtn.onclick = () =>
     .catch(e => authError.textContent = e.message);
 
 /* =========================================================
-   START
+   SCHEDULE
    ========================================================= */
+const days = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+const hours = Array.from({ length: 15 }, (_, i) => i + 8);
+const grid = document.getElementById("schedule-grid");
+
+let selectedColor = "#4caf50";
+let eraserMode = false;
+
+document.querySelectorAll("#colors button[data-color]").forEach(btn => {
+  btn.onclick = () => {
+    selectedColor = btn.dataset.color;
+    eraserMode = false;
+  };
+});
+
+eraser-btn.onclick = () => {
+  eraserMode = true;
+};
+
 function start(user) {
-  authScreen.style.display = "none";
   mainContent.style.display = "block";
-
-  const pRef = ref(db, "presence/" + user.uid);
-  set(pRef, user.email);
-  onDisconnect(pRef).remove();
-
-  onValue(ref(db, "presence"), snap => {
-    onlineUsersList.innerHTML = "";
-    Object.values(snap.val() || {}).forEach(email => {
-      const li = document.createElement("li");
-      li.textContent = email;
-      onlineUsersList.appendChild(li);
-    });
-  });
-
+  authScreen.style.display = "none";
   buildSchedule(user.email);
   syncSchedule();
   setupChat(user.email);
 }
-
-/* =========================================================
-   SCHEDULE BUILD
-   ========================================================= */
-const days = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-const hours = Array.from({ length: 15 }, (_, i) => i + 8);
-
-let selectedColor = "#4caf50";
-
-document.querySelectorAll("#colors button").forEach(btn => {
-  btn.onclick = () => selectedColor = btn.dataset.color;
-});
 
 function buildSchedule(email) {
   grid.innerHTML = "";
@@ -388,6 +345,9 @@ function buildSchedule(email) {
       ["left","right"].forEach(side => {
         const half = document.createElement("div");
         half.className = "half " + side;
+        half.dataset.day = day;
+        half.dataset.hour = hr;
+        half.dataset.side = side;
         half.contentEditable = side === mySide;
 
         half.onclick = () => {
@@ -396,22 +356,19 @@ function buildSchedule(email) {
             return;
           }
 
-          const sameColor = half.style.backgroundColor === selectedColor;
-
-          if (sameColor) {
-            half.style.backgroundColor = "";
+          if (eraserMode) {
             half.innerText = "";
+            half.style.backgroundColor = "";
             remove(ref(db, `schedule/${day}/${hr}/${side}`));
-          } else {
-            half.style.backgroundColor = selectedColor;
-            saveHalf(day, hr, side, half);
+            return;
           }
+
+          half.style.backgroundColor = selectedColor;
+          saveHalf(day, hr, side, half);
         };
 
         half.oninput = () => {
-          if (side === mySide) {
-            saveHalf(day, hr, side, half);
-          }
+          if (side === mySide) saveHalf(day, hr, side, half);
         };
 
         cell.appendChild(half);
@@ -422,9 +379,6 @@ function buildSchedule(email) {
   });
 }
 
-/* =========================================================
-   SCHEDULE SYNC
-   ========================================================= */
 function syncSchedule() {
   onValue(ref(db, "schedule"), snap => {
     document.querySelectorAll(".half").forEach(h => {
@@ -433,21 +387,11 @@ function syncSchedule() {
     });
 
     snap.forEach(daySnap => {
-      const day = daySnap.key;
       daySnap.forEach(hourSnap => {
-        const hour = hourSnap.key;
-        Object.entries(hourSnap.val()).forEach(([side, val]) => {
-          const index =
-            days.indexOf(day) +
-            1 +
-            (hours.indexOf(Number(hour)) * (days.length + 1));
-
-          const cell = grid.children[index];
-          if (!cell) return;
-
-          const target = cell.querySelector("." + side);
+        Object.entries(hourSnap.val()).forEach(([side,val]) => {
+          const sel = `.half[data-day="${daySnap.key}"][data-hour="${hourSnap.key}"][data-side="${side}"]`;
+          const target = document.querySelector(sel);
           if (!target) return;
-
           target.innerText = val.text || "";
           target.style.backgroundColor = val.color || "";
         });
@@ -464,20 +408,6 @@ function saveHalf(day, hour, side, el) {
 }
 
 /* =========================================================
-   CLEAR WEEK
-   ========================================================= */
-clearWeekBtn.onclick = () => {
-  if (!confirm("Clear the entire week?")) return;
-
-  remove(ref(db, "schedule")).then(() => {
-    document.querySelectorAll(".half").forEach(h => {
-      h.innerText = "";
-      h.style.backgroundColor = "";
-    });
-  });
-};
-
-/* =========================================================
    CHAT
    ========================================================= */
 function setupChat(email) {
@@ -485,11 +415,7 @@ function setupChat(email) {
 
   sendBtn.onclick = () => {
     if (!chatInput.value.trim()) return;
-    push(chatRef, {
-      name: email,
-      text: chatInput.value,
-      time: Date.now()
-    });
+    push(chatRef, { name: email, text: chatInput.value, time: Date.now() });
     chatInput.value = "";
   };
 
@@ -497,14 +423,12 @@ function setupChat(email) {
     chatBox.innerHTML = "";
     snap.forEach(m => {
       const d = document.createElement("div");
-      d.textContent =
-        `[${new Date(m.val().time).toLocaleTimeString()}] ${m.val().name}: ${m.val().text}`;
+      d.textContent = `[${new Date(m.val().time).toLocaleTimeString()}] ${m.val().name}: ${m.val().text}`;
       chatBox.appendChild(d);
     });
     chatBox.scrollTop = chatBox.scrollHeight;
   });
 }
-
 </script>
 
 </body>
