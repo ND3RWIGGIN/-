@@ -6,7 +6,10 @@
 <title>nd3rwiggin</title>
 
 <style>
-/* ---------- BASE ---------- */
+
+/* =========================================================
+   BASE
+   ========================================================= */
 body {
   margin: 0;
   font-family: Arial, sans-serif;
@@ -22,7 +25,9 @@ button {
   font-family: inherit;
 }
 
-/* ---------- SCREENS ---------- */
+/* =========================================================
+   SCREENS
+   ========================================================= */
 .screen {
   position: fixed;
   inset: 0;
@@ -56,13 +61,16 @@ button {
   cursor: pointer;
 }
 
-#error-msg, #auth-error {
+#error-msg,
+#auth-error {
   color: #ff6b6b;
   margin-top: 10px;
   min-height: 1.2em;
 }
 
-/* ---------- HEADER ---------- */
+/* =========================================================
+   HEADER
+   ========================================================= */
 #quote-container {
   padding: 30px 20px 10px;
   text-align: center;
@@ -75,7 +83,9 @@ button {
   opacity: 0.8;
 }
 
-/* ---------- MAIN ---------- */
+/* =========================================================
+   MAIN
+   ========================================================= */
 #main-content {
   flex: 1;
   overflow-y: auto;
@@ -88,7 +98,9 @@ button {
   margin-bottom: 10px;
 }
 
-/* ---------- COLOR PICKER ---------- */
+/* =========================================================
+   COLOR PICKER
+   ========================================================= */
 #colors {
   display: flex;
   gap: 8px;
@@ -100,11 +112,13 @@ button {
   border-radius: 4px;
   border: none;
   cursor: pointer;
-  color: #000;
   font-size: 0.75rem;
+  color: #000;
 }
 
-/* ---------- SCHEDULE ---------- */
+/* =========================================================
+   SCHEDULE
+   ========================================================= */
 #schedule-scroll {
   overflow-x: auto;
 }
@@ -116,7 +130,8 @@ button {
   gap: 4px;
 }
 
-.day-header, .hour-label {
+.day-header,
+.hour-label {
   font-size: 0.7rem;
   text-align: center;
   opacity: 0.7;
@@ -142,7 +157,9 @@ button {
   border-right: 1px solid #48508a;
 }
 
-/* ---------- CHAT ---------- */
+/* =========================================================
+   CHAT
+   ========================================================= */
 #chat-container {
   margin-top: 20px;
   border-top: 1px solid #48508a;
@@ -171,7 +188,9 @@ button {
 
 <body>
 
-<!-- ---------- LOCK SCREEN ---------- -->
+<!-- =========================================================
+     LOCK SCREEN
+     ========================================================= -->
 <div class="screen" id="lock-screen">
   <h2>Enter Passcode</h2>
   <input class="input-field" id="passcode-input" type="password" />
@@ -179,7 +198,9 @@ button {
   <div id="error-msg"></div>
 </div>
 
-<!-- ---------- AUTH SCREEN ---------- -->
+<!-- =========================================================
+     AUTH SCREEN
+     ========================================================= -->
 <div class="screen" id="auth-screen" style="display:none;">
   <h2>Log In / Sign Up</h2>
   <input class="input-field" id="auth-email" type="email" placeholder="Email" />
@@ -189,13 +210,17 @@ button {
   <div id="auth-error"></div>
 </div>
 
-<!-- ---------- HEADER ---------- -->
+<!-- =========================================================
+     HEADER
+     ========================================================= -->
 <div id="quote-container">
   “Sometimes it just feels like I’m too late”<br />
   <em>nd3r, J12</em>
 </div>
 
-<!-- ---------- MAIN ---------- -->
+<!-- =========================================================
+     MAIN CONTENT
+     ========================================================= -->
 <div id="main-content">
 
   <div id="online-users-container">
@@ -224,13 +249,18 @@ button {
 
 </div>
 
-<!-- ---------- SCRIPT ---------- -->
+<!-- =========================================================
+     SCRIPT
+     ========================================================= -->
 <script type="module">
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
 import { getDatabase, ref, set, onValue, push, remove, onDisconnect } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
 
-/* ---------- DOM ---------- */
+/* =========================================================
+   DOM REFERENCES
+   ========================================================= */
 const lockScreen = document.getElementById("lock-screen");
 const authScreen = document.getElementById("auth-screen");
 const mainContent = document.getElementById("main-content");
@@ -251,7 +281,11 @@ const chatInput = document.getElementById("chat-input");
 const sendBtn = document.getElementById("send-btn");
 const clearWeekBtn = document.getElementById("clear-week-btn");
 
-/* ---------- FIREBASE ---------- */
+const grid = document.getElementById("schedule-grid");
+
+/* =========================================================
+   FIREBASE
+   ========================================================= */
 const firebaseConfig = {
   apiKey: "AIzaSyBUmJ9k5pS62TzIkRHswO2lJLnaeRIfGmE",
   authDomain: "jess-chat-box.firebaseapp.com",
@@ -265,11 +299,10 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
-/* ---------- UNLOCK (FIXED) ---------- */
-unlockBtn.addEventListener("click", (e) => {
-  e.preventDefault();
-  e.stopPropagation();
-
+/* =========================================================
+   UNLOCK
+   ========================================================= */
+unlockBtn.onclick = () => {
   if (passcodeInput.value === "092603") {
     lockScreen.style.display = "none";
     onAuthStateChanged(auth, user => {
@@ -279,9 +312,11 @@ unlockBtn.addEventListener("click", (e) => {
   } else {
     errorMsg.textContent = "Wrong passcode.";
   }
-});
+};
 
-/* ---------- AUTH ---------- */
+/* =========================================================
+   AUTH
+   ========================================================= */
 loginBtn.onclick = () =>
   signInWithEmailAndPassword(auth, authEmail.value, authPassword.value)
     .catch(e => authError.textContent = e.message);
@@ -290,7 +325,9 @@ signupBtn.onclick = () =>
   createUserWithEmailAndPassword(auth, authEmail.value, authPassword.value)
     .catch(e => authError.textContent = e.message);
 
-/* ---------- START ---------- */
+/* =========================================================
+   START
+   ========================================================= */
 function start(user) {
   authScreen.style.display = "none";
   mainContent.style.display = "block";
@@ -308,81 +345,111 @@ function start(user) {
     });
   });
 
-  setupSchedule(user.email);
+  buildSchedule(user.email);
+  syncSchedule();
   setupChat(user.email);
 }
 
-/* ---------- SCHEDULE ---------- */
+/* =========================================================
+   SCHEDULE BUILD
+   ========================================================= */
 const days = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-const hours = Array.from({length:15},(_,i)=>i+8);
-const grid = document.getElementById("schedule-grid");
-
-grid.appendChild(document.createElement("div"));
-days.forEach(d => {
-  const h = document.createElement("div");
-  h.textContent = d;
-  h.className = "day-header";
-  grid.appendChild(h);
-});
+const hours = Array.from({ length: 15 }, (_, i) => i + 8);
 
 let selectedColor = "#4caf50";
-document.querySelectorAll("#colors button").forEach(b =>
-  b.onclick = () => selectedColor = b.dataset.color
-);
 
-function setupSchedule(email) {
+document.querySelectorAll("#colors button").forEach(btn => {
+  btn.onclick = () => selectedColor = btn.dataset.color;
+});
+
+function buildSchedule(email) {
+  grid.innerHTML = "";
+
+  grid.appendChild(document.createElement("div"));
+  days.forEach(d => {
+    const h = document.createElement("div");
+    h.textContent = d;
+    h.className = "day-header";
+    grid.appendChild(h);
+  });
+
   const mySide = email === "eesanana@gmail.com" ? "right" : "left";
 
   hours.forEach(hr => {
-    const l = document.createElement("div");
-    l.textContent = hr + ":00";
-    l.className = "hour-label";
-    grid.appendChild(l);
+    const label = document.createElement("div");
+    label.textContent = hr + ":00";
+    label.className = "hour-label";
+    grid.appendChild(label);
 
-    days.forEach(d => {
+    days.forEach(day => {
       const cell = document.createElement("div");
       cell.className = "hour-cell";
 
       ["left","right"].forEach(side => {
-        const h = document.createElement("div");
-        h.className = "half " + side;
-        h.contentEditable = side === mySide;
+        const half = document.createElement("div");
+        half.className = "half " + side;
+        half.contentEditable = side === mySide;
 
-        h.onclick = () => {
+        half.onclick = () => {
           if (side !== mySide) {
             alert("NOT YOUR SIDE SILLY");
             return;
           }
-          h.style.backgroundColor = selectedColor;
-          saveHalf(d, hr, side, h);
+
+          const sameColor = half.style.backgroundColor === selectedColor;
+
+          if (sameColor) {
+            half.style.backgroundColor = "";
+            half.innerText = "";
+            remove(ref(db, `schedule/${day}/${hr}/${side}`));
+          } else {
+            half.style.backgroundColor = selectedColor;
+            saveHalf(day, hr, side, half);
+          }
         };
 
-        h.oninput = () => {
-          if (side === mySide) saveHalf(d, hr, side, h);
+        half.oninput = () => {
+          if (side === mySide) {
+            saveHalf(day, hr, side, half);
+          }
         };
 
-        cell.appendChild(h);
+        cell.appendChild(half);
       });
 
       grid.appendChild(cell);
     });
   });
+}
 
+/* =========================================================
+   SCHEDULE SYNC
+   ========================================================= */
+function syncSchedule() {
   onValue(ref(db, "schedule"), snap => {
     document.querySelectorAll(".half").forEach(h => {
-      const d = h.parentElement;
-      const day = h.parentElement.dataset?.day;
+      h.innerText = "";
+      h.style.backgroundColor = "";
     });
 
     snap.forEach(daySnap => {
+      const day = daySnap.key;
       daySnap.forEach(hourSnap => {
-        Object.entries(hourSnap.val()).forEach(([side,val]) => {
-          document.querySelectorAll(`.half.${side}`).forEach(h => {
-            if (h.innerText !== val.text) {
-              h.innerText = val.text || "";
-              h.style.backgroundColor = val.color || "";
-            }
-          });
+        const hour = hourSnap.key;
+        Object.entries(hourSnap.val()).forEach(([side, val]) => {
+          const index =
+            days.indexOf(day) +
+            1 +
+            (hours.indexOf(Number(hour)) * (days.length + 1));
+
+          const cell = grid.children[index];
+          if (!cell) return;
+
+          const target = cell.querySelector("." + side);
+          if (!target) return;
+
+          target.innerText = val.text || "";
+          target.style.backgroundColor = val.color || "";
         });
       });
     });
@@ -396,19 +463,33 @@ function saveHalf(day, hour, side, el) {
   });
 }
 
+/* =========================================================
+   CLEAR WEEK
+   ========================================================= */
 clearWeekBtn.onclick = () => {
-  if (confirm("Clear the entire week?")) {
-    remove(ref(db, "schedule"));
-  }
+  if (!confirm("Clear the entire week?")) return;
+
+  remove(ref(db, "schedule")).then(() => {
+    document.querySelectorAll(".half").forEach(h => {
+      h.innerText = "";
+      h.style.backgroundColor = "";
+    });
+  });
 };
 
-/* ---------- CHAT ---------- */
+/* =========================================================
+   CHAT
+   ========================================================= */
 function setupChat(email) {
   const chatRef = ref(db, "chat_river");
 
   sendBtn.onclick = () => {
     if (!chatInput.value.trim()) return;
-    push(chatRef, { name: email, text: chatInput.value, time: Date.now() });
+    push(chatRef, {
+      name: email,
+      text: chatInput.value,
+      time: Date.now()
+    });
     chatInput.value = "";
   };
 
@@ -423,6 +504,7 @@ function setupChat(email) {
     chatBox.scrollTop = chatBox.scrollHeight;
   });
 }
+
 </script>
 
 </body>
