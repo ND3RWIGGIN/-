@@ -31,8 +31,8 @@
       flex-grow: 1;
       overflow-y: auto;
       display: none;
-      align-items: center;
       flex-direction: column;
+      align-items: center;
       padding-bottom: 30px;
     }
 
@@ -171,7 +171,7 @@
   <div id="error-msg"></div>
 </div>
 
-<!-- Auth -->
+<!-- Auth Screen -->
 <div class="screen" id="auth-screen" style="display:none;">
   <h2>Log In / Sign Up</h2>
   <input class="input-field" type="email" id="auth-email" placeholder="Email">
@@ -233,37 +233,60 @@
   const db = getDatabase(app);
   const auth = getAuth(app);
 
-  // Passcode
-  unlock-btn.onclick = () => {
-    if (passcode-input.value === "092603") {
-      lock-screen.style.display = "none";
+  /* DOM ELEMENTS */
+  const unlockBtn = document.getElementById("unlock-btn");
+  const passcodeInput = document.getElementById("passcode-input");
+  const lockScreen = document.getElementById("lock-screen");
+  const authScreen = document.getElementById("auth-screen");
+  const mainContent = document.getElementById("main-content");
+  const errorMsg = document.getElementById("error-msg");
+
+  const loginBtn = document.getElementById("login-btn");
+  const signupBtn = document.getElementById("signup-btn");
+  const authEmail = document.getElementById("auth-email");
+  const authPassword = document.getElementById("auth-password");
+  const authError = document.getElementById("auth-error");
+
+  const chatBox = document.getElementById("chat-box");
+  const chatInput = document.getElementById("chat-input");
+  const sendBtn = document.getElementById("send-btn");
+
+  /* PASSCODE */
+  unlockBtn.onclick = () => {
+    if (passcodeInput.value === "092603") {
+      lockScreen.style.display = "none";
       onAuthStateChanged(auth, user => {
-        user ? startApp(user) : auth-screen.style.display = "flex";
+        if (user) startApp(user);
+        else authScreen.style.display = "flex";
       });
     } else {
-      error-msg.textContent = "Incorrect passcode.";
+      errorMsg.textContent = "Incorrect passcode.";
     }
   };
 
-  login-btn.onclick = () =>
-    signInWithEmailAndPassword(auth, auth-email.value, auth-password.value)
+  loginBtn.onclick = () => {
+    signInWithEmailAndPassword(auth, authEmail.value, authPassword.value)
       .then(res => startApp(res.user))
-      .catch(e => auth-error.textContent = e.message);
+      .catch(err => authError.textContent = err.message);
+  };
 
-  signup-btn.onclick = () =>
-    createUserWithEmailAndPassword(auth, auth-email.value, auth-password.value)
+  signupBtn.onclick = () => {
+    createUserWithEmailAndPassword(auth, authEmail.value, authPassword.value)
       .then(res => startApp(res.user))
-      .catch(e => auth-error.textContent = e.message);
+      .catch(err => authError.textContent = err.message);
+  };
 
   function startApp(user) {
-    auth-screen.style.display = "none";
-    main-content.style.display = "flex";
+    authScreen.style.display = "none";
+    mainContent.style.display = "flex";
 
-    /* Schedule */
+    /* SCHEDULE */
     const scheduleRef = ref(db, "schedule");
     const grid = document.getElementById("schedule-grid");
     const days = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
     let selectedColor = "#4caf50";
+
+    grid.innerHTML = "";
 
     days.forEach(day => {
       const cell = document.createElement("div");
@@ -291,42 +314,44 @@
 
     onValue(scheduleRef, snap => {
       const data = snap.val() || {};
-      document.querySelectorAll(".schedule-cell").forEach(c => {
-        const d = data[c.dataset.day];
+      document.querySelectorAll(".schedule-cell").forEach(cell => {
+        const d = data[cell.dataset.day];
         if (d) {
-          c.innerText = d.text || "";
-          c.style.backgroundColor = d.color || "#2a2f4f";
+          cell.innerText = d.text || "";
+          cell.style.backgroundColor = d.color || "#2a2f4f";
         }
       });
     });
 
-    document.querySelectorAll("#color-picker button").forEach(btn =>
-      btn.onclick = () => selectedColor = btn.dataset.color
-    );
+    document.querySelectorAll("#color-picker button").forEach(btn => {
+      btn.onclick = () => selectedColor = btn.dataset.color;
+    });
 
-    /* Chat */
+    /* CHAT */
     const chatRef = ref(db, "messages");
+
     onChildAdded(chatRef, snap => {
       const m = snap.val();
       const div = document.createElement("div");
       div.textContent = `[${new Date(m.timestamp).toLocaleTimeString()}] ${m.name}: ${m.text}`;
-      chat-box.appendChild(div);
-      chat-box.scrollTop = chat-box.scrollHeight;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
     });
 
-    send-btn.onclick = send;
-    chat-input.onkeydown = e => e.key === "Enter" && send();
+    sendBtn.onclick = send;
+    chatInput.onkeydown = e => e.key === "Enter" && send();
 
     function send() {
-      if (!chat-input.value.trim()) return;
+      if (!chatInput.value.trim()) return;
       push(chatRef, {
         name: user.email,
-        text: chat-input.value,
+        text: chatInput.value,
         timestamp: Date.now()
       });
-      chat-input.value = "";
+      chatInput.value = "";
     }
   }
 </script>
+
 </body>
 </html>
