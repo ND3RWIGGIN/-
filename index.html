@@ -106,64 +106,6 @@ button {
   margin-bottom: 10px;
 }
 
-/* ---------- COLOR PICKER ---------- */
-#colors {
-  display: flex;
-  gap: 8px;
-  margin: 10px 0;
-}
-
-#colors button {
-  padding: 6px 10px;
-  border-radius: 4px;
-  border: none;
-  cursor: pointer;
-  color: #000;
-  font-size: 0.75rem;
-}
-
-#colors button.active {
-  border: 3px solid #fff;
-}
-
-/* ---------- SCHEDULE ---------- */
-#schedule-scroll {
-  overflow-x: auto;
-}
-
-#schedule-grid {
-  display: grid;
-  grid-template-columns: 60px repeat(7, 1fr);
-  min-width: 900px;
-  gap: 4px;
-}
-
-.day-header, .hour-label {
-  font-size: 0.7rem;
-  text-align: center;
-  opacity: 0.7;
-}
-
-.hour-cell {
-  display: flex;
-  min-height: 60px;
-  border: 1px solid #48508a;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.half {
-  flex: 1;
-  padding: 4px;
-  font-size: 0.7rem;
-  outline: none;
-  word-break: break-word;
-}
-
-.half.left {
-  border-right: 1px solid #48508a;
-}
-
 /* ---------- CHAT ---------- */
 #chat-container {
   display: flex;
@@ -187,103 +129,6 @@ button {
   border: none;
   color: #c8d4e4;
 }
-
-/* ---------- WORD GAME ---------- */
-#word-game-container {
-  height: 70vh;
-  display: flex;
-  flex-direction: column;
-}
-
-.score-section {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  gap: 20px;
-  height: 100%;
-}
-
-.player-side {
-  display: flex;
-  flex-direction: column;
-  border: 2px solid #48508a;
-  border-radius: 8px;
-  padding: 15px;
-}
-
-.left-player {
-  border-color: #2196f3;
-}
-
-.right-player {
-  border-color: #ff9800;
-}
-
-.player-side h2 {
-  margin: 0 0 10px 0;
-  text-align: center;
-  font-size: 1.2rem;
-}
-
-.score-display {
-  font-size: 3rem;
-  font-weight: bold;
-  text-align: center;
-  margin-bottom: 20px;
-  color: #4caf50;
-}
-
-.word-history {
-  flex: 1;
-  overflow-y: auto;
-  font-size: 0.85rem;
-  line-height: 1.8;
-}
-
-.word-entry {
-  padding: 5px;
-  margin: 3px 0;
-  background: #3b4166;
-  border-radius: 4px;
-}
-
-.center-input {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 10px;
-  min-width: 250px;
-}
-
-#word-input {
-  padding: 12px;
-  font-size: 1.1rem;
-  text-align: center;
-  background: #3b4166;
-  border: 2px solid #48508a;
-  color: #c8d4e4;
-  border-radius: 6px;
-}
-
-.player-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.word-btn {
-  padding: 10px;
-  background: #48508a;
-  border: none;
-  color: #c8d4e4;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.9rem;
-}
-
-.word-btn:hover {
-  background: #5a62a0;
-}
-
 </style>
 </head>
 
@@ -317,9 +162,7 @@ button {
 
   <div id="nav-tabs">
     <button class="tab-btn active" data-page="quote-page">Main</button>
-    <button class="tab-btn" data-page="schedule-page">Schedule</button>
     <button class="tab-btn" data-page="chat-page">Chat</button>
-    <button class="tab-btn" data-page="word-game-page">Word Game</button>
   </div>
 
   <!-- QUOTE PAGE -->
@@ -330,23 +173,8 @@ button {
 Oh, it's hard to leave you when I get you everywhere"
       </div>
       <div style="margin-top: 20px; font-size: 1.2rem; opacity: 0.8;">
-        <em> Love Me Not, Ravyn Lenae</em>
+        <em>Love Me Not, Ravyn Lenae</em>
       </div>
-    </div>
-  </div>
-
-  <!-- SCHEDULE PAGE -->
-  <div id="schedule-page" class="page">
-    <div id="colors">
-      <button data-color="#4caf50" style="background:#4caf50;" class="active">Free</button>
-      <button data-color="#ff9800" style="background:#ff9800;">School</button>
-      <button data-color="#2196f3" style="background:#2196f3;">Work</button>
-      <button data-color="#ffeb3b" style="background:#ffeb3b;">Other</button>
-      <button data-color="eraser" style="background:#f44336; color:#fff;">Eraser</button>
-    </div>
-
-    <div id="schedule-scroll">
-      <div id="schedule-grid"></div>
     </div>
   </div>
 
@@ -359,62 +187,58 @@ Oh, it's hard to leave you when I get you everywhere"
     </div>
   </div>
 
-  <!-- WORD GAME PAGE -->
-  <div id="word-game-page" class="page">
-    <div id="word-game-container">
-      <div class="score-section">
-        <div class="player-side left-player">
-          <h2>Eesa</h2>
-          <div class="score-display" id="left-score">150</div>
-          <div class="word-history" id="left-history"></div>
-        </div>
-
-        <div class="center-input">
-          <input type="text" id="word-input" placeholder="Enter a word..." />
-          <div class="player-buttons">
-            <button id="submit-left" class="word-btn">Add to Eesa</button>
-            <button id="submit-right" class="word-btn">Add to Rivvy ❤️</button>
-          </div>
-        </div>
-
-        <div class="player-side right-player">
-          <h2>Rivvy ❤️</h2>
-          <div class="score-display" id="right-score">210</div>
-          <div class="word-history" id="right-history"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
 </div>
 
 <!-- ---------- SCRIPT ---------- -->
+
+<!-- Unlock runs independently, no Firebase needed -->
+<script>
+  let firebaseReady = false;
+  let pendingUnlock = false;
+
+  function tryUnlock() {
+    const passcodeInput = document.getElementById("passcode-input");
+    const lockScreen    = document.getElementById("lock-screen");
+    const authScreen    = document.getElementById("auth-screen");
+    const errorMsg      = document.getElementById("error-msg");
+
+    if (passcodeInput.value === "092603") {
+      lockScreen.style.display = "none";
+      if (firebaseReady) {
+        checkAuthAndStart();
+      } else {
+        pendingUnlock = true;
+        authScreen.style.display = "flex";
+      }
+    } else {
+      errorMsg.textContent = "Wrong passcode.";
+    }
+  }
+
+  document.getElementById("unlock-btn").addEventListener("click", tryUnlock);
+  document.getElementById("passcode-input").addEventListener("keypress", (e) => {
+    if (e.key === "Enter") tryUnlock();
+  });
+</script>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
 import { getDatabase, ref, set, onValue, push, remove, onDisconnect } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
 
-/* ---------- DOM ---------- */
-const lockScreen = document.getElementById("lock-screen");
-const authScreen = document.getElementById("auth-screen");
-const mainContent = document.getElementById("main-content");
-
-const passcodeInput = document.getElementById("passcode-input");
-const unlockBtn = document.getElementById("unlock-btn");
-const errorMsg = document.getElementById("error-msg");
-
-const authEmail = document.getElementById("auth-email");
-const authPassword = document.getElementById("auth-password");
-const loginBtn = document.getElementById("login-btn");
-const signupBtn = document.getElementById("signup-btn");
-const authError = document.getElementById("auth-error");
-
+const lockScreen    = document.getElementById("lock-screen");
+const authScreen    = document.getElementById("auth-screen");
+const mainContent   = document.getElementById("main-content");
+const authEmail     = document.getElementById("auth-email");
+const authPassword  = document.getElementById("auth-password");
+const loginBtn      = document.getElementById("login-btn");
+const signupBtn     = document.getElementById("signup-btn");
+const authError     = document.getElementById("auth-error");
 const onlineUsersList = document.getElementById("online-users-list");
-const chatBox = document.getElementById("chat-box");
-const chatInput = document.getElementById("chat-input");
-const sendBtn = document.getElementById("send-btn");
+const chatBox       = document.getElementById("chat-box");
+const chatInput     = document.getElementById("chat-input");
+const sendBtn       = document.getElementById("send-btn");
 
-/* ---------- FIREBASE ---------- */
 const firebaseConfig = {
   apiKey: "AIzaSyBUmJ9k5pS62TzIkRHswO2lJLnaeRIfGmE",
   authDomain: "jess-chat-box.firebaseapp.com",
@@ -424,31 +248,22 @@ const firebaseConfig = {
   appId: "1:414967828897:web:89045ed9bd4b3257c4bbe0"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+const app  = initializeApp(firebaseConfig);
+const db   = getDatabase(app);
 const auth = getAuth(app);
 
-/* ---------- UNLOCK (FIXED) ---------- */
-unlockBtn.addEventListener("click", (e) => {
-  e.preventDefault();
-  e.stopPropagation();
+firebaseReady = true;
 
-  if (passcodeInput.value === "092603") {
-    lockScreen.style.display = "none";
-    
-    // Check if user is already logged in
-    const currentUser = auth.currentUser;
-    if (currentUser) {
-      start(currentUser);
-    } else {
-      authScreen.style.display = "flex";
-    }
+window.checkAuthAndStart = function() {
+  const currentUser = auth.currentUser;
+  if (currentUser) {
+    authScreen.style.display = "none";
+    start(currentUser);
   } else {
-    errorMsg.textContent = "Wrong passcode.";
+    authScreen.style.display = "flex";
   }
-});
+};
 
-/* ---------- AUTH STATE LISTENER ---------- */
 onAuthStateChanged(auth, user => {
   if (user && lockScreen.style.display === "none" && authScreen.style.display !== "none") {
     authScreen.style.display = "none";
@@ -456,7 +271,6 @@ onAuthStateChanged(auth, user => {
   }
 });
 
-/* ---------- AUTH ---------- */
 loginBtn.onclick = () =>
   signInWithEmailAndPassword(auth, authEmail.value, authPassword.value)
     .catch(e => authError.textContent = e.message);
@@ -465,7 +279,8 @@ signupBtn.onclick = () =>
   createUserWithEmailAndPassword(auth, authEmail.value, authPassword.value)
     .catch(e => authError.textContent = e.message);
 
-/* ---------- START ---------- */
+let chatCleared = false;
+
 function start(user) {
   authScreen.style.display = "none";
   mainContent.style.display = "flex";
@@ -483,156 +298,26 @@ function start(user) {
     });
   });
 
-  setupSchedule(user.email);
+  if (!chatCleared) {
+    chatCleared = true;
+    remove(ref(db, "chat_river"));
+  }
+
   setupChat(user.email);
   setupNavigation();
-  setupWordGame();
 }
 
-/* ---------- NAVIGATION ---------- */
 function setupNavigation() {
   document.querySelectorAll(".tab-btn").forEach(btn => {
     btn.onclick = () => {
-      // Remove active class from all tabs and pages
       document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
       document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-      
-      // Add active class to clicked tab and corresponding page
       btn.classList.add("active");
       document.getElementById(btn.dataset.page).classList.add("active");
     };
   });
 }
 
-/* ---------- SCHEDULE ---------- */
-const days = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-const hours = Array.from({length:15},(_,i)=>i+8);
-const grid = document.getElementById("schedule-grid");
-
-grid.appendChild(document.createElement("div"));
-days.forEach(d => {
-  const h = document.createElement("div");
-  h.textContent = d;
-  h.className = "day-header";
-  grid.appendChild(h);
-});
-
-let selectedColor = "#4caf50";
-
-// Color picker with eraser
-document.querySelectorAll("#colors button").forEach(b => {
-  b.onclick = () => {
-    document.querySelectorAll("#colors button").forEach(btn => btn.classList.remove("active"));
-    b.classList.add("active");
-    selectedColor = b.dataset.color;
-  };
-});
-
-function setupSchedule(email) {
-  const mySide = email === "eesanana@gmail.com" ? "right" : "left";
-  const cellMap = {}; // Track cells by day/hour/side
-
-  hours.forEach(hr => {
-    const l = document.createElement("div");
-    l.textContent = hr + ":00";
-    l.className = "hour-label";
-    grid.appendChild(l);
-
-    days.forEach(d => {
-      const cell = document.createElement("div");
-      cell.className = "hour-cell";
-
-      ["left","right"].forEach(side => {
-        const h = document.createElement("div");
-        h.className = "half " + side;
-        h.contentEditable = side === mySide;
-        
-        // Store reference for updates
-        const key = `${d}-${hr}-${side}`;
-        cellMap[key] = h;
-
-        h.onclick = () => {
-          if (side !== mySide) {
-            alert("NOT YOUR SIDE SILLY");
-            return;
-          }
-          
-          // Eraser clears the cell
-          if (selectedColor === "eraser") {
-            h.style.backgroundColor = "";
-            h.innerText = "";
-            saveHalf(d, hr, side, h);
-          } else {
-            h.style.backgroundColor = selectedColor;
-            saveHalf(d, hr, side, h);
-          }
-        };
-
-        h.oninput = () => {
-          if (side === mySide) saveHalf(d, hr, side, h);
-        };
-
-        cell.appendChild(h);
-      });
-
-      grid.appendChild(cell);
-    });
-  });
-
-  // Listen for changes and update specific cells only
-  onValue(ref(db, "schedule"), snap => {
-    const data = snap.val() || {};
-    
-    days.forEach(day => {
-      hours.forEach(hour => {
-        ["left", "right"].forEach(side => {
-          const key = `${day}-${hour}-${side}`;
-          const cell = cellMap[key];
-          
-          if (cell && data[day] && data[day][hour] && data[day][hour][side]) {
-            const val = data[day][hour][side];
-            
-            // Only update if different to avoid cursor jump
-            if (cell.innerText !== val.text || cell.style.backgroundColor !== val.color) {
-              const wasEditable = cell.contentEditable;
-              const selection = window.getSelection();
-              const hadFocus = document.activeElement === cell;
-              
-              cell.innerText = val.text || "";
-              cell.style.backgroundColor = val.color || "";
-              
-              // Restore focus if this cell was being edited
-              if (hadFocus && wasEditable === "true") {
-                cell.focus();
-              }
-            }
-          } else if (cell && (!data[day] || !data[day][hour] || !data[day][hour][side])) {
-            // Clear cell if no data
-            cell.innerText = "";
-            cell.style.backgroundColor = "";
-          }
-        });
-      });
-    });
-  });
-}
-
-function saveHalf(day, hour, side, el) {
-  const text = el.innerText.trim();
-  const color = el.style.backgroundColor;
-  
-  if (!text && !color) {
-    // Remove from database if empty
-    remove(ref(db, `schedule/${day}/${hour}/${side}`));
-  } else {
-    set(ref(db, `schedule/${day}/${hour}/${side}`), {
-      text: text,
-      color: color
-    });
-  }
-}
-
-/* ---------- CHAT ---------- */
 function setupChat(email) {
   const chatRef = ref(db, "chat_river");
 
@@ -642,116 +327,18 @@ function setupChat(email) {
     chatInput.value = "";
   };
 
+  chatInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") sendBtn.click();
+  });
+
   onValue(chatRef, snap => {
     chatBox.innerHTML = "";
     snap.forEach(m => {
       const d = document.createElement("div");
-      d.textContent =
-        `[${new Date(m.val().time).toLocaleTimeString()}] ${m.val().name}: ${m.val().text}`;
+      d.textContent = `[${new Date(m.val().time).toLocaleTimeString()}] ${m.val().name}: ${m.val().text}`;
       chatBox.appendChild(d);
     });
     chatBox.scrollTop = chatBox.scrollHeight;
-  });
-}
-
-/* ---------- WORD GAME ---------- */
-function setupWordGame() {
-  const wordInput = document.getElementById("word-input");
-  const submitLeft = document.getElementById("submit-left");
-  const submitRight = document.getElementById("submit-right");
-  const leftScore = document.getElementById("left-score");
-  const rightScore = document.getElementById("right-score");
-  const leftHistory = document.getElementById("left-history");
-  const rightHistory = document.getElementById("right-history");
-
-  // Scrabble letter values
-  const letterValues = {
-    'a': 1, 'e': 1, 'i': 1, 'o': 1, 'u': 1, 'l': 1, 'n': 1, 's': 1, 't': 1, 'r': 1,
-    'd': 2, 'g': 2,
-    'b': 3, 'c': 3, 'm': 3, 'p': 3,
-    'f': 4, 'h': 4, 'v': 4, 'w': 4, 'y': 4,
-    'k': 5,
-    'j': 8, 'x': 8,
-    'q': 10, 'z': 10
-  };
-
-  function calculateWordScore(word) {
-    return word.toLowerCase().split('').reduce((score, letter) => {
-      return score + (letterValues[letter] || 0);
-    }, 0);
-  }
-
-  function addWord(side) {
-    const word = wordInput.value.trim();
-    if (!word) return;
-
-    const points = calculateWordScore(word);
-    const wordRef = ref(db, `wordgame/${side}`);
-    
-    push(wordRef, {
-      word: word,
-      points: points,
-      time: Date.now()
-    });
-
-    wordInput.value = "";
-  }
-
-  submitLeft.onclick = () => addWord("left");
-  submitRight.onclick = () => addWord("right");
-
-  wordInput.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") {
-      addWord("left"); // Default to left side on Enter
-    }
-  });
-
-  // Listen for left side updates
-  onValue(ref(db, "wordgame/left"), snap => {
-    leftHistory.innerHTML = "";
-    let total = 150; // Starting score
-    const words = [];
-    
-    snap.forEach(w => {
-      words.push(w.val());
-    });
-
-    // Sort by time
-    words.sort((a, b) => a.time - b.time);
-
-    words.forEach(w => {
-      total += w.points;
-      const entry = document.createElement("div");
-      entry.className = "word-entry";
-      entry.textContent = `${w.word} (+${w.points})`;
-      leftHistory.appendChild(entry);
-    });
-
-    leftScore.textContent = total;
-  });
-
-  // Listen for right side updates
-  onValue(ref(db, "wordgame/right"), snap => {
-    rightHistory.innerHTML = "";
-    let total = 210; // Starting score
-    const words = [];
-    
-    snap.forEach(w => {
-      words.push(w.val());
-    });
-
-    // Sort by time
-    words.sort((a, b) => a.time - b.time);
-
-    words.forEach(w => {
-      total += w.points;
-      const entry = document.createElement("div");
-      entry.className = "word-entry";
-      entry.textContent = `${w.word} (+${w.points})`;
-      rightHistory.appendChild(entry);
-    });
-
-    rightScore.textContent = total;
   });
 }
 </script>
