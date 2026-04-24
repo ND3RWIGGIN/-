@@ -2,523 +2,1252 @@
 <html lang="en">
 <head>
   <title>nd3rwiggin</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
-    /* Make body full height and column layout */
+    :root {
+      --bg: #191f41;
+      --bg2: #1e2448;
+      --surface: #252b50;
+      --surface2: #2e3560;
+      --border: #3a4270;
+      --accent: #7b8fd4;
+      --accent2: #a8b4e8;
+      --text: #c8d4e4;
+      --text-dim: #7a8aaa;
+      --success: #6dbf9e;
+      --danger: #e07b7b;
+      --gold: #d4b483;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      height: 100vh;
       display: flex;
       flex-direction: column;
-      height: 100vh;
-      margin: 0;
-      background-color: #191f41;
-      color: #c8d4e4;
-      font-family: Arial, sans-serif;
-      text-align: center;
-      overflow: hidden; /* prevent scroll on body */
+      overflow: hidden;
     }
 
-    /* Quote container fixed height at top */
-    #quote-container {
+    /* ── NAV ── */
+    #nav {
       flex-shrink: 0;
-      padding: 40px 20px 20px;
-      background-color: #191f41;
-      font-size: 1.5rem;
-      line-height: 1.4;
-      font-weight: 500;
-      user-select: none;
-      color: #c8d4e4;
-    }
-
-    #quote-container em {
-      font-style: italic;
-      font-weight: 400;
-      font-size: 1rem;
-    }
-
-    /* Main content scrollable area */
-    #main-content {
-      flex-grow: 1;
-      overflow-y: auto;
-      display: none; /* initially hidden, shown after login */
-      flex-direction: column;
+      display: flex;
       align-items: center;
-      width: 100%;
-      padding: 10px 0 30px;
-      box-sizing: border-box;
+      gap: 0;
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      padding: 0 20px;
+      height: 48px;
+      position: relative;
+      z-index: 100;
     }
 
-    h2, h3 {
-      margin: 0;
-    }
-    h3 {
-      margin-top: 5px;
-      font-weight: 400;
+    #nav-logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.1rem;
+      color: var(--accent2);
+      margin-right: 24px;
+      letter-spacing: 0.04em;
     }
 
-    #chat-container {
-      margin-top: 30px;
-      width: 320px;
-      max-height: 400px;
+    .nav-tab {
+      padding: 0 18px;
+      height: 48px;
       display: flex;
-      flex-direction: column;
-      background-color: #2a2f4f;
-      border: 1px solid #c8d4e4;
-      border-radius: 5px;
-      padding: 10px;
-    }
-
-    #chat-box {
-      flex-grow: 1;
-      overflow-y: auto;
-      padding: 5px;
-      font-size: 0.9rem;
-      border-bottom: 1px solid #48508a;
-      max-height: 300px;
-      color: #c8d4e4;
-      text-align: left;
-    }
-
-    #chat-input-container {
-      margin-top: 10px;
-      display: flex;
-    }
-
-    #chat-input {
-      flex-grow: 1;
-      padding: 8px;
-      border: none;
-      font-size: 1rem;
-      background-color: #3b4166;
-      color: #c8d4e4;
-      border-radius: 3px 0 0 3px;
-    }
-
-    #chat-input::placeholder {
-      color: #9aa7c2;
-    }
-
-    #send-btn {
-      padding: 8px 15px;
-      background-color: #48508a;
-      color: #c8d4e4;
-      border: none;
+      align-items: center;
+      gap: 8px;
       cursor: pointer;
-      border-radius: 0 3px 3px 0;
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s ease;
+      position: relative;
     }
 
-    .screen {
+    .nav-tab:hover { color: var(--text); }
+    .nav-tab.active { color: var(--accent2); border-bottom-color: var(--accent2); }
+
+    .nav-tab .tab-lock {
+      font-size: 0.65rem;
+      background: var(--surface2);
+      color: var(--text-dim);
+      padding: 2px 5px;
+      border-radius: 3px;
+      border: 1px solid var(--border);
+    }
+
+    #nav-users {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    .online-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 6px var(--success);
+      display: inline-block;
+    }
+
+    /* ── SCREENS ── */
+    .overlay-screen {
       position: fixed;
-      top: 0; left: 0;
-      height: 100vh;
-      width: 100vw;
-      background-color: #191f41;
+      inset: 0;
+      background: var(--bg);
       display: flex;
       flex-direction: column;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
       z-index: 9999;
+      gap: 12px;
     }
 
-    .input-field {
-      padding: 10px;
-      font-size: 1.2rem;
-      border-radius: 5px;
-      border: none;
-      margin-top: 10px;
-      width: 250px;
-      text-align: center;
-      background-color: #3b4166;
-      color: #c8d4e4;
+    .overlay-screen h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.6rem;
+      color: var(--accent2);
+      margin-bottom: 8px;
     }
+
+    .inp {
+      width: 260px;
+      padding: 10px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .inp:focus { border-color: var(--accent); }
+    .inp::placeholder { color: var(--text-dim); }
 
     .btn {
-      margin-top: 15px;
-      padding: 10px 20px;
-      font-size: 1rem;
-      background-color: #48508a;
-      border: none;
-      color: #c8d4e4;
-      border-radius: 5px;
+      padding: 9px 22px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 6px;
       cursor: pointer;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.85rem;
+      letter-spacing: 0.04em;
+      transition: all 0.15s;
+    }
+    .btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .btn.primary:hover { background: var(--accent2); border-color: var(--accent2); }
+
+    .err { color: var(--danger); font-size: 0.8rem; min-height: 1em; }
+
+    /* ── PAGES ── */
+    .page {
+      display: none;
+      flex: 1;
+      overflow: hidden;
+    }
+    .page.active { display: flex; }
+
+    /* ═══════════════════════════════
+       PAGE 1: HOME / CHAT
+    ═══════════════════════════════ */
+    #page-home {
+      flex-direction: column;
+      align-items: center;
+      overflow-y: auto;
+      padding: 0 20px 40px;
     }
 
-    #error-msg, #auth-error {
-      color: #ff6b6b;
+    #quote-block {
+      width: 100%;
+      max-width: 600px;
+      text-align: center;
+      padding: 32px 20px 24px;
+      flex-shrink: 0;
+    }
+
+    #quote-block .quote-text {
+      font-family: 'DM Serif Display', serif;
+      font-style: italic;
+      font-size: 1.25rem;
+      line-height: 1.7;
+      color: var(--accent2);
+    }
+
+    #quote-block .quote-attr {
       margin-top: 10px;
-      height: 1.2em;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+      text-transform: uppercase;
     }
 
-    #online-users-container {
-      margin-top: 15px;
-      width: 320px;
-      color: #c8d4e4;
-      text-align: left;
-      font-size: 0.9rem;
-    }
-
-    #online-users-list {
-      list-style: none;
-      padding-left: 10px;
-      margin-top: 5px;
-    }
-
-    /* New styles for photo upload section */
+    /* Photos */
     #photo-section {
       display: flex;
-      justify-content: center;
-      gap: 40px;
-      margin: 20px 0;
+      gap: 36px;
+      margin: 16px 0;
       width: 100%;
-      max-width: 700px;
+      max-width: 600px;
+      justify-content: center;
     }
-    .photo-container {
-      text-align: center;
+
+    .photo-card {
       flex: 1;
+      max-width: 220px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
     }
-    .photo-container img {
-      width: 150px;
-      height: 150px;
+
+    .photo-card h3 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1rem;
+      color: var(--accent2);
+      font-weight: 400;
+    }
+
+    .photo-card img {
+      width: 190px;
+      height: 190px;
       object-fit: cover;
-      border-radius: 10px;
-      border: 2px solid #48508a;
-      background-color: #252a59;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg2);
     }
-    .photo-container input[type="file"] {
-      margin-top: 10px;
+
+    .photo-card input[type="file"] {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      max-width: 190px;
     }
+
     .upload-msg {
-      margin-top: 6px;
-      font-size: 0.9rem;
-      height: 1.2em;
-      color: #c8d4e4;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      min-height: 1em;
     }
+
+    /* Chat */
+    #chat-wrap {
+      width: 100%;
+      max-width: 600px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      height: 280px;
+      margin-top: 16px;
+    }
+
+    .chat-box {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 14px;
+      font-size: 0.82rem;
+      line-height: 1.6;
+      color: var(--text);
+    }
+
+    .chat-box::-webkit-scrollbar { width: 4px; }
+    .chat-box::-webkit-scrollbar-track { background: transparent; }
+    .chat-box::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .chat-msg { margin-bottom: 4px; }
+    .chat-msg .msg-who { color: var(--accent); }
+    .chat-msg .msg-time { color: var(--text-dim); font-size: 0.72rem; margin-right: 4px; }
+
+    .chat-input-row {
+      display: flex;
+      border-top: 1px solid var(--border);
+    }
+
+    .chat-input-row input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      padding: 10px 14px;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.85rem;
+      outline: none;
+    }
+
+    .chat-input-row input::placeholder { color: var(--text-dim); }
+
+    .chat-input-row button {
+      background: transparent;
+      border: none;
+      border-left: 1px solid var(--border);
+      color: var(--accent);
+      padding: 10px 16px;
+      cursor: pointer;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+      transition: color 0.15s;
+    }
+    .chat-input-row button:hover { color: var(--accent2); }
+
+    /* ═══════════════════════════════
+       PAGE 2: MATCHING GAME
+    ═══════════════════════════════ */
+    #page-match {
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #match-locked {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      text-align: center;
+    }
+
+    #match-locked h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.5rem;
+      color: var(--accent2);
+    }
+
+    #match-locked p {
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      max-width: 280px;
+      line-height: 1.7;
+    }
+
+    #match-locked .users-needed {
+      display: flex;
+      gap: 24px;
+      margin-top: 8px;
+    }
+
+    .user-status-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 0.8rem;
+    }
+
+    #match-ui {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Scoreboard */
+    #match-scoreboard {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 24px;
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8rem;
+    }
+
+    .score-player {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .score-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1rem;
+      color: var(--accent2);
+    }
+
+    .score-val {
+      font-size: 1.4rem;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .score-sub { color: var(--text-dim); font-size: 0.72rem; }
+
+    .score-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    #match-timer {
+      font-size: 1.8rem;
+      font-family: 'DM Serif Display', serif;
+      color: var(--gold);
+    }
+
+    #match-status-text {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      letter-spacing: 0.06em;
+    }
+
+    #match-start-btn {
+      margin-top: 6px;
+    }
+
+    /* Grid */
+    #match-grid-wrap {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    #match-grid {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 8px;
+      width: 100%;
+      max-width: 720px;
+    }
+
+    .card {
+      aspect-ratio: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      transition: transform 0.12s, background 0.15s, border-color 0.15s;
+      user-select: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card .card-front, .card .card-back {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.2s;
+    }
+
+    .card .card-back { opacity: 1; font-size: 1.2rem; color: var(--border); }
+    .card .card-front { opacity: 0; }
+
+    .card.flipped .card-back { opacity: 0; }
+    .card.flipped .card-front { opacity: 1; }
+    .card.matched { background: var(--surface2); border-color: var(--success); cursor: default; }
+    .card.matched .card-front { color: var(--success); }
+    .card:hover:not(.matched):not(.flipped) { background: var(--surface2); transform: scale(1.04); }
+
+    .card.flip-jess { border-color: #a8b4e8; }
+    .card.flip-eesa { border-color: var(--gold); }
+
+    /* Game over overlay */
+    #match-result {
+      position: absolute;
+      inset: 0;
+      background: rgba(25, 31, 65, 0.9);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      z-index: 50;
+      text-align: center;
+    }
+
+    #match-result h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2rem;
+      color: var(--gold);
+    }
+
+    #match-result .result-detail {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      line-height: 2;
+    }
+
+    /* ═══════════════════════════════
+       PAGE 3: WATCH PARTY
+    ═══════════════════════════════ */
+    #page-watch {
+      flex-direction: row;
+      overflow: hidden;
+    }
+
+    #watch-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #watch-url-bar {
+      flex-shrink: 0;
+      display: flex;
+      gap: 10px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg2);
+      align-items: center;
+    }
+
+    #watch-url-bar .url-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      white-space: nowrap;
+    }
+
+    #watch-url-input {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 12px;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.82rem;
+      outline: none;
+    }
+    #watch-url-input:focus { border-color: var(--accent); }
+    #watch-url-input::placeholder { color: var(--text-dim); }
+
+    #watch-frame-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0d1029;
+      position: relative;
+    }
+
+    #watch-frame-wrap iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    #watch-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      color: var(--text-dim);
+      text-align: center;
+      padding: 20px;
+    }
+
+    #watch-placeholder .watch-icon {
+      font-size: 3rem;
+      opacity: 0.3;
+    }
+
+    #watch-placeholder p {
+      font-size: 0.85rem;
+      max-width: 260px;
+      line-height: 1.7;
+    }
+
+    /* Watch sidebar chat */
+    #watch-chat {
+      width: 280px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      border-left: 1px solid var(--border);
+      background: var(--bg2);
+    }
+
+    #watch-chat-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    /* ─ online pills in watch header ─ */
+    #watch-online {
+      padding: 6px 16px 8px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 8px;
+      font-size: 0.72rem;
+      flex-wrap: wrap;
+    }
+
   </style>
 </head>
 <body>
-  <!-- Passcode screen -->
-  <div class="screen" id="lock-screen">
-    <h2>Enter Passcode</h2>
-    <input class="input-field" type="password" id="passcode-input" placeholder="Passcode" />
-    <button class="btn" id="unlock-btn">Unlock</button>
-    <div id="error-msg"></div>
+
+<!-- ── LOCK SCREEN ── -->
+<div class="overlay-screen" id="lock-screen">
+  <h2>nd3rwiggin</h2>
+  <input class="inp" type="password" id="passcode-input" placeholder="passcode" />
+  <button class="btn primary" id="unlock-btn">enter</button>
+  <div id="error-msg" class="err"></div>
+</div>
+
+<!-- ── AUTH SCREEN ── -->
+<div class="overlay-screen" id="auth-screen" style="display:none;">
+  <h2>welcome back</h2>
+  <input class="inp" type="email" id="auth-email" placeholder="email" />
+  <input class="inp" type="password" id="auth-password" placeholder="password" />
+  <div style="display:flex;gap:10px;">
+    <button class="btn" id="login-btn">log in</button>
+    <button class="btn" id="signup-btn">sign up</button>
   </div>
+  <div id="auth-error" class="err"></div>
+</div>
 
-  <!-- Auth screen -->
-  <div class="screen" id="auth-screen" style="display:none;">
-    <h2>Log In / Sign Up</h2>
-    <input class="input-field" type="email" id="auth-email" placeholder="Email" />
-    <input class="input-field" type="password" id="auth-password" placeholder="Password" />
-    <button class="btn" id="login-btn">Log In</button>
-    <button class="btn" id="signup-btn">Sign Up</button>
-    <div id="auth-error"></div>
+<!-- ── NAV ── -->
+<nav id="nav" style="display:none;">
+  <span id="nav-logo">nd3rwiggin</span>
+  <div class="nav-tab active" data-page="home">home</div>
+  <div class="nav-tab" data-page="match" id="tab-match">
+    match
+    <span class="tab-lock" id="match-lock-badge">🔒</span>
   </div>
+  <div class="nav-tab" data-page="watch">watch party</div>
+  <div id="nav-users"></div>
+</nav>
 
-  <!-- Quote container fixed at top -->
-  <div id="quote-container">
-
-
-"“Out beyond ideas of wrongdoing and rightdoing there is a field. <br>
-I will meet you there.”"
-    <br>
-
-    <em> Rumi </em>
-  </div>
-
-  <!-- Main content -->
-  <div id="main-content">
-    <!-- Online users -->
-    <div id="online-users-container">
-      <strong>Online Users:</strong>
-      <ul id="online-users-list"></ul>
+<!-- ═══════════ PAGE: HOME ═══════════ -->
+<div class="page active" id="page-home">
+  <div id="quote-block">
+    <div class="quote-text">
+      "Out beyond ideas of wrongdoing and rightdoing,<br>there is a field. I will meet you there."
     </div>
+    <div class="quote-attr">— Rumi</div>
+  </div>
 
-    <!-- New photo upload & display section -->
-    <div id="photo-section">
-      <div class="photo-container">
-        <h3>Jess's Photo</h3>
-        <img id="jess-img" src="" alt="Jess's photo" />
-        <br />
-        <input type="file" id="jess-file" accept="image/*" />
-        <div id="jess-msg" class="upload-msg"></div>
-      </div>
-      <div class="photo-container">
-        <h3>Eesa's Photo</h3>
-        <img id="eesa-img" src="" alt="Eesa's photo" />
-        <br />
-        <input type="file" id="eesa-file" accept="image/*" />
-        <div id="eesa-msg" class="upload-msg"></div>
-      </div>
+  <div id="photo-section">
+    <div class="photo-card">
+      <h3>Jess</h3>
+      <img id="jess-img" src="" alt="Jess's photo" />
+      <input type="file" id="jess-file" accept="image/*" />
+      <div id="jess-msg" class="upload-msg"></div>
     </div>
-
-    <div id="chat-container">
-      <div id="chat-box"></div>
-      <div id="chat-input-container">
-        <input type="text" id="chat-input" placeholder="Type your message..." />
-        <button id="send-btn">Send</button>
-      </div>
+    <div class="photo-card">
+      <h3>Eesa</h3>
+      <img id="eesa-img" src="" alt="Eesa's photo" />
+      <input type="file" id="eesa-file" accept="image/*" />
+      <div id="eesa-msg" class="upload-msg"></div>
     </div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-    import {
-      getDatabase,
-      ref,
-      push,
-      onChildAdded,
-      query,
-      orderByChild,
-      endAt,
-      get,
-      remove,
-      onDisconnect,
-      set,
-      onValue
-    } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
-    import {
-      getAuth,
-      createUserWithEmailAndPassword,
-      signInWithEmailAndPassword,
-      onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+  <div id="chat-wrap">
+    <div class="chat-box" id="home-chat-box"></div>
+    <div class="chat-input-row">
+      <input type="text" id="home-chat-input" placeholder="say something…" />
+      <button id="home-send-btn">send</button>
+    </div>
+  </div>
+</div>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBUmJ9k5pS62TzIkRHswO2lJLnaeRIfGmE",
-      authDomain: "jess-chat-box.firebaseapp.com",
-      projectId: "jess-chat-box",
-      storageBucket: "jess-chat-box.appspot.com",
-      messagingSenderId: "414967828897",
-      appId: "1:414967828897:web:89045ed9bd4b3257c4bbe0"
-    };
+<!-- ═══════════ PAGE: MATCH ═══════════ -->
+<div class="page" id="page-match" style="position:relative;">
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const auth = getAuth(app);
-    const messagesRef = ref(db, "messages");
+  <!-- Locked state -->
+  <div id="match-locked">
+    <h2>matching game</h2>
+    <p>both jess & eesa need to be online to unlock this mode</p>
+    <div class="users-needed">
+      <div class="user-status-pill">
+        <span class="online-dot" id="jess-match-dot" style="background:#3a4270;box-shadow:none;"></span>
+        <span>jess</span>
+      </div>
+      <div class="user-status-pill">
+        <span class="online-dot" id="eesa-match-dot" style="background:#3a4270;box-shadow:none;"></span>
+        <span>eesa</span>
+      </div>
+    </div>
+  </div>
 
-    // Elements
-    const chatBox = document.getElementById("chat-box");
-    const chatInput = document.getElementById("chat-input");
-    const sendBtn = document.getElementById("send-btn");
+  <!-- Game UI -->
+  <div id="match-ui">
+    <div id="match-scoreboard">
+      <div class="score-player">
+        <div class="score-name">Jess</div>
+        <div class="score-val" id="score-jess">0</div>
+        <div class="score-sub" id="acc-jess">0% acc</div>
+      </div>
+      <div class="score-center">
+        <div id="match-timer">0:00</div>
+        <div id="match-status-text">waiting to start</div>
+        <button class="btn primary" id="match-start-btn" style="margin-top:6px;">start game</button>
+      </div>
+      <div class="score-player">
+        <div class="score-name">Eesa</div>
+        <div class="score-val" id="score-eesa">0</div>
+        <div class="score-sub" id="acc-eesa">0% acc</div>
+      </div>
+    </div>
+    <div id="match-grid-wrap">
+      <div id="match-grid"></div>
+    </div>
+  </div>
 
-    const lockScreen = document.getElementById("lock-screen");
-    const authScreen = document.getElementById("auth-screen");
-    const mainContent = document.getElementById("main-content");
+  <!-- Result overlay -->
+  <div id="match-result">
+    <h2 id="result-title">🎉 Jess wins!</h2>
+    <div class="result-detail" id="result-detail"></div>
+    <button class="btn primary" id="result-restart-btn">play again</button>
+  </div>
+</div>
 
-    const passcodeInput = document.getElementById("passcode-input");
-    const unlockBtn = document.getElementById("unlock-btn");
-    const errorMsg = document.getElementById("error-msg");
+<!-- ═══════════ PAGE: WATCH ═══════════ -->
+<div class="page" id="page-watch">
+  <div id="watch-main">
+    <div id="watch-url-bar">
+      <span class="url-label">YouTube</span>
+      <input type="text" id="watch-url-input" placeholder="paste a youtube link…" />
+      <button class="btn primary" id="watch-load-btn">load</button>
+    </div>
+    <div id="watch-frame-wrap">
+      <div id="watch-placeholder">
+        <div class="watch-icon">▶</div>
+        <p>paste a youtube link above and hit load — it'll sync for both of you</p>
+      </div>
+    </div>
+  </div>
+  <div id="watch-chat">
+    <div id="watch-chat-header">live chat</div>
+    <div id="watch-online"></div>
+    <div class="chat-box" id="watch-chat-box" style="flex:1;"></div>
+    <div class="chat-input-row">
+      <input type="text" id="watch-chat-input" placeholder="react…" />
+      <button id="watch-send-btn">send</button>
+    </div>
+  </div>
+</div>
 
-    const authEmail = document.getElementById("auth-email");
-    const authPassword = document.getElementById("auth-password");
-    const loginBtn = document.getElementById("login-btn");
-    const signupBtn = document.getElementById("signup-btn");
-    const authError = document.getElementById("auth-error");
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+  import {
+    getDatabase, ref, push, onChildAdded, query, orderByChild, endAt,
+    get, remove, onDisconnect, set, onValue, update
+  } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
+  import {
+    getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
 
-    const users = {
-      jess: "Jess",
-      eesa: "Eesa"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyBUmJ9k5pS62TzIkRHswO2lJLnaeRIfGmE",
+    authDomain: "jess-chat-box.firebaseapp.com",
+    projectId: "jess-chat-box",
+    storageBucket: "jess-chat-box.appspot.com",
+    messagingSenderId: "414967828897",
+    appId: "1:414967828897:web:89045ed9bd4b3257c4bbe0"
+  };
 
-    // Utility to check if two timestamps are on same day
-    function isSameDay(ts1, ts2) {
-      const d1 = new Date(ts1);
-      const d2 = new Date(ts2);
-      return d1.getFullYear() === d2.getFullYear() &&
-        d1.getMonth() === d2.getMonth() &&
-        d1.getDate() === d2.getDate();
-    }
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const auth = getAuth(app);
 
-    // Upload base64 image to Realtime Database
-    async function uploadImageAsBase64(file, userId) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = async function(event) {
-          const base64String = event.target.result;
-          const now = Date.now();
+  // ── DOM refs ──
+  const lockScreen = document.getElementById("lock-screen");
+  const authScreen = document.getElementById("auth-screen");
+  const navEl = document.getElementById("nav");
 
-          const photoRef = ref(db, "photos/" + userId);
+  let currentUser = null;
+  let currentUserLabel = null; // 'jess' or 'eesa'
+  let onlineUsersMap = {};  // uid -> email
 
-          // Check if user already uploaded today
-          get(photoRef).then(snapshot => {
-            const data = snapshot.val();
-            if (data && isSameDay(data.timestamp, now)) {
-              reject("You can only upload once per day.");
-            } else {
-              set(photoRef, {
-                imageBase64: base64String,
-                timestamp: now
-              }).then(() => {
-                resolve("Upload successful!");
-              }).catch(reject);
-            }
-          }).catch(reject);
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
+  // ─── LOCK ───
+  document.getElementById("unlock-btn").onclick = () => {
+    if (document.getElementById("passcode-input").value === "mochatimo") {
+      lockScreen.style.display = "none";
+      onAuthStateChanged(auth, user => {
+        if (user) { currentUser = user; bootApp(); }
+        else authScreen.style.display = "flex";
       });
+    } else {
+      document.getElementById("error-msg").textContent = "incorrect passcode.";
     }
+  };
+  document.getElementById("passcode-input").onkeydown = e => { if (e.key === "Enter") document.getElementById("unlock-btn").click(); };
 
-    // Show user's photo from database
-    function showImage(userId) {
-      const photoRef = ref(db, "photos/" + userId);
-      onValue(photoRef, (snapshot) => {
-        const data = snapshot.val();
-        const imgEl = document.getElementById(userId + "-img");
-        if (data && data.imageBase64) {
-          imgEl.src = data.imageBase64;
-        } else {
-          imgEl.src = "";
+  document.getElementById("login-btn").onclick = () => {
+    signInWithEmailAndPassword(auth, document.getElementById("auth-email").value, document.getElementById("auth-password").value)
+      .then(c => { authScreen.style.display = "none"; currentUser = c.user; bootApp(); })
+      .catch(e => document.getElementById("auth-error").textContent = e.message);
+  };
+  document.getElementById("signup-btn").onclick = () => {
+    createUserWithEmailAndPassword(auth, document.getElementById("auth-email").value, document.getElementById("auth-password").value)
+      .then(c => { authScreen.style.display = "none"; currentUser = c.user; bootApp(); })
+      .catch(e => document.getElementById("auth-error").textContent = e.message);
+  };
+
+  // ─── BOOT ───
+  function bootApp() {
+    navEl.style.display = "flex";
+    setupNav();
+    setupPresence();
+    setupPhotos();
+    setupHomeChat();
+    setupMatchGame();
+    setupWatchParty();
+  }
+
+  // ─── NAV ───
+  function setupNav() {
+    document.querySelectorAll(".nav-tab").forEach(tab => {
+      tab.onclick = () => {
+        document.querySelectorAll(".nav-tab").forEach(t => t.classList.remove("active"));
+        document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+        tab.classList.add("active");
+        document.getElementById("page-" + tab.dataset.page).classList.add("active");
+      };
+    });
+  }
+
+  // ─── PRESENCE ───
+  function setupPresence() {
+    const uid = currentUser.uid;
+    const email = currentUser.email;
+    const userRef = ref(db, 'presence/' + uid);
+    set(userRef, email);
+    onDisconnect(userRef).remove();
+
+    onValue(ref(db, 'presence/'), snap => {
+      onlineUsersMap = snap.val() || {};
+      updateNavUsers();
+      updateMatchLock();
+      updateWatchOnline();
+    });
+  }
+
+  function updateNavUsers() {
+    const el = document.getElementById("nav-users");
+    const emails = Object.values(onlineUsersMap);
+    el.innerHTML = emails.map(e =>
+      `<span><span class="online-dot"></span> ${e.split("@")[0]}</span>`
+    ).join("  ");
+  }
+
+  function bothOnline() {
+    const emails = Object.values(onlineUsersMap).map(e => e.toLowerCase());
+    return emails.some(e => e.includes("jess")) && emails.some(e => e.includes("eesa"));
+  }
+
+  function updateMatchLock() {
+    const locked = !bothOnline();
+    document.getElementById("match-locked").style.display = locked ? "flex" : "none";
+    document.getElementById("match-ui").style.display = locked ? "none" : "flex";
+    document.getElementById("match-lock-badge").style.display = locked ? "inline" : "none";
+
+    const emails = Object.values(onlineUsersMap).map(e => e.toLowerCase());
+    const jessOn = emails.some(e => e.includes("jess"));
+    const eesaOn = emails.some(e => e.includes("eesa"));
+
+    const dotStyle = (on) => on
+      ? "background:var(--success);box-shadow:0 0 6px var(--success);"
+      : "background:#3a4270;box-shadow:none;";
+    document.getElementById("jess-match-dot").style.cssText = dotStyle(jessOn);
+    document.getElementById("eesa-match-dot").style.cssText = dotStyle(eesaOn);
+  }
+
+  function updateWatchOnline() {
+    const el = document.getElementById("watch-online");
+    const emails = Object.values(onlineUsersMap);
+    el.innerHTML = emails.map(e =>
+      `<span class="user-status-pill" style="font-size:0.7rem;padding:3px 10px;"><span class="online-dot"></span>${e.split("@")[0]}</span>`
+    ).join("");
+  }
+
+  // ─── PHOTOS ───
+  function isSameDay(ts1, ts2) {
+    const a = new Date(ts1), b = new Date(ts2);
+    return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  }
+
+  function setupPhotos() {
+    ["jess", "eesa"].forEach(uid => {
+      // Live update image
+      onValue(ref(db, "photos/" + uid), snap => {
+        const d = snap.val();
+        const img = document.getElementById(uid + "-img");
+        img.src = d && d.imageBase64 ? d.imageBase64 : "";
+      });
+
+      // File upload
+      document.getElementById(uid + "-file").addEventListener("change", async e => {
+        const file = e.target.files[0]; if (!file) return;
+        const msg = document.getElementById(uid + "-msg");
+        msg.textContent = "uploading…";
+
+        const reader = new FileReader();
+        reader.onload = async ev => {
+          const b64 = ev.target.result;
+          const now = Date.now();
+          const photoRef = ref(db, "photos/" + uid);
+          const snap = await get(photoRef);
+          const d = snap.val();
+          if (d && isSameDay(d.timestamp, now)) {
+            msg.textContent = "one upload per day";
+          } else {
+            await set(photoRef, { imageBase64: b64, timestamp: now });
+            msg.textContent = "uploaded!";
+          }
+        };
+        reader.readAsDataURL(file);
+        e.target.value = "";
+      });
+    });
+
+    // cleanup old >7 days
+    get(ref(db, "photos/")).then(snap => {
+      const all = snap.val(); if (!all) return;
+      const now = Date.now();
+      Object.entries(all).forEach(([id, d]) => {
+        if (now - d.timestamp > 7 * 86400000) remove(ref(db, "photos/" + id));
+      });
+    });
+  }
+
+  // ─── CHAT helper ───
+  function setupChatBox(boxId, inputId, sendBtnId, dbPath) {
+    const box = document.getElementById(boxId);
+    const input = document.getElementById(inputId);
+    const btn = document.getElementById(sendBtnId);
+    const msgsRef = ref(db, dbPath);
+
+    onChildAdded(msgsRef, snap => {
+      const m = snap.val();
+      const div = document.createElement("div");
+      div.className = "chat-msg";
+      const t = new Date(m.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      div.innerHTML = `<span class="msg-time">${t}</span><span class="msg-who">${m.name}</span>: ${escapeHtml(m.text)}`;
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+    });
+
+    const send = () => {
+      const text = input.value.trim(); if (!text) return;
+      push(msgsRef, { name: currentUser.email.split("@")[0], text, timestamp: Date.now() });
+      input.value = "";
+    };
+
+    btn.onclick = send;
+    input.onkeydown = e => { if (e.key === "Enter") send(); };
+
+    // cleanup old messages >30 days
+    const q = query(msgsRef, orderByChild("timestamp"), endAt(Date.now() - 30 * 86400000));
+    get(q).then(snap => snap.forEach(c => remove(ref(db, dbPath + "/" + c.key))));
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  // ─── HOME CHAT ───
+  function setupHomeChat() {
+    setupChatBox("home-chat-box", "home-chat-input", "home-send-btn", "messages");
+  }
+
+  // ─── WATCH PARTY ───
+  function setupWatchParty() {
+    setupChatBox("watch-chat-box", "watch-chat-input", "watch-send-btn", "watchMessages");
+
+    const urlInput = document.getElementById("watch-url-input");
+    const loadBtn = document.getElementById("watch-load-btn");
+    const frameWrap = document.getElementById("watch-frame-wrap");
+    const videoRef = ref(db, "watchParty/videoId");
+
+    const loadVideo = (videoId) => {
+      if (!videoId) return;
+      document.getElementById("watch-placeholder").style.display = "none";
+      frameWrap.innerHTML = `<iframe
+        src="https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen></iframe>`;
+    };
+
+    // Sync from DB
+    onValue(videoRef, snap => {
+      const vid = snap.val();
+      if (vid) loadVideo(vid);
+    });
+
+    loadBtn.onclick = () => {
+      const url = urlInput.value.trim();
+      const vid = extractYouTubeId(url);
+      if (!vid) { alert("couldn't find a youtube video id in that link"); return; }
+      set(videoRef, vid);
+      urlInput.value = "";
+    };
+
+    urlInput.onkeydown = e => { if (e.key === "Enter") loadBtn.click(); };
+  }
+
+  function extractYouTubeId(url) {
+    const patterns = [
+      /youtube\.com\/watch\?v=([^&]+)/,
+      /youtu\.be\/([^?&]+)/,
+      /youtube\.com\/embed\/([^?&]+)/,
+      /youtube\.com\/shorts\/([^?&]+)/
+    ];
+    for (const p of patterns) {
+      const m = url.match(p);
+      if (m) return m[1];
+    }
+    return null;
+  }
+
+  // ─── MATCHING GAME ───
+  const EMOJIS = ["🌸","🌙","⭐","🌊","🔥","🌈","🌿","🦋","🌺","🍀","🌻","🌝","🎯","🎨","🎭","🎪","🧩","🦄","🍉","🐚","🌵","🍄","🐠","🦊","🎸","🌀","🏔️","🐋","🌠","🦅","🎋","🐉"];
+
+  let gameState = null;
+  let timerInterval = null;
+
+  function setupMatchGame() {
+    document.getElementById("match-start-btn").onclick = startMatchGame;
+    document.getElementById("result-restart-btn").onclick = startMatchGame;
+
+    // Listen for game state from DB
+    onValue(ref(db, "matchGame/state"), snap => {
+      const s = snap.val();
+      if (!s) return;
+      syncGameState(s);
+    });
+
+    // Listen for card flips from other user
+    onValue(ref(db, "matchGame/flips"), snap => {
+      const flips = snap.val();
+      if (!flips) return;
+      Object.entries(flips).forEach(([uid, flip]) => {
+        if (uid === currentUser.uid) return;
+        // animate the flip for the other user
+        const card = document.querySelector(`.card[data-idx="${flip.idx}"]`);
+        if (card && !card.classList.contains("matched")) {
+          card.classList.add(flip.who === "jess" ? "flip-jess" : "flip-eesa");
         }
       });
+    });
+  }
+
+  function whoAmI() {
+    const email = currentUser.email.toLowerCase();
+    if (email.includes("jess")) return "jess";
+    if (email.includes("eesa")) return "eesa";
+    return "player";
+  }
+
+  function startMatchGame() {
+    // Generate shuffled deck
+    const count = 32; // 32 pairs = 64 cards
+    const chosen = EMOJIS.slice(0, count);
+    const deck = shuffle([...chosen, ...chosen]);
+    const state = {
+      deck,
+      flipped: [],       // indices currently face-up (unmatched)
+      matched: [],       // indices matched
+      scores: { jess: 0, eesa: 0 },
+      attempts: { jess: 0, eesa: 0 },
+      started: Date.now(),
+      finished: false,
+      turn: "jess"
+    };
+    set(ref(db, "matchGame/state"), state);
+    set(ref(db, "matchGame/flips"), null);
+    document.getElementById("match-result").style.display = "none";
+    document.getElementById("match-start-btn").style.display = "none";
+    document.getElementById("match-status-text").textContent = "game on!";
+  }
+
+  function syncGameState(s) {
+    gameState = s;
+    renderGrid(s);
+    updateScoreboard(s);
+
+    if (s.finished) {
+      endGame(s);
     }
 
-    // Remove photos older than 7 days
-    function cleanupOldPhotos() {
-      const photosRef = ref(db, "photos/");
-      get(photosRef).then(snapshot => {
-        const allPhotos = snapshot.val();
-        if (!allPhotos) return;
-
-        const now = Date.now();
-        Object.entries(allPhotos).forEach(([userId, photoData]) => {
-          if (now - photoData.timestamp > 7 * 24 * 60 * 60 * 1000) {
-            remove(ref(db, "photos/" + userId));
-          }
-        });
-      });
+    // Timer
+    if (timerInterval) clearInterval(timerInterval);
+    if (s.started && !s.finished) {
+      timerInterval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - s.started) / 1000);
+        const m = Math.floor(elapsed / 60);
+        const sec = elapsed % 60;
+        document.getElementById("match-timer").textContent = `${m}:${sec.toString().padStart(2, "0")}`;
+      }, 500);
     }
+  }
 
-    unlockBtn.onclick = () => {
-      if (passcodeInput.value === "mochatimo") {
-        lockScreen.style.display = "none";
-        onAuthStateChanged(auth, (user) => {
-          if (user) {
-            startApp(user);
-          } else {
-            authScreen.style.display = "flex";
-          }
+  function renderGrid(s) {
+    const grid = document.getElementById("match-grid");
+    grid.innerHTML = "";
+    s.deck.forEach((emoji, idx) => {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.dataset.idx = idx;
+
+      const front = document.createElement("div");
+      front.className = "card-front";
+      front.textContent = emoji;
+
+      const back = document.createElement("div");
+      back.className = "card-back";
+      back.textContent = "✦";
+
+      card.appendChild(front);
+      card.appendChild(back);
+
+      const isMatched = s.matched && s.matched.includes(idx);
+      const isFlipped = s.flipped && s.flipped.includes(idx);
+
+      if (isMatched) { card.classList.add("matched", "flipped"); }
+      else if (isFlipped) { card.classList.add("flipped"); }
+
+      if (!isMatched && !s.finished) {
+        card.onclick = () => handleCardClick(idx);
+      }
+
+      grid.appendChild(card);
+    });
+  }
+
+  async function handleCardClick(idx) {
+    if (!gameState || gameState.finished) return;
+    const s = gameState;
+    const me = whoAmI();
+
+    // Don't flip already matched or already flipped
+    if (s.matched && s.matched.includes(idx)) return;
+    if (s.flipped && s.flipped.includes(idx)) return;
+
+    // Record flip for visual sync
+    set(ref(db, `matchGame/flips/${currentUser.uid}`), { idx, who: me, ts: Date.now() });
+
+    const newFlipped = [...(s.flipped || []), idx];
+
+    if (newFlipped.length === 1) {
+      // First flip
+      await update(ref(db, "matchGame/state"), { flipped: newFlipped });
+    } else if (newFlipped.length === 2) {
+      // Second flip — check match
+      const [a, b] = newFlipped;
+      const newAttempts = { ...s.attempts, [me]: (s.attempts[me] || 0) + 1 };
+
+      if (s.deck[a] === s.deck[b]) {
+        // Match!
+        const newMatched = [...(s.matched || []), a, b];
+        const newScores = { ...s.scores, [me]: (s.scores[me] || 0) + 1 };
+        const allMatched = newMatched.length === s.deck.length;
+        await update(ref(db, "matchGame/state"), {
+          flipped: [],
+          matched: newMatched,
+          scores: newScores,
+          attempts: newAttempts,
+          finished: allMatched
         });
+        set(ref(db, `matchGame/flips`), null);
       } else {
-        errorMsg.textContent = "Incorrect passcode.";
-      }
-    };
-
-    loginBtn.onclick = () => {
-      signInWithEmailAndPassword(auth, authEmail.value, authPassword.value)
-        .then((userCredential) => {
-          authScreen.style.display = "none";
-          startApp(userCredential.user);
-        })
-        .catch((err) => {
-          authError.textContent = err.message;
-        });
-    };
-
-    signupBtn.onclick = () => {
-      createUserWithEmailAndPassword(auth, authEmail.value, authPassword.value)
-        .then((userCredential) => {
-          authScreen.style.display = "none";
-          startApp(userCredential.user);
-        })
-        .catch((err) => {
-          authError.textContent = err.message;
-        });
-    };
-
-    function startApp(user) {
-      mainContent.style.display = "flex";
-
-      const userId = user.uid;
-      const email = user.email;
-      const userRef = ref(db, 'presence/' + userId);
-
-      set(userRef, email);
-      onDisconnect(userRef).remove();
-
-      const presenceRef = ref(db, 'presence/');
-      onValue(presenceRef, (snapshot) => {
-        const usersOnline = snapshot.val() || {};
-        const onlineUsersList = document.getElementById('online-users-list');
-        onlineUsersList.innerHTML = '';
-        Object.values(usersOnline).forEach((userEmail) => {
-          const li = document.createElement('li');
-          li.textContent = userEmail;
-          onlineUsersList.appendChild(li);
-        });
-      });
-
-      // Show images initially & on change
-      Object.keys(users).forEach(userIdKey => showImage(userIdKey));
-
-      // Setup file input listeners for uploading
-      Object.keys(users).forEach(userIdKey => {
-        const fileInput = document.getElementById(userIdKey + "-file");
-        const msgDiv = document.getElementById(userIdKey + "-msg");
-
-        fileInput.addEventListener("change", async (e) => {
-          const file = e.target.files[0];
-          if (!file) return;
-
-          msgDiv.textContent = "Uploading...";
-          try {
-            const result = await uploadImageAsBase64(file, userIdKey);
-            msgDiv.textContent = result;
-          } catch (err) {
-            msgDiv.textContent = err;
+        // No match — show briefly then flip back
+        await update(ref(db, "matchGame/state"), { flipped: newFlipped, attempts: newAttempts });
+        setTimeout(async () => {
+          const snap = await get(ref(db, "matchGame/state"));
+          const cur = snap.val();
+          if (cur && JSON.stringify(cur.flipped) === JSON.stringify(newFlipped)) {
+            await update(ref(db, "matchGame/state"), { flipped: [] });
+            set(ref(db, `matchGame/flips`), null);
           }
-          fileInput.value = "";
-        });
-      });
-
-      // Load and listen for new chat messages
-      onChildAdded(messagesRef, (data) => {
-        const msg = data.val();
-        const time = new Date(msg.timestamp).toLocaleTimeString();
-        const div = document.createElement("div");
-        div.textContent = `[${time}] ${msg.name}: ${msg.text}`;
-        chatBox.appendChild(div);
-        chatBox.scrollTop = chatBox.scrollHeight;
-      });
-
-      sendBtn.onclick = () => sendMessage(user.email);
-      chatInput.onkeydown = (e) => {
-        if (e.key === "Enter") sendMessage(user.email);
-      };
-
-      async function sendMessage(name) {
-        const text = chatInput.value.trim();
-        if (!text) return;
-
-        const message = {
-          name,
-          text,
-          timestamp: Date.now()
-        };
-
-        await push(messagesRef, message);
-        chatInput.value = "";
+        }, 900);
       }
-
-      async function deleteOldMessages() {
-        const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
-        const oldQuery = query(messagesRef, orderByChild("timestamp"), endAt(thirtyDaysAgo));
-        const snapshot = await get(oldQuery);
-        snapshot.forEach(child => {
-          remove(ref(db, "messages/" + child.key));
-        });
-      }
-
-      deleteOldMessages();
-
-      // Clean up old photos >7 days on every app start
-      cleanupOldPhotos();
     }
-  </script>
-</body>
-</html>
+  }
 
-}
+  function updateScoreboard(s) {
+    document.getElementById("score-jess").textContent = s.scores?.jess || 0;
+    document.getElementById("score-eesa").textContent = s.scores?.eesa || 0;
+
+    const acc = (who) => {
+      const att = s.attempts?.[who] || 0;
+      const sc = s.scores?.[who] || 0;
+      return att === 0 ? "0% acc" : Math.round((sc / att) * 100) + "% acc";
+    };
+    document.getElementById("acc-jess").textContent = acc("jess");
+    document.getElementById("acc-eesa").textContent = acc("eesa");
+  }
+
+  function endGame(s) {
+    if (timerInterval) clearInterval(timerInterval);
+    const elapsed = Math.floor((Date.now() - s.started) / 1000);
+    const m = Math.floor(elapsed / 60);
+    const sec = elapsed % 60;
+
+    const jScore = s.scores?.jess || 0;
+    const eScore = s.scores?.eesa || 0;
+    let winner = jScore > eScore ? "jess" : eScore > jScore ? "eesa" : null;
+
+    const resultEl = document.getElementById("match-result");
+    const titleEl = document.getElementById("result-title");
+    const detailEl = document.getElementById("result-detail");
+
+    if (winner) {
+      titleEl.textContent = `🎉 ${winner === "jess" ? "Jess" : "Eesa"} wins!`;
+    } else {
+      titleEl.textContent = "🤝 it's a tie!";
+    }
+
+    const acc = (who, sc, att) => att === 0 ? "0%" : Math.round((sc / att) * 100) + "%";
+    detailEl.innerHTML = `
+      time: ${m}:${sec.toString().padStart(2, "0")}<br>
+      jess — ${jScore} matches · ${acc("jess", jScore, s.attempts?.jess || 0)} accuracy<br>
+      eesa — ${eScore} matches · ${acc("eesa", eScore, s.attempts?.eesa || 0)} accuracy
+    `;
+
+    resultEl.style.display = "flex";
+    document.getElementById("match-start-btn").style.display = "block";
+    document.getElementById("match-start-btn").textContent = "play again";
+    document.getElementById("match-status-text").textContent = "game over";
+  }
+
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
 </script>
-
 </body>
 </html>
