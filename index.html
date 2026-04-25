@@ -226,7 +226,7 @@
     .photo-card img {
       width: 190px;
       height: 190px;
-      object-fit: contain;
+      object-fit: cover;
       border-radius: 8px;
       border: 1px solid var(--border);
       background: var(--bg2);
@@ -552,11 +552,17 @@
       justify-content: center;
       background: #0d1029;
       position: relative;
+      overflow: hidden;
     }
 
-    #watch-frame-wrap iframe {
-      width: 100%;
-      height: 100%;
+    /* YouTube player fills the frame */
+    #yt-player-container {
+      position: absolute;
+      inset: 0;
+    }
+    #yt-player-container iframe {
+      width: 100% !important;
+      height: 100% !important;
       border: none;
     }
 
@@ -568,6 +574,7 @@
       color: var(--text-dim);
       text-align: center;
       padding: 20px;
+      z-index: 1;
     }
 
     #watch-placeholder .watch-icon {
@@ -579,6 +586,47 @@
       font-size: 0.85rem;
       max-width: 260px;
       line-height: 1.7;
+    }
+
+    /* Controls bar below the video */
+    #watch-controls {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+    }
+
+    .watch-ctrl-btn {
+      padding: 7px 18px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.82rem;
+      letter-spacing: 0.04em;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .watch-ctrl-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .watch-ctrl-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    #ctrl-status {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      letter-spacing: 0.04em;
+      margin-left: 4px;
+    }
+
+    #ctrl-who {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      margin-left: auto;
+      font-style: italic;
     }
 
     /* Watch sidebar chat */
@@ -741,8 +789,17 @@
     <div id="watch-frame-wrap">
       <div id="watch-placeholder">
         <div class="watch-icon">▶</div>
-        <p>paste a youtube link above and hit load — it'll sync for both of you</p>
+        <p>paste a youtube link above and hit load — it syncs for both of you</p>
       </div>
+      <!-- YouTube player mounts here -->
+      <div id="yt-player-container" style="display:none;width:100%;height:100%;"></div>
+    </div>
+    <!-- Sync controls bar -->
+    <div id="watch-controls" style="display:none;">
+      <button class="watch-ctrl-btn" id="ctrl-play-pause">▶ play</button>
+      <button class="watch-ctrl-btn" id="ctrl-sync">⟳ sync me</button>
+      <span id="ctrl-status"></span>
+      <span id="ctrl-who"></span>
     </div>
   </div>
   <div id="watch-chat">
@@ -981,38 +1038,221 @@
   }
 
   // ─── WATCH PARTY ───
+  let ytPlayer = null;           // YT.Player instance
+  let ytReady = false;           // IFrame API loaded
+  let ytCurrentVideoId = null;   // which video is loaded
+  let ignoringStateChange = false; // prevent echo loops
+  let watchPartyRef = null;
+
+  // Load YouTube IFrame API once
+  function loadYTApi() {
+    return new Promise(resolve => {
+      if (window.YT && window.YT.Player) { resolve(); return; }
+      window.onYouTubeIframeAPIReady = resolve;
+      const tag = document.createElement("script");
+      tag.src = "https://www.youtube.com/iframe_api";
+      document.head.appendChild(tag);
+    });
+  }
+
   function setupWatchParty() {
     setupChatBox("watch-chat-box", "watch-chat-input", "watch-send-btn", "watchMessages");
 
-    const urlInput = document.getElementById("watch-url-input");
-    const loadBtn = document.getElementById("watch-load-btn");
-    const frameWrap = document.getElementById("watch-frame-wrap");
-    const videoRef = ref(db, "watchParty/videoId");
+    const urlInput  = document.getElementById("watch-url-input");
+    const loadBtn   = document.getElementById("watch-load-btn");
+    const ctrlBtn   = document.getElementById("ctrl-play-pause");
+    const syncBtn   = document.getElementById("ctrl-sync");
+    const ctrlStatus = document.getElementById("ctrl-status");
+    const ctrlWho   = document.getElementById("ctrl-who");
+    const controls  = document.getElementById("watch-controls");
+    watchPartyRef   = ref(db, "watchParty");
 
-    const loadVideo = (videoId) => {
-      if (!videoId) return;
-      document.getElementById("watch-placeholder").style.display = "none";
-      frameWrap.innerHTML = `<iframe
-        src="https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen></iframe>`;
-    };
+    // ── Load YouTube API, then listen for DB state ──
+    loadYTApi().then(() => {
+      ytReady = true;
 
-    // Sync from DB
-    onValue(videoRef, snap => {
-      const vid = snap.val();
-      if (vid) loadVideo(vid);
+      // Listen for party state changes from Firebase
+      onValue(watchPartyRef, snap => {
+        const party = snap.val();
+        if (!party || !party.videoId) return;
+
+        // Show controls bar
+        controls.style.display = "flex";
+
+        // If video changed, create/swap the player
+        if (party.videoId !== ytCurrentVideoId) {
+          ytCurrentVideoId = party.videoId;
+          document.getElementById("watch-placeholder").style.display = "none";
+          document.getElementById("yt-player-container").style.display = "block";
+          createPlayer(party.videoId, party);
+          return; // onReady will apply state
+        }
+
+        // Same video — apply play/pause state
+        if (ytPlayer && typeof ytPlayer.getPlayerState === "function") {
+          applyPartyState(party);
+        }
+
+        // Update UI
+        updateCtrlUI(party, ctrlBtn, ctrlStatus, ctrlWho);
+      });
     });
 
+    // ── Load button ──
     loadBtn.onclick = () => {
       const url = urlInput.value.trim();
       const vid = extractYouTubeId(url);
       if (!vid) { alert("couldn't find a youtube video id in that link"); return; }
-      set(videoRef, vid);
+      // Writing a new video always starts paused at 0 so both clients sync cleanly
+      set(watchPartyRef, {
+        videoId: vid,
+        state: "paused",
+        pausedAt: 0,
+        startedAt: null,
+        triggeredBy: currentUser.email.split("@")[0]
+      });
       urlInput.value = "";
     };
-
     urlInput.onkeydown = e => { if (e.key === "Enter") loadBtn.click(); };
+
+    // ── Custom play/pause button ──
+    ctrlBtn.onclick = () => {
+      if (!ytPlayer || !ytCurrentVideoId) return;
+      get(watchPartyRef).then(snap => {
+        const party = snap.val() || {};
+        const name = currentUser.email.split("@")[0];
+        if (party.state === "playing") {
+          // Pause
+          const pos = ytPlayer.getCurrentTime();
+          set(watchPartyRef, {
+            videoId: ytCurrentVideoId,
+            state: "paused",
+            pausedAt: pos,
+            startedAt: null,
+            triggeredBy: name
+          });
+        } else {
+          // Play from current position
+          const pos = ytPlayer.getCurrentTime();
+          set(watchPartyRef, {
+            videoId: ytCurrentVideoId,
+            state: "playing",
+            startedAt: Date.now() - pos * 1000,
+            pausedAt: null,
+            triggeredBy: name
+          });
+        }
+      });
+    };
+
+    // ── Sync me button — jumps this client to the correct position ──
+    syncBtn.onclick = () => {
+      get(watchPartyRef).then(snap => {
+        const party = snap.val();
+        if (!party || !ytPlayer) return;
+        ignoringStateChange = true;
+        if (party.state === "playing") {
+          const pos = (Date.now() - party.startedAt) / 1000;
+          ytPlayer.seekTo(pos, true);
+          ytPlayer.playVideo();
+        } else {
+          ytPlayer.seekTo(party.pausedAt || 0, true);
+          ytPlayer.pauseVideo();
+        }
+        setTimeout(() => { ignoringStateChange = false; }, 1500);
+        ctrlStatus.textContent = "synced!";
+        setTimeout(() => { ctrlStatus.textContent = ""; }, 2000);
+      });
+    };
+  }
+
+  function createPlayer(videoId, initialParty) {
+    // Destroy existing player if any
+    if (ytPlayer) {
+      try { ytPlayer.destroy(); } catch(e) {}
+      ytPlayer = null;
+    }
+
+    const container = document.getElementById("yt-player-container");
+    container.innerHTML = "";
+    const div = document.createElement("div");
+    div.id = "yt-player-div";
+    container.appendChild(div);
+
+    ytPlayer = new YT.Player("yt-player-div", {
+      videoId,
+      playerVars: { rel: 0, modestbranding: 1, iv_load_policy: 3 },
+      events: {
+        onReady: () => {
+          applyPartyState(initialParty);
+          updateCtrlUI(initialParty,
+            document.getElementById("ctrl-play-pause"),
+            document.getElementById("ctrl-status"),
+            document.getElementById("ctrl-who")
+          );
+        },
+        onStateChange: onYTStateChange
+      }
+    });
+  }
+
+  function applyPartyState(party) {
+    if (!ytPlayer || typeof ytPlayer.seekTo !== "function") return;
+    ignoringStateChange = true;
+
+    if (party.state === "playing") {
+      const pos = (Date.now() - party.startedAt) / 1000;
+      ytPlayer.seekTo(pos, true);
+      ytPlayer.playVideo();
+    } else {
+      ytPlayer.seekTo(party.pausedAt || 0, true);
+      ytPlayer.pauseVideo();
+    }
+
+    setTimeout(() => { ignoringStateChange = false; }, 1500);
+  }
+
+  function onYTStateChange(event) {
+    // YT.PlayerState: PLAYING=1, PAUSED=2, ENDED=0, BUFFERING=3
+    if (ignoringStateChange || !watchPartyRef || !ytCurrentVideoId) return;
+
+    const name = currentUser.email.split("@")[0];
+
+    if (event.data === YT.PlayerState.PLAYING) {
+      const pos = ytPlayer.getCurrentTime();
+      set(watchPartyRef, {
+        videoId: ytCurrentVideoId,
+        state: "playing",
+        startedAt: Date.now() - pos * 1000,
+        pausedAt: null,
+        triggeredBy: name
+      });
+    } else if (event.data === YT.PlayerState.PAUSED) {
+      const pos = ytPlayer.getCurrentTime();
+      set(watchPartyRef, {
+        videoId: ytCurrentVideoId,
+        state: "paused",
+        pausedAt: pos,
+        startedAt: null,
+        triggeredBy: name
+      });
+    }
+  }
+
+  function updateCtrlUI(party, btn, statusEl, whoEl) {
+    if (!party) return;
+    if (party.state === "playing") {
+      btn.textContent = "⏸ pause";
+      btn.classList.add("active");
+      statusEl.textContent = "playing";
+    } else {
+      btn.textContent = "▶ play";
+      btn.classList.remove("active");
+      statusEl.textContent = "paused";
+    }
+    if (party.triggeredBy) {
+      whoEl.textContent = `last action by ${party.triggeredBy}`;
+    }
   }
 
   function extractYouTubeId(url) {
