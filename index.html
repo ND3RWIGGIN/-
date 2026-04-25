@@ -847,7 +847,7 @@
 
   // ─── LOCK ───
   document.getElementById("unlock-btn").onclick = () => {
-    if (document.getElementById("passcode-input").value === "mochatimo") {
+    if (document.getElementById("passcode-input").value === "112906") {
       lockScreen.style.display = "none";
       onAuthStateChanged(auth, user => {
         if (user) { currentUser = user; bootApp(); }
