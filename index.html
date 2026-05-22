@@ -169,28 +169,112 @@
       padding: 0 20px 40px;
     }
 
-    #quote-block {
+    /* ── QUOTE CARDS ── */
+    #quote-section {
+      display: flex;
+      gap: 36px;
+      margin: 24px 0 8px;
       width: 100%;
       max-width: 600px;
-      text-align: center;
-      padding: 32px 20px 24px;
-      flex-shrink: 0;
+      justify-content: center;
     }
 
-    #quote-block .quote-text {
+    .quote-card {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .quote-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .quote-card-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1rem;
+      color: var(--accent2);
+      font-weight: 400;
+    }
+
+    .quote-card-date {
+      font-size: 0.68rem;
+      color: var(--text-dim);
+      letter-spacing: 0.06em;
+    }
+
+    .quote-card-text {
       font-family: 'DM Serif Display', serif;
       font-style: italic;
-      font-size: 1.25rem;
-      line-height: 1.7;
-      color: var(--accent2);
+      font-size: 0.95rem;
+      line-height: 1.65;
+      color: var(--text);
+      min-height: 48px;
+      word-break: break-word;
     }
 
-    #quote-block .quote-attr {
-      margin-top: 10px;
-      font-size: 0.75rem;
-      letter-spacing: 0.1em;
+    .quote-card-text.empty {
       color: var(--text-dim);
-      text-transform: uppercase;
+      font-style: normal;
+      font-size: 0.8rem;
+      font-family: 'DM Mono', monospace;
+    }
+
+    .quote-card-attr {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      letter-spacing: 0.08em;
+    }
+
+    .quote-card-input-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 2px;
+    }
+
+    .quote-card-input-row textarea {
+      flex: 1;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.78rem;
+      padding: 7px 10px;
+      outline: none;
+      resize: none;
+      height: 52px;
+      line-height: 1.5;
+      transition: border-color 0.15s;
+    }
+    .quote-card-input-row textarea:focus { border-color: var(--accent); }
+    .quote-card-input-row textarea::placeholder { color: var(--text-dim); }
+
+    .quote-card-input-row button {
+      padding: 0 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--accent);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+      align-self: stretch;
+    }
+    .quote-card-input-row button:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    .quote-card .upload-msg {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      min-height: 1em;
     }
 
     /* Photos */
@@ -555,7 +639,6 @@
       overflow: hidden;
     }
 
-    /* YouTube player fills the frame */
     #yt-player-container {
       position: absolute;
       inset: 0;
@@ -588,7 +671,6 @@
       line-height: 1.7;
     }
 
-    /* Controls bar below the video */
     #watch-controls {
       flex-shrink: 0;
       display: flex;
@@ -629,7 +711,6 @@
       font-style: italic;
     }
 
-    /* Watch sidebar chat */
     #watch-chat {
       width: 280px;
       flex-shrink: 0;
@@ -648,7 +729,6 @@
       color: var(--text-dim);
     }
 
-    /* ─ online pills in watch header ─ */
     #watch-online {
       padding: 6px 16px 8px;
       border-bottom: 1px solid var(--border);
@@ -657,7 +737,6 @@
       font-size: 0.72rem;
       flex-wrap: wrap;
     }
-
   </style>
 </head>
 <body>
@@ -696,11 +775,36 @@
 
 <!-- ═══════════ PAGE: HOME ═══════════ -->
 <div class="page active" id="page-home">
-  <div id="quote-block">
-    <div class="quote-text">
-      "I love you Jess :)"
+
+  <!-- Quote cards -->
+  <div id="quote-section">
+    <div class="quote-card" id="quote-card-jess">
+      <div class="quote-card-header">
+        <span class="quote-card-name">Jess</span>
+        <span class="quote-card-date" id="quote-date-jess"></span>
+      </div>
+      <div class="quote-card-text empty" id="quote-text-jess">no quote yet today</div>
+      <div class="quote-card-attr" id="quote-attr-jess"></div>
+      <div class="quote-card-input-row" id="quote-input-row-jess" style="display:none;">
+        <textarea id="quote-textarea-jess" placeholder="your quote for today…"></textarea>
+        <button id="quote-submit-jess">post</button>
+      </div>
+      <div class="upload-msg" id="quote-msg-jess"></div>
     </div>
-    <div class="quote-attr">— ND3R, J13</div>
+
+    <div class="quote-card" id="quote-card-eesa">
+      <div class="quote-card-header">
+        <span class="quote-card-name">Eesa</span>
+        <span class="quote-card-date" id="quote-date-eesa"></span>
+      </div>
+      <div class="quote-card-text empty" id="quote-text-eesa">no quote yet today</div>
+      <div class="quote-card-attr" id="quote-attr-eesa"></div>
+      <div class="quote-card-input-row" id="quote-input-row-eesa" style="display:none;">
+        <textarea id="quote-textarea-eesa" placeholder="your quote for today…"></textarea>
+        <button id="quote-submit-eesa">post</button>
+      </div>
+      <div class="upload-msg" id="quote-msg-eesa"></div>
+    </div>
   </div>
 
   <div id="photo-section">
@@ -730,7 +834,6 @@
 <!-- ═══════════ PAGE: MATCH ═══════════ -->
 <div class="page" id="page-match" style="position:relative;">
 
-  <!-- Locked state -->
   <div id="match-locked">
     <h2>matching game</h2>
     <p>both jess & eesa need to be online to unlock this mode</p>
@@ -746,7 +849,6 @@
     </div>
   </div>
 
-  <!-- Game UI -->
   <div id="match-ui">
     <div id="match-scoreboard">
       <div class="score-player">
@@ -770,7 +872,6 @@
     </div>
   </div>
 
-  <!-- Result overlay -->
   <div id="match-result">
     <h2 id="result-title">🎉 Jess wins!</h2>
     <div class="result-detail" id="result-detail"></div>
@@ -791,10 +892,8 @@
         <div class="watch-icon">▶</div>
         <p>paste a youtube link above and hit load — it syncs for both of you</p>
       </div>
-      <!-- YouTube player mounts here -->
       <div id="yt-player-container" style="display:none;width:100%;height:100%;"></div>
     </div>
-    <!-- Sync controls bar -->
     <div id="watch-controls" style="display:none;">
       <button class="watch-ctrl-btn" id="ctrl-play-pause">▶ play</button>
       <button class="watch-ctrl-btn" id="ctrl-sync">⟳ sync me</button>
@@ -836,14 +935,12 @@
   const db = getDatabase(app);
   const auth = getAuth(app);
 
-  // ── DOM refs ──
   const lockScreen = document.getElementById("lock-screen");
   const authScreen = document.getElementById("auth-screen");
   const navEl = document.getElementById("nav");
 
   let currentUser = null;
-  let currentUserLabel = null; // 'jess' or 'eesa'
-  let onlineUsersMap = {};  // uid -> email
+  let onlineUsersMap = {};
 
   // ─── LOCK ───
   document.getElementById("unlock-btn").onclick = () => {
@@ -875,6 +972,7 @@
     navEl.style.display = "flex";
     setupNav();
     setupPresence();
+    setupQuotes();
     setupPhotos();
     setupHomeChat();
     setupMatchGame();
@@ -947,22 +1045,102 @@
     ).join("");
   }
 
-  // ─── PHOTOS ───
+  // ─── HELPERS ───
   function isSameDay(ts1, ts2) {
     const a = new Date(ts1), b = new Date(ts2);
     return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
   }
 
+  function whoAmI() {
+    const email = currentUser.email.toLowerCase();
+    if (email.includes("jess")) return "jess";
+    if (email.includes("eesa")) return "eesa";
+    return null;
+  }
+
+  function formatDate(ts) {
+    return new Date(ts).toLocaleDateString([], { month: "short", day: "numeric" });
+  }
+
+  // ─── QUOTES ───
+  function setupQuotes() {
+    const me = whoAmI(); // 'jess' or 'eesa' or null
+
+    ["jess", "eesa"].forEach(uid => {
+      // Live listener — update the displayed quote for both cards
+      onValue(ref(db, "quotes/" + uid), snap => {
+        const d = snap.val();
+        const textEl = document.getElementById("quote-text-" + uid);
+        const attrEl = document.getElementById("quote-attr-" + uid);
+        const dateEl = document.getElementById("quote-date-" + uid);
+
+        if (d && d.text) {
+          textEl.textContent = "\u201c" + d.text + "\u201d";
+          textEl.classList.remove("empty");
+          attrEl.textContent = "— " + (uid === "jess" ? "Jess" : "Eesa");
+          dateEl.textContent = formatDate(d.timestamp);
+        } else {
+          textEl.textContent = "no quote yet today";
+          textEl.classList.add("empty");
+          attrEl.textContent = "";
+          dateEl.textContent = "";
+        }
+      });
+
+      // Show the input row only on the card that belongs to the current user
+      if (uid === me) {
+        document.getElementById("quote-input-row-" + uid).style.display = "flex";
+
+        document.getElementById("quote-submit-" + uid).onclick = async () => {
+          const textarea = document.getElementById("quote-textarea-" + uid);
+          const msg = document.getElementById("quote-msg-" + uid);
+          const text = textarea.value.trim();
+          if (!text) return;
+
+          const now = Date.now();
+          const quoteRef = ref(db, "quotes/" + uid);
+          const snap = await get(quoteRef);
+          const d = snap.val();
+
+          if (d && isSameDay(d.timestamp, now)) {
+            msg.textContent = "one quote per day ✦";
+            setTimeout(() => { msg.textContent = ""; }, 3000);
+          } else {
+            await set(quoteRef, { text, timestamp: now });
+            textarea.value = "";
+            msg.textContent = "posted!";
+            setTimeout(() => { msg.textContent = ""; }, 2000);
+          }
+        };
+
+        // Allow Ctrl+Enter to submit
+        document.getElementById("quote-textarea-" + uid).onkeydown = e => {
+          if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+            document.getElementById("quote-submit-" + uid).click();
+          }
+        };
+      }
+    });
+
+    // Cleanup quotes older than 7 days
+    get(ref(db, "quotes/")).then(snap => {
+      const all = snap.val(); if (!all) return;
+      const now = Date.now();
+      Object.entries(all).forEach(([id, d]) => {
+        if (now - d.timestamp > 7 * 86400000) remove(ref(db, "quotes/" + id));
+      });
+    });
+  }
+
+  // ─── PHOTOS ───
   function setupPhotos() {
     ["jess", "eesa"].forEach(uid => {
-      // Live update image
       onValue(ref(db, "photos/" + uid), snap => {
         const d = snap.val();
         const img = document.getElementById(uid + "-img");
         img.src = d && d.imageBase64 ? d.imageBase64 : "";
       });
 
-      // File upload
       document.getElementById(uid + "-file").addEventListener("change", async e => {
         const file = e.target.files[0]; if (!file) return;
         const msg = document.getElementById(uid + "-msg");
@@ -987,7 +1165,6 @@
       });
     });
 
-    // cleanup old >7 days
     get(ref(db, "photos/")).then(snap => {
       const all = snap.val(); if (!all) return;
       const now = Date.now();
@@ -1023,7 +1200,6 @@
     btn.onclick = send;
     input.onkeydown = e => { if (e.key === "Enter") send(); };
 
-    // cleanup old messages >30 days
     const q = query(msgsRef, orderByChild("timestamp"), endAt(Date.now() - 30 * 86400000));
     get(q).then(snap => snap.forEach(c => remove(ref(db, dbPath + "/" + c.key))));
   }
@@ -1038,13 +1214,12 @@
   }
 
   // ─── WATCH PARTY ───
-  let ytPlayer = null;           // YT.Player instance
-  let ytReady = false;           // IFrame API loaded
-  let ytCurrentVideoId = null;   // which video is loaded
-  let ignoringStateChange = false; // prevent echo loops
+  let ytPlayer = null;
+  let ytReady = false;
+  let ytCurrentVideoId = null;
+  let ignoringStateChange = false;
   let watchPartyRef = null;
 
-  // Load YouTube IFrame API once
   function loadYTApi() {
     return new Promise(resolve => {
       if (window.YT && window.YT.Player) { resolve(); return; }
@@ -1058,52 +1233,44 @@
   function setupWatchParty() {
     setupChatBox("watch-chat-box", "watch-chat-input", "watch-send-btn", "watchMessages");
 
-    const urlInput  = document.getElementById("watch-url-input");
-    const loadBtn   = document.getElementById("watch-load-btn");
-    const ctrlBtn   = document.getElementById("ctrl-play-pause");
-    const syncBtn   = document.getElementById("ctrl-sync");
+    const urlInput   = document.getElementById("watch-url-input");
+    const loadBtn    = document.getElementById("watch-load-btn");
+    const ctrlBtn    = document.getElementById("ctrl-play-pause");
+    const syncBtn    = document.getElementById("ctrl-sync");
     const ctrlStatus = document.getElementById("ctrl-status");
-    const ctrlWho   = document.getElementById("ctrl-who");
-    const controls  = document.getElementById("watch-controls");
-    watchPartyRef   = ref(db, "watchParty");
+    const ctrlWho    = document.getElementById("ctrl-who");
+    const controls   = document.getElementById("watch-controls");
+    watchPartyRef    = ref(db, "watchParty");
 
-    // ── Load YouTube API, then listen for DB state ──
     loadYTApi().then(() => {
       ytReady = true;
 
-      // Listen for party state changes from Firebase
       onValue(watchPartyRef, snap => {
         const party = snap.val();
         if (!party || !party.videoId) return;
 
-        // Show controls bar
         controls.style.display = "flex";
 
-        // If video changed, create/swap the player
         if (party.videoId !== ytCurrentVideoId) {
           ytCurrentVideoId = party.videoId;
           document.getElementById("watch-placeholder").style.display = "none";
           document.getElementById("yt-player-container").style.display = "block";
           createPlayer(party.videoId, party);
-          return; // onReady will apply state
+          return;
         }
 
-        // Same video — apply play/pause state
         if (ytPlayer && typeof ytPlayer.getPlayerState === "function") {
           applyPartyState(party);
         }
 
-        // Update UI
         updateCtrlUI(party, ctrlBtn, ctrlStatus, ctrlWho);
       });
     });
 
-    // ── Load button ──
     loadBtn.onclick = () => {
       const url = urlInput.value.trim();
       const vid = extractYouTubeId(url);
       if (!vid) { alert("couldn't find a youtube video id in that link"); return; }
-      // Writing a new video always starts paused at 0 so both clients sync cleanly
       set(watchPartyRef, {
         videoId: vid,
         state: "paused",
@@ -1115,37 +1282,21 @@
     };
     urlInput.onkeydown = e => { if (e.key === "Enter") loadBtn.click(); };
 
-    // ── Custom play/pause button ──
     ctrlBtn.onclick = () => {
       if (!ytPlayer || !ytCurrentVideoId) return;
       get(watchPartyRef).then(snap => {
         const party = snap.val() || {};
         const name = currentUser.email.split("@")[0];
         if (party.state === "playing") {
-          // Pause
           const pos = ytPlayer.getCurrentTime();
-          set(watchPartyRef, {
-            videoId: ytCurrentVideoId,
-            state: "paused",
-            pausedAt: pos,
-            startedAt: null,
-            triggeredBy: name
-          });
+          set(watchPartyRef, { videoId: ytCurrentVideoId, state: "paused", pausedAt: pos, startedAt: null, triggeredBy: name });
         } else {
-          // Play from current position
           const pos = ytPlayer.getCurrentTime();
-          set(watchPartyRef, {
-            videoId: ytCurrentVideoId,
-            state: "playing",
-            startedAt: Date.now() - pos * 1000,
-            pausedAt: null,
-            triggeredBy: name
-          });
+          set(watchPartyRef, { videoId: ytCurrentVideoId, state: "playing", startedAt: Date.now() - pos * 1000, pausedAt: null, triggeredBy: name });
         }
       });
     };
 
-    // ── Sync me button — jumps this client to the correct position ──
     syncBtn.onclick = () => {
       get(watchPartyRef).then(snap => {
         const party = snap.val();
@@ -1167,12 +1318,7 @@
   }
 
   function createPlayer(videoId, initialParty) {
-    // Destroy existing player if any
-    if (ytPlayer) {
-      try { ytPlayer.destroy(); } catch(e) {}
-      ytPlayer = null;
-    }
-
+    if (ytPlayer) { try { ytPlayer.destroy(); } catch(e) {} ytPlayer = null; }
     const container = document.getElementById("yt-player-container");
     container.innerHTML = "";
     const div = document.createElement("div");
@@ -1185,11 +1331,7 @@
       events: {
         onReady: () => {
           applyPartyState(initialParty);
-          updateCtrlUI(initialParty,
-            document.getElementById("ctrl-play-pause"),
-            document.getElementById("ctrl-status"),
-            document.getElementById("ctrl-who")
-          );
+          updateCtrlUI(initialParty, document.getElementById("ctrl-play-pause"), document.getElementById("ctrl-status"), document.getElementById("ctrl-who"));
         },
         onStateChange: onYTStateChange
       }
@@ -1199,7 +1341,6 @@
   function applyPartyState(party) {
     if (!ytPlayer || typeof ytPlayer.seekTo !== "function") return;
     ignoringStateChange = true;
-
     if (party.state === "playing") {
       const pos = (Date.now() - party.startedAt) / 1000;
       ytPlayer.seekTo(pos, true);
@@ -1208,34 +1349,18 @@
       ytPlayer.seekTo(party.pausedAt || 0, true);
       ytPlayer.pauseVideo();
     }
-
     setTimeout(() => { ignoringStateChange = false; }, 1500);
   }
 
   function onYTStateChange(event) {
-    // YT.PlayerState: PLAYING=1, PAUSED=2, ENDED=0, BUFFERING=3
     if (ignoringStateChange || !watchPartyRef || !ytCurrentVideoId) return;
-
     const name = currentUser.email.split("@")[0];
-
     if (event.data === YT.PlayerState.PLAYING) {
       const pos = ytPlayer.getCurrentTime();
-      set(watchPartyRef, {
-        videoId: ytCurrentVideoId,
-        state: "playing",
-        startedAt: Date.now() - pos * 1000,
-        pausedAt: null,
-        triggeredBy: name
-      });
+      set(watchPartyRef, { videoId: ytCurrentVideoId, state: "playing", startedAt: Date.now() - pos * 1000, pausedAt: null, triggeredBy: name });
     } else if (event.data === YT.PlayerState.PAUSED) {
       const pos = ytPlayer.getCurrentTime();
-      set(watchPartyRef, {
-        videoId: ytCurrentVideoId,
-        state: "paused",
-        pausedAt: pos,
-        startedAt: null,
-        triggeredBy: name
-      });
+      set(watchPartyRef, { videoId: ytCurrentVideoId, state: "paused", pausedAt: pos, startedAt: null, triggeredBy: name });
     }
   }
 
@@ -1250,9 +1375,7 @@
       btn.classList.remove("active");
       statusEl.textContent = "paused";
     }
-    if (party.triggeredBy) {
-      whoEl.textContent = `last action by ${party.triggeredBy}`;
-    }
+    if (party.triggeredBy) whoEl.textContent = `last action by ${party.triggeredBy}`;
   }
 
   function extractYouTubeId(url) {
@@ -1279,20 +1402,17 @@
     document.getElementById("match-start-btn").onclick = startMatchGame;
     document.getElementById("result-restart-btn").onclick = startMatchGame;
 
-    // Listen for game state from DB
     onValue(ref(db, "matchGame/state"), snap => {
       const s = snap.val();
       if (!s) return;
       syncGameState(s);
     });
 
-    // Listen for card flips from other user
     onValue(ref(db, "matchGame/flips"), snap => {
       const flips = snap.val();
       if (!flips) return;
       Object.entries(flips).forEach(([uid, flip]) => {
         if (uid === currentUser.uid) return;
-        // animate the flip for the other user
         const card = document.querySelector(`.card[data-idx="${flip.idx}"]`);
         if (card && !card.classList.contains("matched")) {
           card.classList.add(flip.who === "jess" ? "flip-jess" : "flip-eesa");
@@ -1301,22 +1421,14 @@
     });
   }
 
-  function whoAmI() {
-    const email = currentUser.email.toLowerCase();
-    if (email.includes("jess")) return "jess";
-    if (email.includes("eesa")) return "eesa";
-    return "player";
-  }
-
   function startMatchGame() {
-    // Generate shuffled deck
-    const count = 32; // 32 pairs = 64 cards
+    const count = 32;
     const chosen = EMOJIS.slice(0, count);
     const deck = shuffle([...chosen, ...chosen]);
     const state = {
       deck,
-      flipped: [],       // indices currently face-up (unmatched)
-      matched: [],       // indices matched
+      flipped: [],
+      matched: [],
       scores: { jess: 0, eesa: 0 },
       attempts: { jess: 0, eesa: 0 },
       started: Date.now(),
@@ -1334,12 +1446,7 @@
     gameState = s;
     renderGrid(s);
     updateScoreboard(s);
-
-    if (s.finished) {
-      endGame(s);
-    }
-
-    // Timer
+    if (s.finished) endGame(s);
     if (timerInterval) clearInterval(timerInterval);
     if (s.started && !s.finished) {
       timerInterval = setInterval(() => {
@@ -1358,28 +1465,19 @@
       const card = document.createElement("div");
       card.className = "card";
       card.dataset.idx = idx;
-
       const front = document.createElement("div");
       front.className = "card-front";
       front.textContent = emoji;
-
       const back = document.createElement("div");
       back.className = "card-back";
       back.textContent = "✦";
-
       card.appendChild(front);
       card.appendChild(back);
-
       const isMatched = s.matched && s.matched.includes(idx);
       const isFlipped = s.flipped && s.flipped.includes(idx);
-
       if (isMatched) { card.classList.add("matched", "flipped"); }
       else if (isFlipped) { card.classList.add("flipped"); }
-
-      if (!isMatched && !s.finished) {
-        card.onclick = () => handleCardClick(idx);
-      }
-
+      if (!isMatched && !s.finished) card.onclick = () => handleCardClick(idx);
       grid.appendChild(card);
     });
   }
@@ -1388,39 +1486,22 @@
     if (!gameState || gameState.finished) return;
     const s = gameState;
     const me = whoAmI();
-
-    // Don't flip already matched or already flipped
     if (s.matched && s.matched.includes(idx)) return;
     if (s.flipped && s.flipped.includes(idx)) return;
-
-    // Record flip for visual sync
     set(ref(db, `matchGame/flips/${currentUser.uid}`), { idx, who: me, ts: Date.now() });
-
     const newFlipped = [...(s.flipped || []), idx];
-
     if (newFlipped.length === 1) {
-      // First flip
       await update(ref(db, "matchGame/state"), { flipped: newFlipped });
     } else if (newFlipped.length === 2) {
-      // Second flip — check match
       const [a, b] = newFlipped;
       const newAttempts = { ...s.attempts, [me]: (s.attempts[me] || 0) + 1 };
-
       if (s.deck[a] === s.deck[b]) {
-        // Match!
         const newMatched = [...(s.matched || []), a, b];
         const newScores = { ...s.scores, [me]: (s.scores[me] || 0) + 1 };
         const allMatched = newMatched.length === s.deck.length;
-        await update(ref(db, "matchGame/state"), {
-          flipped: [],
-          matched: newMatched,
-          scores: newScores,
-          attempts: newAttempts,
-          finished: allMatched
-        });
+        await update(ref(db, "matchGame/state"), { flipped: [], matched: newMatched, scores: newScores, attempts: newAttempts, finished: allMatched });
         set(ref(db, `matchGame/flips`), null);
       } else {
-        // No match — show briefly then flip back
         await update(ref(db, "matchGame/state"), { flipped: newFlipped, attempts: newAttempts });
         setTimeout(async () => {
           const snap = await get(ref(db, "matchGame/state"));
@@ -1437,7 +1518,6 @@
   function updateScoreboard(s) {
     document.getElementById("score-jess").textContent = s.scores?.jess || 0;
     document.getElementById("score-eesa").textContent = s.scores?.eesa || 0;
-
     const acc = (who) => {
       const att = s.attempts?.[who] || 0;
       const sc = s.scores?.[who] || 0;
@@ -1452,28 +1532,20 @@
     const elapsed = Math.floor((Date.now() - s.started) / 1000);
     const m = Math.floor(elapsed / 60);
     const sec = elapsed % 60;
-
     const jScore = s.scores?.jess || 0;
     const eScore = s.scores?.eesa || 0;
     let winner = jScore > eScore ? "jess" : eScore > jScore ? "eesa" : null;
-
     const resultEl = document.getElementById("match-result");
     const titleEl = document.getElementById("result-title");
     const detailEl = document.getElementById("result-detail");
-
-    if (winner) {
-      titleEl.textContent = `🎉 ${winner === "jess" ? "Jess" : "Eesa"} wins!`;
-    } else {
-      titleEl.textContent = "🤝 it's a tie!";
-    }
-
+    if (winner) { titleEl.textContent = `🎉 ${winner === "jess" ? "Jess" : "Eesa"} wins!`; }
+    else { titleEl.textContent = "🤝 it's a tie!"; }
     const acc = (who, sc, att) => att === 0 ? "0%" : Math.round((sc / att) * 100) + "%";
     detailEl.innerHTML = `
       time: ${m}:${sec.toString().padStart(2, "0")}<br>
       jess — ${jScore} matches · ${acc("jess", jScore, s.attempts?.jess || 0)} accuracy<br>
       eesa — ${eScore} matches · ${acc("eesa", eScore, s.attempts?.eesa || 0)} accuracy
     `;
-
     resultEl.style.display = "flex";
     document.getElementById("match-start-btn").style.display = "block";
     document.getElementById("match-start-btn").textContent = "play again";
@@ -1487,7 +1559,6 @@
     }
     return arr;
   }
-
 </script>
 </body>
 </html>
