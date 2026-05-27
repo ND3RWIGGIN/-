@@ -17,6 +17,7 @@
       --success: #6dbf9e;
       --danger: #e07b7b;
       --gold: #d4b483;
+      --spotify: #1DB954;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -66,28 +67,56 @@
       color: var(--text-dim);
       border-bottom: 2px solid transparent;
       transition: all 0.15s ease;
-      position: relative;
     }
 
     .nav-tab:hover { color: var(--text); }
     .nav-tab.active { color: var(--accent2); border-bottom-color: var(--accent2); }
 
-    .nav-tab .tab-lock {
-      font-size: 0.65rem;
-      background: var(--surface2);
-      color: var(--text-dim);
-      padding: 2px 5px;
-      border-radius: 3px;
-      border: 1px solid var(--border);
-    }
-
     #nav-users {
       margin-left: auto;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 12px;
       font-size: 0.75rem;
       color: var(--text-dim);
+    }
+
+    .nav-user-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 3px 10px 3px 7px;
+      font-size: 0.72rem;
+      transition: border-color 0.2s;
+      position: relative;
+      cursor: default;
+    }
+
+    .nav-user-pill:hover .last-seen-tooltip {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .last-seen-tooltip {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 0.68rem;
+      color: var(--text-dim);
+      white-space: nowrap;
+      opacity: 0;
+      transform: translateY(-4px);
+      transition: all 0.15s ease;
+      pointer-events: none;
+      z-index: 200;
     }
 
     .online-dot {
@@ -96,6 +125,12 @@
       background: var(--success);
       box-shadow: 0 0 6px var(--success);
       display: inline-block;
+      flex-shrink: 0;
+    }
+
+    .online-dot.offline {
+      background: var(--border);
+      box-shadow: none;
     }
 
     /* ── SCREENS ── */
@@ -169,7 +204,6 @@
       padding: 0 20px 40px;
     }
 
-    /* ── QUOTE CARDS ── */
     #quote-section {
       display: flex;
       gap: 36px;
@@ -226,18 +260,9 @@
       font-family: 'DM Mono', monospace;
     }
 
-    .quote-card-attr {
-      font-size: 0.72rem;
-      color: var(--text-dim);
-      letter-spacing: 0.08em;
-    }
+    .quote-card-attr { font-size: 0.72rem; color: var(--text-dim); letter-spacing: 0.08em; }
 
-    .quote-card-input-row {
-      display: flex;
-      gap: 6px;
-      margin-top: 2px;
-    }
-
+    .quote-card-input-row { display: flex; gap: 6px; margin-top: 2px; }
     .quote-card-input-row textarea {
       flex: 1;
       background: var(--bg2);
@@ -255,7 +280,6 @@
     }
     .quote-card-input-row textarea:focus { border-color: var(--accent); }
     .quote-card-input-row textarea::placeholder { color: var(--text-dim); }
-
     .quote-card-input-row button {
       padding: 0 10px;
       background: var(--surface2);
@@ -270,14 +294,8 @@
       align-self: stretch;
     }
     .quote-card-input-row button:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .quote-card .upload-msg { font-size: 0.72rem; color: var(--text-dim); min-height: 1em; }
 
-    .quote-card .upload-msg {
-      font-size: 0.72rem;
-      color: var(--text-dim);
-      min-height: 1em;
-    }
-
-    /* Photos */
     #photo-section {
       display: flex;
       gap: 36px;
@@ -316,19 +334,9 @@
       background: var(--bg2);
     }
 
-    .photo-card input[type="file"] {
-      font-size: 0.72rem;
-      color: var(--text-dim);
-      max-width: 190px;
-    }
+    .photo-card input[type="file"] { font-size: 0.72rem; color: var(--text-dim); max-width: 190px; }
+    .upload-msg { font-size: 0.75rem; color: var(--text-dim); min-height: 1em; }
 
-    .upload-msg {
-      font-size: 0.75rem;
-      color: var(--text-dim);
-      min-height: 1em;
-    }
-
-    /* Chat */
     #chat-wrap {
       width: 100%;
       max-width: 600px;
@@ -349,7 +357,6 @@
       line-height: 1.6;
       color: var(--text);
     }
-
     .chat-box::-webkit-scrollbar { width: 4px; }
     .chat-box::-webkit-scrollbar-track { background: transparent; }
     .chat-box::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
@@ -358,11 +365,7 @@
     .chat-msg .msg-who { color: var(--accent); }
     .chat-msg .msg-time { color: var(--text-dim); font-size: 0.72rem; margin-right: 4px; }
 
-    .chat-input-row {
-      display: flex;
-      border-top: 1px solid var(--border);
-    }
-
+    .chat-input-row { display: flex; border-top: 1px solid var(--border); }
     .chat-input-row input {
       flex: 1;
       background: transparent;
@@ -373,9 +376,7 @@
       font-size: 0.85rem;
       outline: none;
     }
-
     .chat-input-row input::placeholder { color: var(--text-dim); }
-
     .chat-input-row button {
       background: transparent;
       border: none;
@@ -391,217 +392,46 @@
     .chat-input-row button:hover { color: var(--accent2); }
 
     /* ═══════════════════════════════
-       PAGE 2: MATCHING GAME
+       PAGE: WATCH PARTY
     ═══════════════════════════════ */
-    #page-match {
-      flex-direction: column;
-      overflow: hidden;
-    }
+    #page-watch { flex-direction: row; overflow: hidden; }
 
-    #match-locked {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      text-align: center;
-    }
+    #watch-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
-    #match-locked h2 {
-      font-family: 'DM Serif Display', serif;
-      font-size: 1.5rem;
-      color: var(--accent2);
-    }
-
-    #match-locked p {
-      color: var(--text-dim);
-      font-size: 0.85rem;
-      max-width: 280px;
-      line-height: 1.7;
-    }
-
-    #match-locked .users-needed {
-      display: flex;
-      gap: 24px;
-      margin-top: 8px;
-    }
-
-    .user-status-pill {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 6px 14px;
-      font-size: 0.8rem;
-    }
-
-    #match-ui {
-      flex: 1;
-      display: none;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    /* Scoreboard */
-    #match-scoreboard {
+    /* Source tabs */
+    #watch-source-tabs {
       flex-shrink: 0;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 12px 24px;
+      gap: 0;
       background: var(--bg2);
       border-bottom: 1px solid var(--border);
-      font-size: 0.8rem;
+      padding: 0 16px;
+      height: 44px;
     }
 
-    .score-player {
+    .source-tab {
+      padding: 0 16px;
+      height: 44px;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      gap: 2px;
-    }
-
-    .score-name {
-      font-family: 'DM Serif Display', serif;
-      font-size: 1rem;
-      color: var(--accent2);
-    }
-
-    .score-val {
-      font-size: 1.4rem;
-      font-weight: 500;
-      color: var(--text);
-    }
-
-    .score-sub { color: var(--text-dim); font-size: 0.72rem; }
-
-    .score-center {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-    }
-
-    #match-timer {
-      font-size: 1.8rem;
-      font-family: 'DM Serif Display', serif;
-      color: var(--gold);
-    }
-
-    #match-status-text {
-      font-size: 0.75rem;
-      color: var(--text-dim);
-      letter-spacing: 0.06em;
-    }
-
-    #match-start-btn {
-      margin-top: 6px;
-    }
-
-    /* Grid */
-    #match-grid-wrap {
-      flex: 1;
-      overflow-y: auto;
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      padding: 16px;
-    }
-
-    #match-grid {
-      display: grid;
-      grid-template-columns: repeat(8, 1fr);
-      gap: 8px;
-      width: 100%;
-      max-width: 720px;
-    }
-
-    .card {
-      aspect-ratio: 1;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
+      gap: 6px;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.4rem;
-      transition: transform 0.12s, background 0.15s, border-color 0.15s;
-      user-select: none;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .card .card-front, .card .card-back {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: opacity 0.2s;
-    }
-
-    .card .card-back { opacity: 1; font-size: 1.2rem; color: var(--border); }
-    .card .card-front { opacity: 0; }
-
-    .card.flipped .card-back { opacity: 0; }
-    .card.flipped .card-front { opacity: 1; }
-    .card.matched { background: var(--surface2); border-color: var(--success); cursor: default; }
-    .card.matched .card-front { color: var(--success); }
-    .card:hover:not(.matched):not(.flipped) { background: var(--surface2); transform: scale(1.04); }
-
-    .card.flip-jess { border-color: #a8b4e8; }
-    .card.flip-eesa { border-color: var(--gold); }
-
-    /* Game over overlay */
-    #match-result {
-      position: absolute;
-      inset: 0;
-      background: rgba(25, 31, 65, 0.9);
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-      z-index: 50;
-      text-align: center;
-    }
-
-    #match-result h2 {
-      font-family: 'DM Serif Display', serif;
-      font-size: 2rem;
-      color: var(--gold);
-    }
-
-    #match-result .result-detail {
-      font-size: 0.85rem;
+      font-size: 0.75rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
       color: var(--text-dim);
-      line-height: 2;
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
     }
-
-    /* ═══════════════════════════════
-       PAGE 3: WATCH PARTY
-    ═══════════════════════════════ */
-    #page-watch {
-      flex-direction: row;
-      overflow: hidden;
-    }
-
-    #watch-main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
+    .source-tab:hover { color: var(--text); }
+    .source-tab.active { color: var(--accent2); border-bottom-color: var(--accent2); }
 
     #watch-url-bar {
       flex-shrink: 0;
       display: flex;
       gap: 10px;
-      padding: 12px 16px;
+      padding: 10px 16px;
       border-bottom: 1px solid var(--border);
       background: var(--bg2);
       align-items: center;
@@ -643,10 +473,62 @@
       position: absolute;
       inset: 0;
     }
-    #yt-player-container iframe {
-      width: 100% !important;
-      height: 100% !important;
-      border: none;
+    #yt-player-container iframe { width: 100% !important; height: 100% !important; border: none; }
+
+    #iframe-player-container {
+      position: absolute;
+      inset: 0;
+      display: none;
+    }
+    #iframe-player-container iframe { width: 100%; height: 100%; border: none; }
+
+    /* Screen share panel */
+    #screenshare-panel {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      background: #0d1029;
+      padding: 24px;
+      text-align: center;
+    }
+    #screenshare-panel.visible { display: flex; }
+
+    #screenshare-video {
+      width: 100%;
+      max-height: calc(100% - 120px);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #000;
+      display: none;
+    }
+
+    .screenshare-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      color: var(--text-dim);
+    }
+
+    .share-icon { font-size: 2.5rem; opacity: 0.4; }
+
+    .screenshare-placeholder p {
+      font-size: 0.82rem;
+      line-height: 1.7;
+      max-width: 280px;
+      color: var(--text-dim);
+    }
+
+    .screenshare-note {
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      opacity: 0.7;
+      max-width: 320px;
+      line-height: 1.6;
     }
 
     #watch-placeholder {
@@ -659,17 +541,8 @@
       padding: 20px;
       z-index: 1;
     }
-
-    #watch-placeholder .watch-icon {
-      font-size: 3rem;
-      opacity: 0.3;
-    }
-
-    #watch-placeholder p {
-      font-size: 0.85rem;
-      max-width: 260px;
-      line-height: 1.7;
-    }
+    #watch-placeholder .watch-icon { font-size: 3rem; opacity: 0.3; }
+    #watch-placeholder p { font-size: 0.85rem; max-width: 260px; line-height: 1.7; }
 
     #watch-controls {
       flex-shrink: 0;
@@ -696,20 +569,11 @@
     }
     .watch-ctrl-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
     .watch-ctrl-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .watch-ctrl-btn.danger { background: var(--surface2); border-color: var(--danger); color: var(--danger); }
+    .watch-ctrl-btn.danger:hover { background: var(--danger); color: #fff; }
 
-    #ctrl-status {
-      font-size: 0.75rem;
-      color: var(--text-dim);
-      letter-spacing: 0.04em;
-      margin-left: 4px;
-    }
-
-    #ctrl-who {
-      font-size: 0.72rem;
-      color: var(--text-dim);
-      margin-left: auto;
-      font-style: italic;
-    }
+    #ctrl-status { font-size: 0.75rem; color: var(--text-dim); letter-spacing: 0.04em; margin-left: 4px; }
+    #ctrl-who { font-size: 0.72rem; color: var(--text-dim); margin-left: auto; font-style: italic; }
 
     #watch-chat {
       width: 280px;
@@ -736,6 +600,196 @@
       gap: 8px;
       font-size: 0.72rem;
       flex-wrap: wrap;
+    }
+
+    /* ═══════════════════════════════
+       PAGE: MUSIC
+    ═══════════════════════════════ */
+    #page-music {
+      flex-direction: column;
+      align-items: center;
+      overflow-y: auto;
+      padding: 24px 20px 40px;
+      gap: 20px;
+    }
+
+    #music-header {
+      width: 100%;
+      max-width: 640px;
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 14px;
+    }
+
+    #music-header h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.4rem;
+      color: var(--accent2);
+      font-weight: 400;
+    }
+
+    #music-header span {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      letter-spacing: 0.06em;
+    }
+
+    #music-share-panel {
+      width: 100%;
+      max-width: 640px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    #music-share-panel h3 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 0.95rem;
+      color: var(--accent2);
+      font-weight: 400;
+    }
+
+    .music-input-row {
+      display: flex;
+      gap: 8px;
+      align-items: stretch;
+    }
+
+    .music-input-row input {
+      flex: 1;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.82rem;
+      padding: 8px 12px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .music-input-row input:focus { border-color: var(--accent); }
+    .music-input-row input::placeholder { color: var(--text-dim); }
+
+    .music-hint {
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    .spotify-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(29, 185, 84, 0.12);
+      border: 1px solid rgba(29, 185, 84, 0.3);
+      border-radius: 4px;
+      padding: 2px 7px;
+      font-size: 0.68rem;
+      color: var(--spotify);
+      letter-spacing: 0.04em;
+    }
+
+    /* Music feed */
+    #music-feed {
+      width: 100%;
+      max-width: 640px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .music-entry {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: border-color 0.15s;
+    }
+    .music-entry:hover { border-color: var(--accent); }
+
+    .music-entry-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px 8px;
+    }
+
+    .music-entry-who {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .music-who-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: 0.9rem;
+      color: var(--accent2);
+    }
+
+    .music-entry-time {
+      font-size: 0.68rem;
+      color: var(--text-dim);
+    }
+
+    .music-entry-body {
+      padding: 0 16px 14px;
+    }
+
+    .music-song-name {
+      font-size: 0.95rem;
+      color: var(--text);
+      margin-bottom: 3px;
+      font-weight: 500;
+    }
+
+    .music-song-artist {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+    }
+
+    .music-note {
+      font-family: 'DM Serif Display', serif;
+      font-style: italic;
+      font-size: 0.85rem;
+      color: var(--text);
+      line-height: 1.55;
+      margin-bottom: 12px;
+      opacity: 0.85;
+    }
+
+    /* Spotify embed */
+    .spotify-embed-wrap {
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .spotify-embed-wrap iframe {
+      border: none;
+      border-radius: 8px;
+      width: 100%;
+    }
+
+    .no-spotify-note {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      padding: 6px 0;
+      font-style: italic;
+    }
+
+    .music-empty {
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      padding: 40px 20px;
+      line-height: 1.8;
     }
   </style>
 </head>
@@ -765,18 +819,13 @@
 <nav id="nav" style="display:none;">
   <span id="nav-logo">nd3rwiggin</span>
   <div class="nav-tab active" data-page="home">home</div>
-  <div class="nav-tab" data-page="match" id="tab-match">
-    match
-    <span class="tab-lock" id="match-lock-badge">🔒</span>
-  </div>
   <div class="nav-tab" data-page="watch">watch party</div>
+  <div class="nav-tab" data-page="music">music</div>
   <div id="nav-users"></div>
 </nav>
 
 <!-- ═══════════ PAGE: HOME ═══════════ -->
 <div class="page active" id="page-home">
-
-  <!-- Quote cards -->
   <div id="quote-section">
     <div class="quote-card" id="quote-card-jess">
       <div class="quote-card-header">
@@ -791,7 +840,6 @@
       </div>
       <div class="upload-msg" id="quote-msg-jess"></div>
     </div>
-
     <div class="quote-card" id="quote-card-eesa">
       <div class="quote-card-header">
         <span class="quote-card-name">Eesa</span>
@@ -831,69 +879,50 @@
   </div>
 </div>
 
-<!-- ═══════════ PAGE: MATCH ═══════════ -->
-<div class="page" id="page-match" style="position:relative;">
-
-  <div id="match-locked">
-    <h2>matching game</h2>
-    <p>both jess & eesa need to be online to unlock this mode</p>
-    <div class="users-needed">
-      <div class="user-status-pill">
-        <span class="online-dot" id="jess-match-dot" style="background:#3a4270;box-shadow:none;"></span>
-        <span>jess</span>
-      </div>
-      <div class="user-status-pill">
-        <span class="online-dot" id="eesa-match-dot" style="background:#3a4270;box-shadow:none;"></span>
-        <span>eesa</span>
-      </div>
-    </div>
-  </div>
-
-  <div id="match-ui">
-    <div id="match-scoreboard">
-      <div class="score-player">
-        <div class="score-name">Jess</div>
-        <div class="score-val" id="score-jess">0</div>
-        <div class="score-sub" id="acc-jess">0% acc</div>
-      </div>
-      <div class="score-center">
-        <div id="match-timer">0:00</div>
-        <div id="match-status-text">waiting to start</div>
-        <button class="btn primary" id="match-start-btn" style="margin-top:6px;">start game</button>
-      </div>
-      <div class="score-player">
-        <div class="score-name">Eesa</div>
-        <div class="score-val" id="score-eesa">0</div>
-        <div class="score-sub" id="acc-eesa">0% acc</div>
-      </div>
-    </div>
-    <div id="match-grid-wrap">
-      <div id="match-grid"></div>
-    </div>
-  </div>
-
-  <div id="match-result">
-    <h2 id="result-title">🎉 Jess wins!</h2>
-    <div class="result-detail" id="result-detail"></div>
-    <button class="btn primary" id="result-restart-btn">play again</button>
-  </div>
-</div>
-
 <!-- ═══════════ PAGE: WATCH ═══════════ -->
 <div class="page" id="page-watch">
   <div id="watch-main">
+    <!-- Source mode tabs -->
+    <div id="watch-source-tabs">
+      <div class="source-tab active" data-source="youtube">▶ youtube</div>
+      <div class="source-tab" data-source="anylink">🔗 any link</div>
+      <div class="source-tab" data-source="screenshare">🖥 screen share</div>
+    </div>
+
+    <!-- URL bar (shown for youtube + anylink) -->
     <div id="watch-url-bar">
-      <span class="url-label">YouTube</span>
+      <span class="url-label" id="url-bar-label">YouTube</span>
       <input type="text" id="watch-url-input" placeholder="paste a youtube link…" />
       <button class="btn primary" id="watch-load-btn">load</button>
     </div>
+
+    <!-- Frame -->
     <div id="watch-frame-wrap">
       <div id="watch-placeholder">
         <div class="watch-icon">▶</div>
         <p>paste a youtube link above and hit load — it syncs for both of you</p>
       </div>
       <div id="yt-player-container" style="display:none;width:100%;height:100%;"></div>
+
+      <!-- Any-link iframe player -->
+      <div id="iframe-player-container">
+        <iframe id="any-link-iframe" src="" allowfullscreen allow="autoplay; fullscreen"></iframe>
+      </div>
+
+      <!-- Screen share panel -->
+      <div id="screenshare-panel">
+        <div class="screenshare-placeholder" id="screenshare-placeholder">
+          <div class="share-icon">🖥</div>
+          <p>share your screen so you can both watch together from any source</p>
+          <button class="btn primary" id="start-screenshare-btn">start sharing</button>
+          <div class="screenshare-note">note: screen share only shows on your device. paste the any-link tab for your friend to watch with you, or use this to mirror your own screen locally.</div>
+        </div>
+        <video id="screenshare-video" autoplay playsinline muted></video>
+        <button class="watch-ctrl-btn danger" id="stop-screenshare-btn" style="display:none;">⏹ stop sharing</button>
+      </div>
     </div>
+
+    <!-- Controls (youtube + anylink) -->
     <div id="watch-controls" style="display:none;">
       <button class="watch-ctrl-btn" id="ctrl-play-pause">▶ play</button>
       <button class="watch-ctrl-btn" id="ctrl-sync">⟳ sync me</button>
@@ -901,6 +930,8 @@
       <span id="ctrl-who"></span>
     </div>
   </div>
+
+  <!-- Chat sidebar -->
   <div id="watch-chat">
     <div id="watch-chat-header">live chat</div>
     <div id="watch-online"></div>
@@ -912,11 +943,47 @@
   </div>
 </div>
 
+<!-- ═══════════ PAGE: MUSIC ═══════════ -->
+<div class="page" id="page-music">
+  <div id="music-header">
+    <h2>now playing</h2>
+    <span>share what's been on repeat</span>
+  </div>
+
+  <div id="music-share-panel">
+    <h3>share a song</h3>
+    <div class="music-input-row">
+      <input type="text" id="music-song-input" placeholder="song name" />
+    </div>
+    <div class="music-input-row">
+      <input type="text" id="music-artist-input" placeholder="artist" />
+    </div>
+    <div class="music-input-row">
+      <input type="text" id="music-note-input" placeholder="why you've been playing it… (optional)" />
+    </div>
+    <div class="music-input-row">
+      <input type="text" id="music-spotify-input" placeholder="spotify link (optional) — paste a track or album URL" />
+    </div>
+    <div class="music-hint">
+      <span class="spotify-badge">✦ spotify</span>
+      paste a <strong style="color:var(--text)">open.spotify.com/track/…</strong> link and it'll embed a playable snippet right here
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button class="btn primary" id="music-post-btn">post</button>
+      <span id="music-post-msg" style="font-size:0.78rem;color:var(--text-dim);"></span>
+    </div>
+  </div>
+
+  <div id="music-feed">
+    <div class="music-empty" id="music-empty">no songs shared yet — post what you've been playing ✦</div>
+  </div>
+</div>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
   import {
     getDatabase, ref, push, onChildAdded, query, orderByChild, endAt,
-    get, remove, onDisconnect, set, onValue, update
+    get, remove, onDisconnect, set, onValue, update, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
   import {
     getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged
@@ -975,8 +1042,8 @@
     setupQuotes();
     setupPhotos();
     setupHomeChat();
-    setupMatchGame();
     setupWatchParty();
+    setupMusicPage();
   }
 
   // ─── NAV ───
@@ -991,58 +1058,93 @@
     });
   }
 
-  // ─── PRESENCE ───
+  // ─── PRESENCE with last-seen ───
   function setupPresence() {
     const uid = currentUser.uid;
     const email = currentUser.email;
-    const userRef = ref(db, 'presence/' + uid);
-    set(userRef, email);
-    onDisconnect(userRef).remove();
+    const presenceRef = ref(db, 'presence/' + uid);
+    const lastSeenRef = ref(db, 'lastSeen/' + uid);
 
+    // Write online status
+    set(presenceRef, { email, online: true, since: Date.now() });
+    // On disconnect: remove presence and write last-seen timestamp
+    onDisconnect(presenceRef).remove();
+    onDisconnect(lastSeenRef).set({ email, ts: Date.now() });
+
+    // Listen to presence
     onValue(ref(db, 'presence/'), snap => {
       onlineUsersMap = snap.val() || {};
       updateNavUsers();
-      updateMatchLock();
       updateWatchOnline();
     });
   }
 
-  function updateNavUsers() {
+  function timeAgo(ts) {
+    const diff = Math.floor((Date.now() - ts) / 1000);
+    if (diff < 60) return `${diff}s ago`;
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+    return `${Math.floor(diff / 86400)}d ago`;
+  }
+
+  async function updateNavUsers() {
     const el = document.getElementById("nav-users");
-    const emails = Object.values(onlineUsersMap);
-    el.innerHTML = emails.map(e =>
-      `<span><span class="online-dot"></span> ${e.split("@")[0]}</span>`
-    ).join("  ");
-  }
+    el.innerHTML = "";
 
-  function bothOnline() {
-    const emails = Object.values(onlineUsersMap).map(e => e.toLowerCase());
-    return emails.some(e => e.includes("jess")) && emails.some(e => e.includes("eesa"));
-  }
+    // Get last-seen for offline users
+    const lastSeenSnap = await get(ref(db, 'lastSeen/'));
+    const lastSeenMap = lastSeenSnap.val() || {};
 
-  function updateMatchLock() {
-    const locked = !bothOnline();
-    document.getElementById("match-locked").style.display = locked ? "flex" : "none";
-    document.getElementById("match-ui").style.display = locked ? "none" : "flex";
-    document.getElementById("match-lock-badge").style.display = locked ? "inline" : "none";
+    // Build set of online emails
+    const onlineEmails = new Set(Object.values(onlineUsersMap).map(u => (u.email || u).toLowerCase()));
 
-    const emails = Object.values(onlineUsersMap).map(e => e.toLowerCase());
-    const jessOn = emails.some(e => e.includes("jess"));
-    const eesaOn = emails.some(e => e.includes("eesa"));
+    // Known users: merge online + anyone with lastSeen
+    const allUsers = {};
+    Object.values(onlineUsersMap).forEach(u => {
+      const email = u.email || u;
+      allUsers[email.toLowerCase()] = { email, online: true };
+    });
+    Object.values(lastSeenMap).forEach(u => {
+      const key = u.email.toLowerCase();
+      if (!allUsers[key]) allUsers[key] = { email: u.email, online: false, ts: u.ts };
+      else allUsers[key].ts = u.ts;
+    });
 
-    const dotStyle = (on) => on
-      ? "background:var(--success);box-shadow:0 0 6px var(--success);"
-      : "background:#3a4270;box-shadow:none;";
-    document.getElementById("jess-match-dot").style.cssText = dotStyle(jessOn);
-    document.getElementById("eesa-match-dot").style.cssText = dotStyle(eesaOn);
+    Object.values(allUsers).forEach(u => {
+      const pill = document.createElement("div");
+      pill.className = "nav-user-pill";
+      const dot = document.createElement("span");
+      dot.className = "online-dot" + (u.online ? "" : " offline");
+      const name = document.createElement("span");
+      name.textContent = u.email.split("@")[0];
+
+      const tooltip = document.createElement("div");
+      tooltip.className = "last-seen-tooltip";
+      if (u.online) {
+        tooltip.textContent = "online now";
+      } else if (u.ts) {
+        tooltip.textContent = "last seen " + timeAgo(u.ts);
+      } else {
+        tooltip.textContent = "offline";
+      }
+
+      pill.appendChild(dot);
+      pill.appendChild(name);
+      pill.appendChild(tooltip);
+      el.appendChild(pill);
+    });
+
+    // Keep tooltip time fresh
+    setTimeout(updateNavUsers, 30000);
   }
 
   function updateWatchOnline() {
     const el = document.getElementById("watch-online");
-    const emails = Object.values(onlineUsersMap);
-    el.innerHTML = emails.map(e =>
-      `<span class="user-status-pill" style="font-size:0.7rem;padding:3px 10px;"><span class="online-dot"></span>${e.split("@")[0]}</span>`
-    ).join("");
+    const vals = Object.values(onlineUsersMap);
+    el.innerHTML = vals.map(u => {
+      const email = u.email || u;
+      return `<span class="user-status-pill" style="font-size:0.7rem;padding:3px 10px;"><span class="online-dot"></span>${email.split("@")[0]}</span>`;
+    }).join("");
   }
 
   // ─── HELPERS ───
@@ -1062,18 +1164,19 @@
     return new Date(ts).toLocaleDateString([], { month: "short", day: "numeric" });
   }
 
+  function escapeHtml(s) {
+    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
   // ─── QUOTES ───
   function setupQuotes() {
-    const me = whoAmI(); // 'jess' or 'eesa' or null
-
+    const me = whoAmI();
     ["jess", "eesa"].forEach(uid => {
-      // Live listener — update the displayed quote for both cards
       onValue(ref(db, "quotes/" + uid), snap => {
         const d = snap.val();
         const textEl = document.getElementById("quote-text-" + uid);
         const attrEl = document.getElementById("quote-attr-" + uid);
         const dateEl = document.getElementById("quote-date-" + uid);
-
         if (d && d.text) {
           textEl.textContent = "\u201c" + d.text + "\u201d";
           textEl.classList.remove("empty");
@@ -1087,21 +1190,17 @@
         }
       });
 
-      // Show the input row only on the card that belongs to the current user
       if (uid === me) {
         document.getElementById("quote-input-row-" + uid).style.display = "flex";
-
         document.getElementById("quote-submit-" + uid).onclick = async () => {
           const textarea = document.getElementById("quote-textarea-" + uid);
           const msg = document.getElementById("quote-msg-" + uid);
           const text = textarea.value.trim();
           if (!text) return;
-
           const now = Date.now();
           const quoteRef = ref(db, "quotes/" + uid);
           const snap = await get(quoteRef);
           const d = snap.val();
-
           if (d && isSameDay(d.timestamp, now)) {
             msg.textContent = "one quote per day ✦";
             setTimeout(() => { msg.textContent = ""; }, 3000);
@@ -1112,17 +1211,12 @@
             setTimeout(() => { msg.textContent = ""; }, 2000);
           }
         };
-
-        // Allow Ctrl+Enter to submit
         document.getElementById("quote-textarea-" + uid).onkeydown = e => {
-          if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
-            document.getElementById("quote-submit-" + uid).click();
-          }
+          if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) document.getElementById("quote-submit-" + uid).click();
         };
       }
     });
 
-    // Cleanup quotes older than 7 days
     get(ref(db, "quotes/")).then(snap => {
       const all = snap.val(); if (!all) return;
       const now = Date.now();
@@ -1137,15 +1231,12 @@
     ["jess", "eesa"].forEach(uid => {
       onValue(ref(db, "photos/" + uid), snap => {
         const d = snap.val();
-        const img = document.getElementById(uid + "-img");
-        img.src = d && d.imageBase64 ? d.imageBase64 : "";
+        document.getElementById(uid + "-img").src = d && d.imageBase64 ? d.imageBase64 : "";
       });
-
       document.getElementById(uid + "-file").addEventListener("change", async e => {
         const file = e.target.files[0]; if (!file) return;
         const msg = document.getElementById(uid + "-msg");
         msg.textContent = "uploading…";
-
         const reader = new FileReader();
         reader.onload = async ev => {
           const b64 = ev.target.result;
@@ -1162,14 +1253,6 @@
         };
         reader.readAsDataURL(file);
         e.target.value = "";
-      });
-    });
-
-    get(ref(db, "photos/")).then(snap => {
-      const all = snap.val(); if (!all) return;
-      const now = Date.now();
-      Object.entries(all).forEach(([id, d]) => {
-        if (now - d.timestamp > 7 * 86400000) remove(ref(db, "photos/" + id));
       });
     });
   }
@@ -1196,19 +1279,10 @@
       push(msgsRef, { name: currentUser.email.split("@")[0], text, timestamp: Date.now() });
       input.value = "";
     };
-
     btn.onclick = send;
     input.onkeydown = e => { if (e.key === "Enter") send(); };
-
-    const q = query(msgsRef, orderByChild("timestamp"), endAt(Date.now() - 30 * 86400000));
-    get(q).then(snap => snap.forEach(c => remove(ref(db, dbPath + "/" + c.key))));
   }
 
-  function escapeHtml(s) {
-    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  }
-
-  // ─── HOME CHAT ───
   function setupHomeChat() {
     setupChatBox("home-chat-box", "home-chat-input", "home-send-btn", "messages");
   }
@@ -1219,6 +1293,8 @@
   let ytCurrentVideoId = null;
   let ignoringStateChange = false;
   let watchPartyRef = null;
+  let currentSource = "youtube"; // youtube | anylink | screenshare
+  let screenStream = null;
 
   function loadYTApi() {
     return new Promise(resolve => {
@@ -1242,15 +1318,23 @@
     const controls   = document.getElementById("watch-controls");
     watchPartyRef    = ref(db, "watchParty");
 
+    // Source tab switching
+    document.querySelectorAll(".source-tab").forEach(tab => {
+      tab.onclick = () => {
+        document.querySelectorAll(".source-tab").forEach(t => t.classList.remove("active"));
+        tab.classList.add("active");
+        currentSource = tab.dataset.source;
+        switchWatchSource(currentSource);
+      };
+    });
+
     loadYTApi().then(() => {
       ytReady = true;
-
       onValue(watchPartyRef, snap => {
         const party = snap.val();
         if (!party || !party.videoId) return;
-
+        if (currentSource !== "youtube") return;
         controls.style.display = "flex";
-
         if (party.videoId !== ytCurrentVideoId) {
           ytCurrentVideoId = party.videoId;
           document.getElementById("watch-placeholder").style.display = "none";
@@ -1258,27 +1342,23 @@
           createPlayer(party.videoId, party);
           return;
         }
-
-        if (ytPlayer && typeof ytPlayer.getPlayerState === "function") {
-          applyPartyState(party);
-        }
-
+        if (ytPlayer && typeof ytPlayer.getPlayerState === "function") applyPartyState(party);
         updateCtrlUI(party, ctrlBtn, ctrlStatus, ctrlWho);
       });
     });
 
     loadBtn.onclick = () => {
       const url = urlInput.value.trim();
-      const vid = extractYouTubeId(url);
-      if (!vid) { alert("couldn't find a youtube video id in that link"); return; }
-      set(watchPartyRef, {
-        videoId: vid,
-        state: "paused",
-        pausedAt: 0,
-        startedAt: null,
-        triggeredBy: currentUser.email.split("@")[0]
-      });
-      urlInput.value = "";
+      if (currentSource === "youtube") {
+        const vid = extractYouTubeId(url);
+        if (!vid) { alert("couldn't find a youtube video id in that link"); return; }
+        set(watchPartyRef, { videoId: vid, state: "paused", pausedAt: 0, startedAt: null, triggeredBy: currentUser.email.split("@")[0] });
+        urlInput.value = "";
+      } else if (currentSource === "anylink") {
+        if (!url) { alert("paste a link first"); return; }
+        loadAnyLink(url);
+        urlInput.value = "";
+      }
     };
     urlInput.onkeydown = e => { if (e.key === "Enter") loadBtn.click(); };
 
@@ -1315,6 +1395,87 @@
         setTimeout(() => { ctrlStatus.textContent = ""; }, 2000);
       });
     };
+
+    // Screen share
+    document.getElementById("start-screenshare-btn").onclick = startScreenShare;
+    document.getElementById("stop-screenshare-btn").onclick = stopScreenShare;
+  }
+
+  function switchWatchSource(source) {
+    const urlBar = document.getElementById("watch-url-bar");
+    const urlInput = document.getElementById("watch-url-input");
+    const urlLabel = document.getElementById("url-bar-label");
+    const controls = document.getElementById("watch-controls");
+    const placeholder = document.getElementById("watch-placeholder");
+    const ytContainer = document.getElementById("yt-player-container");
+    const iframeContainer = document.getElementById("iframe-player-container");
+    const screensharePanel = document.getElementById("screenshare-panel");
+
+    // Reset all panels
+    ytContainer.style.display = "none";
+    iframeContainer.style.display = "none";
+    screensharePanel.classList.remove("visible");
+    controls.style.display = "none";
+    urlBar.style.display = "flex";
+    placeholder.style.display = "flex";
+
+    if (source === "youtube") {
+      urlLabel.textContent = "YouTube";
+      urlInput.placeholder = "paste a youtube link…";
+      placeholder.querySelector("p").textContent = "paste a youtube link above and hit load — it syncs for both of you";
+      // Re-show YT if already loaded
+      if (ytCurrentVideoId) {
+        ytContainer.style.display = "block";
+        placeholder.style.display = "none";
+        controls.style.display = "flex";
+      }
+    } else if (source === "anylink") {
+      urlLabel.textContent = "Any Link";
+      urlInput.placeholder = "paste any video link — anime site, streaming, etc…";
+      placeholder.querySelector("p").textContent = "paste any video URL and hit load — it'll open in an embedded frame";
+      // Re-show iframe if already loaded
+      const iframe = document.getElementById("any-link-iframe");
+      if (iframe.src && iframe.src !== window.location.href) {
+        iframeContainer.style.display = "block";
+        placeholder.style.display = "none";
+      }
+    } else if (source === "screenshare") {
+      urlBar.style.display = "none";
+      screensharePanel.classList.add("visible");
+      placeholder.style.display = "none";
+    }
+  }
+
+  function loadAnyLink(url) {
+    const iframeContainer = document.getElementById("iframe-player-container");
+    const iframe = document.getElementById("any-link-iframe");
+    const placeholder = document.getElementById("watch-placeholder");
+    iframe.src = url;
+    iframeContainer.style.display = "block";
+    placeholder.style.display = "none";
+  }
+
+  async function startScreenShare() {
+    try {
+      screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+      const video = document.getElementById("screenshare-video");
+      video.srcObject = screenStream;
+      video.style.display = "block";
+      document.getElementById("screenshare-placeholder").style.display = "none";
+      document.getElementById("stop-screenshare-btn").style.display = "inline-block";
+      screenStream.getVideoTracks()[0].onended = stopScreenShare;
+    } catch (err) {
+      alert("Screen share cancelled or not supported.");
+    }
+  }
+
+  function stopScreenShare() {
+    if (screenStream) { screenStream.getTracks().forEach(t => t.stop()); screenStream = null; }
+    const video = document.getElementById("screenshare-video");
+    video.srcObject = null;
+    video.style.display = "none";
+    document.getElementById("screenshare-placeholder").style.display = "flex";
+    document.getElementById("stop-screenshare-btn").style.display = "none";
   }
 
   function createPlayer(videoId, initialParty) {
@@ -1324,7 +1485,6 @@
     const div = document.createElement("div");
     div.id = "yt-player-div";
     container.appendChild(div);
-
     ytPlayer = new YT.Player("yt-player-div", {
       videoId,
       playerVars: { rel: 0, modestbranding: 1, iv_load_policy: 3 },
@@ -1366,15 +1526,8 @@
 
   function updateCtrlUI(party, btn, statusEl, whoEl) {
     if (!party) return;
-    if (party.state === "playing") {
-      btn.textContent = "⏸ pause";
-      btn.classList.add("active");
-      statusEl.textContent = "playing";
-    } else {
-      btn.textContent = "▶ play";
-      btn.classList.remove("active");
-      statusEl.textContent = "paused";
-    }
+    if (party.state === "playing") { btn.textContent = "⏸ pause"; btn.classList.add("active"); statusEl.textContent = "playing"; }
+    else { btn.textContent = "▶ play"; btn.classList.remove("active"); statusEl.textContent = "paused"; }
     if (party.triggeredBy) whoEl.textContent = `last action by ${party.triggeredBy}`;
   }
 
@@ -1385,179 +1538,112 @@
       /youtube\.com\/embed\/([^?&]+)/,
       /youtube\.com\/shorts\/([^?&]+)/
     ];
-    for (const p of patterns) {
-      const m = url.match(p);
-      if (m) return m[1];
-    }
+    for (const p of patterns) { const m = url.match(p); if (m) return m[1]; }
     return null;
   }
 
-  // ─── MATCHING GAME ───
-  const EMOJIS = ["🌸","🌙","⭐","🌊","🔥","🌈","🌿","🦋","🌺","🍀","🌻","🌝","🎯","🎨","🎭","🎪","🧩","🦄","🍉","🐚","🌵","🍄","🐠","🦊","🎸","🌀","🏔️","🐋","🌠","🦅","🎋","🐉"];
+  // ─── MUSIC PAGE ───
+  function setupMusicPage() {
+    const postBtn = document.getElementById("music-post-btn");
+    const postMsg = document.getElementById("music-post-msg");
+    const feedEl  = document.getElementById("music-feed");
+    const emptyEl = document.getElementById("music-empty");
+    const musicRef = ref(db, "music");
 
-  let gameState = null;
-  let timerInterval = null;
+    postBtn.onclick = async () => {
+      const song     = document.getElementById("music-song-input").value.trim();
+      const artist   = document.getElementById("music-artist-input").value.trim();
+      const note     = document.getElementById("music-note-input").value.trim();
+      const spotify  = document.getElementById("music-spotify-input").value.trim();
 
-  function setupMatchGame() {
-    document.getElementById("match-start-btn").onclick = startMatchGame;
-    document.getElementById("result-restart-btn").onclick = startMatchGame;
+      if (!song) { postMsg.textContent = "add a song name ✦"; setTimeout(() => postMsg.textContent = "", 2000); return; }
 
-    onValue(ref(db, "matchGame/state"), snap => {
-      const s = snap.val();
-      if (!s) return;
-      syncGameState(s);
+      const entry = {
+        song,
+        artist,
+        note,
+        spotify: extractSpotifyEmbed(spotify),
+        who: currentUser.email.split("@")[0],
+        timestamp: Date.now()
+      };
+
+      await push(musicRef, entry);
+
+      document.getElementById("music-song-input").value = "";
+      document.getElementById("music-artist-input").value = "";
+      document.getElementById("music-note-input").value = "";
+      document.getElementById("music-spotify-input").value = "";
+      postMsg.textContent = "posted ✦";
+      setTimeout(() => postMsg.textContent = "", 2000);
+    };
+
+    // Load existing + listen for new
+    let firstLoad = true;
+    const entries = [];
+    onChildAdded(musicRef, snap => {
+      emptyEl.style.display = "none";
+      const m = snap.val();
+      entries.unshift({ key: snap.key, ...m });
+
+      // Rebuild feed sorted newest first
+      renderMusicFeed(entries, feedEl);
     });
 
-    onValue(ref(db, "matchGame/flips"), snap => {
-      const flips = snap.val();
-      if (!flips) return;
-      Object.entries(flips).forEach(([uid, flip]) => {
-        if (uid === currentUser.uid) return;
-        const card = document.querySelector(`.card[data-idx="${flip.idx}"]`);
-        if (card && !card.classList.contains("matched")) {
-          card.classList.add(flip.who === "jess" ? "flip-jess" : "flip-eesa");
-        }
+    // Cleanup entries older than 30 days
+    get(musicRef).then(snap => {
+      const all = snap.val(); if (!all) return;
+      const now = Date.now();
+      Object.entries(all).forEach(([key, d]) => {
+        if (now - d.timestamp > 30 * 86400000) remove(ref(db, "music/" + key));
       });
     });
   }
 
-  function startMatchGame() {
-    const count = 32;
-    const chosen = EMOJIS.slice(0, count);
-    const deck = shuffle([...chosen, ...chosen]);
-    const state = {
-      deck,
-      flipped: [],
-      matched: [],
-      scores: { jess: 0, eesa: 0 },
-      attempts: { jess: 0, eesa: 0 },
-      started: Date.now(),
-      finished: false,
-      turn: "jess"
-    };
-    set(ref(db, "matchGame/state"), state);
-    set(ref(db, "matchGame/flips"), null);
-    document.getElementById("match-result").style.display = "none";
-    document.getElementById("match-start-btn").style.display = "none";
-    document.getElementById("match-status-text").textContent = "game on!";
-  }
+  function renderMusicFeed(entries, feedEl) {
+    // Remove existing entry cards (keep empty placeholder)
+    feedEl.querySelectorAll(".music-entry").forEach(el => el.remove());
 
-  function syncGameState(s) {
-    gameState = s;
-    renderGrid(s);
-    updateScoreboard(s);
-    if (s.finished) endGame(s);
-    if (timerInterval) clearInterval(timerInterval);
-    if (s.started && !s.finished) {
-      timerInterval = setInterval(() => {
-        const elapsed = Math.floor((Date.now() - s.started) / 1000);
-        const m = Math.floor(elapsed / 60);
-        const sec = elapsed % 60;
-        document.getElementById("match-timer").textContent = `${m}:${sec.toString().padStart(2, "0")}`;
-      }, 500);
-    }
-  }
-
-  function renderGrid(s) {
-    const grid = document.getElementById("match-grid");
-    grid.innerHTML = "";
-    s.deck.forEach((emoji, idx) => {
+    const sorted = [...entries].sort((a, b) => b.timestamp - a.timestamp);
+    sorted.forEach(m => {
       const card = document.createElement("div");
-      card.className = "card";
-      card.dataset.idx = idx;
-      const front = document.createElement("div");
-      front.className = "card-front";
-      front.textContent = emoji;
-      const back = document.createElement("div");
-      back.className = "card-back";
-      back.textContent = "✦";
-      card.appendChild(front);
-      card.appendChild(back);
-      const isMatched = s.matched && s.matched.includes(idx);
-      const isFlipped = s.flipped && s.flipped.includes(idx);
-      if (isMatched) { card.classList.add("matched", "flipped"); }
-      else if (isFlipped) { card.classList.add("flipped"); }
-      if (!isMatched && !s.finished) card.onclick = () => handleCardClick(idx);
-      grid.appendChild(card);
+      card.className = "music-entry";
+
+      const t = new Date(m.timestamp).toLocaleDateString([], { month: "short", day: "numeric" }) +
+                " · " + new Date(m.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+      let embedHtml = "";
+      if (m.spotify) {
+        embedHtml = `<div class="spotify-embed-wrap">
+          <iframe src="${m.spotify}" height="80" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+        </div>`;
+      }
+
+      card.innerHTML = `
+        <div class="music-entry-header">
+          <div class="music-entry-who">
+            <span class="online-dot" style="background:var(--accent);box-shadow:0 0 5px var(--accent);"></span>
+            <span class="music-who-name">${escapeHtml(m.who)}</span>
+          </div>
+          <span class="music-entry-time">${t}</span>
+        </div>
+        <div class="music-entry-body">
+          <div class="music-song-name">${escapeHtml(m.song)}</div>
+          ${m.artist ? `<div class="music-song-artist">${escapeHtml(m.artist)}</div>` : ""}
+          ${m.note ? `<div class="music-note">"${escapeHtml(m.note)}"</div>` : ""}
+          ${embedHtml || (m.spotify === null && m.spotify !== undefined ? "" : "")}
+        </div>
+      `;
+
+      feedEl.appendChild(card);
     });
   }
 
-  async function handleCardClick(idx) {
-    if (!gameState || gameState.finished) return;
-    const s = gameState;
-    const me = whoAmI();
-    if (s.matched && s.matched.includes(idx)) return;
-    if (s.flipped && s.flipped.includes(idx)) return;
-    set(ref(db, `matchGame/flips/${currentUser.uid}`), { idx, who: me, ts: Date.now() });
-    const newFlipped = [...(s.flipped || []), idx];
-    if (newFlipped.length === 1) {
-      await update(ref(db, "matchGame/state"), { flipped: newFlipped });
-    } else if (newFlipped.length === 2) {
-      const [a, b] = newFlipped;
-      const newAttempts = { ...s.attempts, [me]: (s.attempts[me] || 0) + 1 };
-      if (s.deck[a] === s.deck[b]) {
-        const newMatched = [...(s.matched || []), a, b];
-        const newScores = { ...s.scores, [me]: (s.scores[me] || 0) + 1 };
-        const allMatched = newMatched.length === s.deck.length;
-        await update(ref(db, "matchGame/state"), { flipped: [], matched: newMatched, scores: newScores, attempts: newAttempts, finished: allMatched });
-        set(ref(db, `matchGame/flips`), null);
-      } else {
-        await update(ref(db, "matchGame/state"), { flipped: newFlipped, attempts: newAttempts });
-        setTimeout(async () => {
-          const snap = await get(ref(db, "matchGame/state"));
-          const cur = snap.val();
-          if (cur && JSON.stringify(cur.flipped) === JSON.stringify(newFlipped)) {
-            await update(ref(db, "matchGame/state"), { flipped: [] });
-            set(ref(db, `matchGame/flips`), null);
-          }
-        }, 900);
-      }
-    }
-  }
-
-  function updateScoreboard(s) {
-    document.getElementById("score-jess").textContent = s.scores?.jess || 0;
-    document.getElementById("score-eesa").textContent = s.scores?.eesa || 0;
-    const acc = (who) => {
-      const att = s.attempts?.[who] || 0;
-      const sc = s.scores?.[who] || 0;
-      return att === 0 ? "0% acc" : Math.round((sc / att) * 100) + "% acc";
-    };
-    document.getElementById("acc-jess").textContent = acc("jess");
-    document.getElementById("acc-eesa").textContent = acc("eesa");
-  }
-
-  function endGame(s) {
-    if (timerInterval) clearInterval(timerInterval);
-    const elapsed = Math.floor((Date.now() - s.started) / 1000);
-    const m = Math.floor(elapsed / 60);
-    const sec = elapsed % 60;
-    const jScore = s.scores?.jess || 0;
-    const eScore = s.scores?.eesa || 0;
-    let winner = jScore > eScore ? "jess" : eScore > jScore ? "eesa" : null;
-    const resultEl = document.getElementById("match-result");
-    const titleEl = document.getElementById("result-title");
-    const detailEl = document.getElementById("result-detail");
-    if (winner) { titleEl.textContent = `🎉 ${winner === "jess" ? "Jess" : "Eesa"} wins!`; }
-    else { titleEl.textContent = "🤝 it's a tie!"; }
-    const acc = (who, sc, att) => att === 0 ? "0%" : Math.round((sc / att) * 100) + "%";
-    detailEl.innerHTML = `
-      time: ${m}:${sec.toString().padStart(2, "0")}<br>
-      jess — ${jScore} matches · ${acc("jess", jScore, s.attempts?.jess || 0)} accuracy<br>
-      eesa — ${eScore} matches · ${acc("eesa", eScore, s.attempts?.eesa || 0)} accuracy
-    `;
-    resultEl.style.display = "flex";
-    document.getElementById("match-start-btn").style.display = "block";
-    document.getElementById("match-start-btn").textContent = "play again";
-    document.getElementById("match-status-text").textContent = "game over";
-  }
-
-  function shuffle(arr) {
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-    return arr;
+  function extractSpotifyEmbed(url) {
+    if (!url) return null;
+    // Match track, album, playlist, episode
+    const m = url.match(/open\.spotify\.com\/(track|album|playlist|episode)\/([a-zA-Z0-9]+)/);
+    if (!m) return null;
+    return `https://open.spotify.com/embed/${m[1]}/${m[2]}?utm_source=generator&theme=0`;
   }
 </script>
 </body>
