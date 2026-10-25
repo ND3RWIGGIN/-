@@ -902,6 +902,48 @@
       padding: 60px 20px;
       line-height: 1.9;
     }
+
+    /* ── HOME: collage + chat (page itself never scrolls) ── */
+    #page-home { overflow: hidden; padding: 14px 20px 16px; gap: 12px; }
+    #page-home #chat-wrap { max-width: 900px; height: 180px; margin-top: 0; flex-shrink: 0; }
+
+    /* ── DAILY page (quote + photo cards moved here) ── */
+    #page-daily { flex-direction: column; align-items: center; overflow-y: auto; padding: 0 20px 40px; }
+
+    /* ── COLLAGE ── */
+    #collage-frame {
+      width: 100%; max-width: 900px; flex: 1; min-height: 0;
+      overflow-y: auto; padding: 10px;
+      background: var(--bg2); border: 1px solid var(--border); border-radius: 14px;
+      box-shadow: 0 0 40px rgba(255,150,185,0.07);
+    }
+    #collage-frame::-webkit-scrollbar { width: 4px; }
+    #collage-frame::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .collage { column-count: 4; column-gap: 10px; }
+    @media (max-width: 900px) { .collage { column-count: 3; } }
+    @media (max-width: 560px) { .collage { column-count: 2; column-gap: 8px; } }
+    .collage figure {
+      margin: 0 0 10px; break-inside: avoid; position: relative; overflow: hidden;
+      border-radius: 12px; border: 1px solid var(--border); cursor: zoom-in;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+      opacity: 0; transform: translateY(8px); animation: collageIn .6s ease forwards;
+      transition: transform .3s ease, box-shadow .3s ease;
+    }
+    .collage figure::after {
+      content: ""; position: absolute; inset: 0; pointer-events: none;
+      background: linear-gradient(160deg, rgba(255,150,185,.16), rgba(40,30,90,.10));
+      mix-blend-mode: soft-light; transition: opacity .3s;
+    }
+    .collage figure:hover { transform: translateY(-3px) scale(1.01); box-shadow: 0 10px 26px rgba(0,0,0,.45), 0 0 28px rgba(255,150,185,.25); }
+    .collage figure:hover::after { opacity: 0; }
+    .collage img { display: block; width: 100%; height: auto; }
+    @keyframes collageIn { to { opacity: 1; transform: none; } }
+    #collage-lightbox {
+      position: fixed; inset: 0; z-index: 9000; display: none; place-items: center;
+      background: rgba(10,12,35,.92); cursor: zoom-out; padding: 20px;
+    }
+    #collage-lightbox.open { display: grid; }
+    #collage-lightbox img { max-width: 100%; max-height: 100%; border-radius: 14px; box-shadow: 0 0 60px rgba(255,150,185,.25); }
   </style>
 </head>
 <body>
@@ -932,11 +974,26 @@
   <div class="nav-tab active" data-page="home">home</div>
   <div class="nav-tab" data-page="watch">watch party</div>
   <div class="nav-tab" data-page="music">music</div>
+  <div class="nav-tab" data-page="daily">daily</div>
   <div id="nav-users"></div>
 </nav>
  
 <!-- ═══════════ PAGE: HOME ═══════════ -->
 <div class="page active" id="page-home">
+ 
+  <div id="collage-frame"><div class="collage" id="collage"></div></div>
+ 
+  <div id="chat-wrap">
+    <div class="chat-box" id="home-chat-box"></div>
+    <div class="chat-input-row">
+      <input type="text" id="home-chat-input" placeholder="say something…" />
+      <button id="home-send-btn">send</button>
+    </div>
+  </div>
+</div>
+ 
+<!-- ═══════════ PAGE: DAILY (quote + photo) ═══════════ -->
+<div class="page" id="page-daily">
  
   <!-- Merged person cards -->
   <div id="person-section">
@@ -999,13 +1056,6 @@
  
   </div>
  
-  <div id="chat-wrap">
-    <div class="chat-box" id="home-chat-box"></div>
-    <div class="chat-input-row">
-      <input type="text" id="home-chat-input" placeholder="say something…" />
-      <button id="home-send-btn">send</button>
-    </div>
-  </div>
 </div>
  
 <!-- ═══════════ PAGE: WATCH ═══════════ -->
@@ -1119,6 +1169,8 @@
  
 </div>
  
+<div id="collage-lightbox"><img alt=""></div>
+ 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
   import {
@@ -1184,6 +1236,25 @@
     setupHomeChat();
     setupWatchParty();
     setupMusicPage();
+    setupCollage();
+  }
+ 
+  // ─── COLLAGE ───
+  function setupCollage() {
+    const wall = document.getElementById("collage");
+    if (wall.childElementCount) return;
+    const box = document.getElementById("collage-lightbox");
+    for (let i = 1; i <= 50; i++) {
+      const fig = document.createElement("figure");
+      fig.style.animationDelay = Math.min(i, 20) * 50 + "ms";
+      const img = new Image();
+      img.src = "photos/us-" + String(i).padStart(2, "0") + ".jpg";
+      img.loading = "lazy"; img.alt = "";
+      fig.appendChild(img);
+      fig.onclick = () => { box.querySelector("img").src = img.src; box.classList.add("open"); };
+      wall.appendChild(fig);
+    }
+    box.onclick = () => box.classList.remove("open");
   }
  
   // ─── NAV ───
@@ -1826,4 +1897,3 @@
 
 </body>
 </html>
-
